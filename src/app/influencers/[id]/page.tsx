@@ -58,7 +58,7 @@ export async function generateStaticParams(): Promise<{ params: { id: string } }
 }
 
 // ✅ Page 컴포넌트: 타입 명시적 지정
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page({ params }: any) {
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
