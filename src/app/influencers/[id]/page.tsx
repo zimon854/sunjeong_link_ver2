@@ -1,8 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 
-
-
 // 목업 인플루언서 데이터
 const mockInfluencers = [
   {
@@ -52,27 +50,15 @@ const mockInfluencers = [
   },
 ];
 
-// ✅ 필수: generateStaticParams 추가
+// ✅ 필수: generateStaticParams
 export async function generateStaticParams(): Promise<{ params: { id: string } }[]> {
   return mockInfluencers.map((inf) => ({
     params: { id: inf.id },
   }));
 }
 
-
-// ✅ 핵심: props 타입은 함수 인자에 직접 명시
+// ✅ 올바른 Page 컴포넌트
 export default function Page({ params }: { params: { id: string } }) {
-  const influencer = mockInfluencers.find((inf) => inf.id === params.id);
-  if (!influencer) return notFound();
-
-// ✅ 타입 명확하게 정의
-type PageProps = {
-  params: {
-    id: string;
-  };
-};
-
-export default function Page({ params }: PageProps) {
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
