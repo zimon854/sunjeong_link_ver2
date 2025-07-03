@@ -91,8 +91,8 @@ export default function Home() {
       .channel('messages')
       .on(
         'postgres_changes',
-        'INSERT',
-        (payload) => {
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload: any) => {
           const msg = payload.new as Message;
           // 내 채팅방에 해당하는 메시지만 추가
           if (
@@ -270,7 +270,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center h-[60vh] text-center px-4">
         <div className="absolute inset-0 -z-10">
-          <Image src="/hero-bg.jpg" alt="hero bg" fill className="object-cover opacity-60" />
+          <Image src="/hero-bg.jpg" alt="hero bg" fill sizes="100vw" className="object-cover opacity-60" />
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
           터지는 <span className="text-blue-400">쇼핑!</span> 팔리는 <span className="text-blue-400">리뷰!</span> <br />강력한 <span className="text-blue-400">확산!</span>
