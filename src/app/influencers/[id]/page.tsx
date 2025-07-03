@@ -1,6 +1,8 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 
+
+
 // 목업 인플루언서 데이터
 const mockInfluencers = [
   {
@@ -56,6 +58,12 @@ export async function generateStaticParams(): Promise<{ params: { id: string } }
     params: { id: inf.id },
   }));
 }
+
+
+// ✅ 핵심: props 타입은 함수 인자에 직접 명시
+export default function Page({ params }: { params: { id: string } }) {
+  const influencer = mockInfluencers.find((inf) => inf.id === params.id);
+  if (!influencer) return notFound();
 
 // ✅ 타입 명확하게 정의
 type PageProps = {
