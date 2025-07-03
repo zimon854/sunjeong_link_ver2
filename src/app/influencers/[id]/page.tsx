@@ -58,11 +58,7 @@ const mockInfluencers = [
   },
 ];
 
-interface Props {
-  params: { id: string };
-}
-
-export default function InfluencerDetailPage({ params }: Props) {
+export default function InfluencerDetailPage({ params }: { params: { id: string } }) {
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
