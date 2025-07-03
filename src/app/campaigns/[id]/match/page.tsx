@@ -2,8 +2,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '../../../../lib/supabaseClient';
+import type { User } from '@supabase/auth-js';
 
-interface User { id: string; email: string; }
 interface Profile { id: string; role: string; }
 
 interface Match {
@@ -49,6 +49,10 @@ export default function CampaignMatchPage() {
 
   const handleApply = async () => {
     setMessage('');
+    if (!user) {
+      setMessage('로그인이 필요합니다.');
+      return;
+    }
     const { error } = await supabase.from('matches').insert({
       campaign_id: campaignId,
       influencer_id: user.id,

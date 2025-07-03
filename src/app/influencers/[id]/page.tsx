@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
 import { notFound } from 'next/navigation';
+import React from 'react';
 
 // 목업 인플루언서 데이터
 const mockInfluencers = [
@@ -50,14 +50,15 @@ const mockInfluencers = [
   },
 ];
 
-// ✅ 정적 경로 생성을 위한 함수
-export function generateStaticParams() {
-  return [];
+// ✅ generateStaticParams: 각 인플루언서의 id를 포함한 params 리턴
+export async function generateStaticParams(): Promise<{ params: { id: string } }[]> {
+  return mockInfluencers.map((inf) => ({
+    params: { id: inf.id },
+  }));
 }
 
-// ✅ 타입 명시 + 컴포넌트 정의
-export default function Page(props: any) {
-  const { params } = props;
+// ✅ Page 컴포넌트: 타입 명시적 지정
+export default function Page({ params }: { params: { id: string } }) {
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
