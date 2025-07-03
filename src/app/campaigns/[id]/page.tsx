@@ -32,19 +32,6 @@ const dummyReviews = [
   { from: '인플루언서B', rating: 4.5, comment: '정산도 빠르고 피드백이 명확해서 좋았습니다.' },
 ];
 
-// 이미지 업로드 함수
-async function uploadCampaignImage(file: File) {
-  // 파일명 중복 방지용 타임스탬프
-  const filePath = `thumbnails/${Date.now()}_${file.name}`;
-  const { data, error } = await supabase
-    .storage
-    .from('campaigns') // 스토리지 버킷명
-    .upload(filePath, file);
-
-  if (error) throw error;
-  return data.path; // DB에 저장할 경로
-}
-
 export default function CampaignDetailPage() {
   const params = useParams();
   const id = params?.id;

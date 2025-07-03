@@ -11,15 +11,6 @@ export default function CampaignCreatePage() {
   const [price, setPrice] = useState("");
   const [status, setStatus] = useState(statuses[0]);
   const [desc, setDesc] = useState("");
-  const [image, setImage] = useState<File|null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
-
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
-      setImagePreview(URL.createObjectURL(e.target.files[0]));
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,11 +43,6 @@ export default function CampaignCreatePage() {
         <div className="mb-4">
           <label className="block font-semibold mb-1 text-gray-800">가격(원) <span className="text-pink-600">*</span></label>
           <input type="number" className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400" value={price} onChange={e => setPrice(e.target.value)} required min={0} />
-        </div>
-        <div className="mb-4">
-          <label className="block font-semibold mb-1 text-gray-800">대표 이미지 <span className="text-pink-600">*</span></label>
-          <input type="file" accept="image/*" onChange={handleImage} required className="mb-2" />
-          {imagePreview && <img src={imagePreview} alt="미리보기" className="w-40 h-40 object-cover rounded-xl border mt-2 mx-auto" />}
         </div>
         <div className="mb-4">
           <label className="block font-semibold mb-1 text-gray-800">상태 <span className="text-pink-600">*</span></label>

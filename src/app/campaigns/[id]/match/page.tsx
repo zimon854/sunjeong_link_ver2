@@ -1,7 +1,10 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '../../../../lib/supabaseClient';
+
+interface User { id: string; email: string; }
+interface Profile { id: string; role: string; }
 
 interface Match {
   id: number;
@@ -13,11 +16,17 @@ interface Match {
 export default function CampaignMatchPage() {
   const params = useParams();
   const campaignId = params?.id;
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+
+  const fetchMatches = useCallback(async () => {
+    const { data, error } = await supabase.from('matches').select('*').eq('campaign_id', campaignId);
+    if (!error && data) setMatches(data);
+    setLoading(false);
+  }, [campaignId]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -31,17 +40,11 @@ export default function CampaignMatchPage() {
   useEffect(() => {
     if (!campaignId) return;
     fetchMatches();
-  }, [campaignId]);
+  }, [campaignId, fetchMatches]);
 
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (!error && data) setProfile(data);
-  };
-
-  const fetchMatches = async () => {
-    const { data, error } = await supabase.from('matches').select('*').eq('campaign_id', campaignId);
-    if (!error && data) setMatches(data);
-    setLoading(false);
   };
 
   const handleApply = async () => {
