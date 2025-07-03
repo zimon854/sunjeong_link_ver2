@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { notFound } from 'next/navigation';
 
 // 목업 인플루언서 데이터
@@ -50,15 +50,15 @@ const mockInfluencers = [
   },
 ];
 
-// ✅ 필수: generateStaticParams
+// ✅ 정적 경로 생성을 위한 함수
 export async function generateStaticParams(): Promise<{ params: { id: string } }[]> {
   return mockInfluencers.map((inf) => ({
     params: { id: inf.id },
   }));
 }
 
-// ✅ 올바른 Page 컴포넌트
-export default function Page({ params }: { params: { id: string } }) {
+// ✅ 타입 명시 + 컴포넌트 정의
+const Page: FC<{ params: { id: string } }> = ({ params }) => {
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
@@ -114,4 +114,6 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
     </div>
   );
-}
+};
+
+export default Page;
