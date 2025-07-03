@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Campaign {
   id: number;
@@ -165,7 +166,7 @@ export default function CampaignListPage() {
             filtered.map((c) => (
               <div key={c.id} className="bg-gradient-to-br from-[#1a237e]/80 to-[#0a0c23]/90 rounded-2xl shadow-2xl border border-blue-900/30 hover:scale-[1.03] transition cursor-pointer flex flex-col">
                 <Link href={`/campaigns/${c.id}`} className="block">
-                  <img src={c.image} alt={c.title} className="w-full h-48 object-cover rounded-t-2xl" />
+                  <Image src={c.image} alt={c.title} width={400} height={192} className="w-full h-48 object-cover rounded-t-2xl" />
                 </Link>
                 <div className="p-4 flex-1 flex flex-col">
                   <div className="text-xs text-blue-200 mb-1 font-semibold">{c.brand}</div>
