@@ -51,10 +51,8 @@ const mockInfluencers = [
 ];
 
 // ✅ 정적 경로 생성을 위한 함수
-export async function generateStaticParams(): Promise<{ params: { id: string } }[]> {
-  return mockInfluencers.map((inf) => ({
-    params: { id: inf.id },
-  }));
+export function generateStaticParams() {
+  return [];
 }
 
 // ✅ 타입 명시 + 컴포넌트 정의
