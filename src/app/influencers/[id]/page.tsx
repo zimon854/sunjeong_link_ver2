@@ -56,7 +56,8 @@ export function generateStaticParams() {
 }
 
 // ✅ 타입 명시 + 컴포넌트 정의
-const Page: FC<{ params: { id: string } }> = ({ params }) => {
+export default function Page(props: any) {
+  const { params } = props;
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
@@ -112,6 +113,4 @@ const Page: FC<{ params: { id: string } }> = ({ params }) => {
       </div>
     </div>
   );
-};
-
-export default Page;
+}
