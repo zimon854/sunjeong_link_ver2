@@ -58,7 +58,7 @@ const mockInfluencers = [
   },
 ];
 
-export default function InfluencerDetailPage({ params }: { params: { id: string } }) {
+export default function Page({ params }: { params: { id: string } }) {
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
