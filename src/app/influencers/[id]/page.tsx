@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 
-// 목업 인플루언서 데이터 (실제 서비스에서는 DB에서 fetch)
+// 목업 인플루언서 데이터
 const mockInfluencers = [
   {
     id: '1',
@@ -32,12 +32,8 @@ const mockInfluencers = [
     campaigns: 12,
     rating: 4.9,
     bio: '트렌디한 패션과 뷰티 콘텐츠로 팔로워와 소통하는 크리에이터.',
-    history: [
-      { title: '패션 브랜드 C', result: '판매 300건', year: 2024 },
-    ],
-    reviews: [
-      { from: 'BrandC', rating: 5, comment: '팔로워 반응이 정말 좋아요.' },
-    ],
+    history: [{ title: '패션 브랜드 C', result: '판매 300건', year: 2024 }],
+    reviews: [{ from: 'BrandC', rating: 5, comment: '팔로워 반응이 정말 좋아요.' }],
   },
   {
     id: '3',
@@ -49,23 +45,32 @@ const mockInfluencers = [
     campaigns: 5,
     rating: 4.7,
     bio: '여행과 음식 리뷰를 전문으로 하는 태국 인플루언서.',
-    history: [
-      { title: '푸드 브랜드 D', result: '클릭 1,500회', year: 2023 },
-    ],
-    reviews: [
-      { from: 'BrandD', rating: 4.7, comment: '진정성 있는 리뷰 감사합니다.' },
-    ],
+    history: [{ title: '푸드 브랜드 D', result: '클릭 1,500회', year: 2023 }],
+    reviews: [{ from: 'BrandD', rating: 4.7, comment: '진정성 있는 리뷰 감사합니다.' }],
   },
 ];
 
-export default function Page({ params }: { params: { id: string } }) {
+// ✅ 필수: generateStaticParams 추가
+export async function generateStaticParams(): Promise<{ params: { id: string } }[]> {
+  return mockInfluencers.map((inf) => ({
+    params: { id: inf.id },
+  }));
+}
+
+// ✅ 타입 명확하게 정의
+type PageProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default function Page({ params }: PageProps) {
   const influencer = mockInfluencers.find((inf) => inf.id === params.id);
   if (!influencer) return notFound();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0c23] to-[#181826] py-12 px-2">
       <div className="max-w-2xl mx-auto bg-white/90 rounded-3xl shadow-2xl border border-blue-900/30 p-8 flex flex-col items-center">
-        {/* 프로필 카드 */}
         <div className="w-full flex flex-col items-center mb-6">
           <img
             src={influencer.avatar}
@@ -73,7 +78,9 @@ export default function Page({ params }: { params: { id: string } }) {
             className="w-28 h-28 rounded-full border-4 border-blue-200 shadow mb-3 bg-white object-contain"
           />
           <h2 className="text-3xl font-extrabold text-blue-700 mb-1">{influencer.name}</h2>
-          <div className="text-blue-500 font-semibold mb-1">{influencer.country} · 팔로워 {influencer.follower.toLocaleString()}명</div>
+          <div className="text-blue-500 font-semibold mb-1">
+            {influencer.country} · 팔로워 {influencer.follower.toLocaleString()}명
+          </div>
           <div className="flex flex-wrap gap-2 mb-2">
             {influencer.categories.map((cat) => (
               <span key={cat} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">#{cat}</span>
@@ -86,7 +93,6 @@ export default function Page({ params }: { params: { id: string } }) {
           <p className="text-gray-600 text-center text-base mb-2 max-w-xl">{influencer.bio}</p>
         </div>
 
-        {/* 캠페인 이력 */}
         <div className="w-full mt-2">
           <h3 className="text-lg font-bold text-blue-800 mb-2">캠페인 이력</h3>
           <ul className="space-y-2">
@@ -99,7 +105,6 @@ export default function Page({ params }: { params: { id: string } }) {
           </ul>
         </div>
 
-        {/* 브랜드 리뷰 */}
         <div className="w-full mt-8">
           <h3 className="text-lg font-bold text-blue-800 mb-2">브랜드 리뷰</h3>
           <ul className="space-y-2">
@@ -115,4 +120,4 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
     </div>
   );
-} 
+}
