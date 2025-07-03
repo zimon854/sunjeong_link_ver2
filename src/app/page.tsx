@@ -238,34 +238,7 @@ export default function Home() {
   return (
   <main className="bg-gradient-to-b from-[#0a0a23] to-[#181826] min-h-screen text-white">
   {/* --- 네비게이션 메뉴바 --- */}
-  <nav className="sticky top-0 z-30 w-full bg-[#10112a]/80 backdrop-blur border-b border-blue-900 shadow-2xl">
-  <div className="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
-    
-    {/* 왼쪽: 선정링크 로고 (좌측 끝에 너무 붙지 않게 여유 있게) */}
-    <Link href="/" className="flex items-center">
-      <Image
-        src="/logo/sunjeong_link_logo.png"
-        alt="선정링크 로고"
-        width={240}
-        height={80}
-        priority
-        className="h-14 w-auto object-contain"
-      />
-    </Link>
-
-    {/* 오른쪽: 메뉴 (정렬/간격 정돈) */}
-    <div className="flex items-center gap-6 text-[15px] font-medium text-white">
-      <NavMenu href="/auth" label="로그인/회원가입" desc="서비스 이용을 위한 계정 생성/로그인" />
-      <NavMenu href="/campaigns" label="캠페인 리스트" desc="진행 중인 모든 캠페인 한눈에 보기" />
-      <NavMenu href="/campaigns/new" label="캠페인 생성" desc="브랜드/셀러용 신규 캠페인 등록" />
-      <NavMenu href="/influencers" label="인플루언서 리스트" desc="인플루언서 한눈에 보기" />
-      <NavMenu href="/chat" label="실시간 채팅" desc="브랜드-인플루언서 실시간 소통" />
-      <NavMenu href="/profile" label="내 프로필 관리" desc="이름, 역할, 소개, 프로필 이미지 관리" />
-      <NavMenu href="/dashboard" label="내 대시보드" desc="내 서비스 현황 한눈에 보기" />
-    </div>
-  </div>
-</nav>
-
+  {/* nav 영역 전체 삭제 */}
 
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center h-[60vh] text-center px-4">
@@ -375,7 +348,7 @@ export default function Home() {
       {/* Membership Plan */}
       <section className="py-12 bg-[#181830]">
         <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">브랜드 맞춤형 추천 플랜</h2>
-        <div className="flex flex-wrap justify-center gap-6">
+        <div className="flex flex-wrap justify-center gap-6 mb-12">
           <PlanCard title="무료 체험" price="0원" features={["기본 기능 제공", "SNS 리뷰 1회"]} highlight />
           <PlanCard title="성장 플랜" price="30만원" features={["SNS 리뷰 10회", "AI 매칭"]} />
           <PlanCard title="프리미엄" price="75만원" features={["무제한 리뷰", "글로벌 확장"]} />
@@ -385,27 +358,42 @@ export default function Home() {
       {/* Feature Comparison */}
       <section className="py-12 max-w-4xl mx-auto">
         <h2 className="text-xl font-bold mb-4">플랜별 기능 비교</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-center border border-gray-700 rounded-lg overflow-hidden">
-            <thead className="bg-gray-800">
+        <div className="overflow-x-auto rounded-2xl shadow-lg bg-[#181830] mb-12">
+          <table className="min-w-full text-center">
+            <thead className="bg-blue-900/80 text-white">
               <tr>
-                <th className="p-2">기능</th>
-                <th className="p-2">무료</th>
-                <th className="p-2">성장</th>
-                <th className="p-2">프리미엄</th>
+                <th className="p-3">기능</th>
+                <th className="p-3">무료</th>
+                <th className="p-3">성장</th>
+                <th className="p-3">프리미엄</th>
               </tr>
             </thead>
-            <tbody className="bg-gray-900">
-              <tr><td className="p-2">SNS 리뷰</td><td>1회</td><td>10회</td><td>무제한</td></tr>
-              <tr><td className="p-2">AI 매칭</td><td>-</td><td>O</td><td>O</td></tr>
-              <tr><td className="p-2">글로벌 확장</td><td>-</td><td>-</td><td>O</td></tr>
+            <tbody className="text-blue-100">
+              <tr className="border-b border-blue-800">
+                <td className="p-3">SNS 리뷰</td>
+                <td>1회</td>
+                <td>10회</td>
+                <td>무제한</td>
+              </tr>
+              <tr className="border-b border-blue-800">
+                <td className="p-3">AI 매칭</td>
+                <td>-</td>
+                <td>O</td>
+                <td>O</td>
+              </tr>
+              <tr>
+                <td className="p-3">글로벌 확장</td>
+                <td>-</td>
+                <td>-</td>
+                <td>O</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </section>
 
       {/* Key Features */}
-      <section className="py-12 px-4 max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
+      <section className="py-12 px-4 max-w-5xl mx-auto grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
         <FeatureCard title="경쟁사 리뷰 분석" desc="AI로 경쟁사 리뷰/트렌드 자동 분석" color="green" />
         <FeatureCard title="구매뽑기" desc="SNS 이벤트로 구매자 데이터 수집" color="blue" />
         <FeatureCard title="맞춤형 인플루언서 매칭" desc="브랜드에 최적화된 인플루언서 자동 추천" color="orange" />

@@ -93,41 +93,41 @@ export default function ProfilePage() {
       {/* 프로필 수정 폼 */}
       <form onSubmit={handleSubmit} className="w-full max-w-xl flex flex-col gap-3 p-8 border border-blue-100 rounded-2xl bg-white/90 shadow-xl">
         <h2 className="text-xl font-bold mb-2 text-blue-900">프로필 수정</h2>
-        <input
-          type="text"
-          value={profile.name}
+      <input
+        type="text"
+        value={profile.name}
           onChange={e => setProfile((p: any) => ({ ...p, name: e.target.value }))}
-          placeholder="이름"
-          className="border p-2 rounded"
-          required
-        />
-        <select
-          value={profile.role}
+        placeholder="이름"
+        className="border p-2 rounded"
+        required
+      />
+      <select
+        value={profile.role}
           onChange={e => setProfile((p: any) => ({ ...p, role: e.target.value }))}
-          className="border p-2 rounded"
-          required
-        >
-          <option value="">역할 선택</option>
-          <option value="brand">브랜드</option>
-          <option value="influencer">인플루언서</option>
-        </select>
-        <textarea
-          value={profile.bio}
+        className="border p-2 rounded"
+        required
+      >
+        <option value="">역할 선택</option>
+        <option value="brand">브랜드</option>
+        <option value="influencer">인플루언서</option>
+      </select>
+      <textarea
+        value={profile.bio}
           onChange={e => setProfile((p: any) => ({ ...p, bio: e.target.value }))}
-          placeholder="자기소개"
-          className="border p-2 rounded"
-          rows={3}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={e => setImage(e.target.files?.[0] ?? null)}
-        />
+        placeholder="자기소개"
+        className="border p-2 rounded"
+        rows={3}
+      />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={e => setImage(e.target.files?.[0] ?? null)}
+      />
         <button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-2 rounded font-bold shadow hover:from-blue-600 hover:to-blue-800 transition-colors" disabled={loading}>
-          {loading ? '저장 중...' : '저장'}
-        </button>
-        {message && <div className="text-center text-green-600">{message}</div>}
-      </form>
+        {loading ? '저장 중...' : '저장'}
+      </button>
+      {message && <div className="text-center text-green-600">{message}</div>}
+    </form>
     </div>
   );
 } 

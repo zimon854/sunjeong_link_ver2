@@ -56,10 +56,10 @@ export default function CampaignDetailPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#0a0c23] to-[#181826] py-10 px-2 md:px-0 flex items-center justify-center">
       <div className="w-full max-w-2xl bg-white/90 rounded-3xl shadow-2xl border border-blue-900/30 p-8">
         {/* 캠페인 대표 이미지 */}
-        {campaign.image && (
+      {campaign.image && (
           <Image
             src={campaign.image.startsWith('http') ? campaign.image : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${campaign.image}`}
-            alt={campaign.title}
+          alt={campaign.title}
             width={600}
             height={224}
             className="w-full h-56 object-cover rounded-xl mb-6 border"

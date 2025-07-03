@@ -159,6 +159,31 @@ const salesTrend = [320000, 410000, 380000, 500000, 470000, 530000, 600000];
 const clicksTrend = [200, 350, 300, 400, 380, 420, 500];
 const conversionTrend = [3.2, 4.1, 3.8, 5.0, 4.7, 5.3, 6.0];
 
+// --- 그래프 통계 계산 함수 ---
+function getStats(arr: number[]) {
+  const sum = arr.reduce((a, b) => a + b, 0);
+  const avg = arr.length ? sum / arr.length : 0;
+  const min = Math.min(...arr);
+  const max = Math.max(...arr);
+  const last = arr[arr.length - 1];
+  const prev = arr.length > 1 ? arr[arr.length - 2] : last;
+  const diff = last - prev;
+  const diffRate = prev ? (diff / prev) * 100 : 0;
+  return { sum, avg, min, max, last, diff, diffRate };
+}
+const salesStats = getStats(salesTrend);
+const clicksStats = getStats(clicksTrend);
+const convStats = getStats(conversionTrend);
+
+// 클릭수 그래프 y축 스케일링 함수
+function getYClick(v: number) {
+  const minY = 20, maxY = 90;
+  const min = clicksStats.min, max = clicksStats.max;
+  if (max === min) return (minY + maxY) / 2;
+  // 값이 클수록 y가 작아야 위로 올라감
+  return maxY - ((v - min) / (max - min)) * (maxY - minY);
+}
+
 export default function DashboardPage() {
   const [mainTab, setMainTab] = useState<'service'|'analytics'>('service');
   const [tab, setTab] = useState<'my'|'joined'>('my');
@@ -292,7 +317,7 @@ export default function DashboardPage() {
             {/* 기간 필터 */}
             <div className="flex justify-end mb-6">
               <select
-                className="border rounded px-3 py-2 bg-white/80 text-blue-900"
+                className="border rounded px-3 py-2 bg-white/80 text-blue-900 text-lg font-semibold"
                 value={period}
                 onChange={e => setPeriod(e.target.value)}
               >
@@ -333,63 +358,102 @@ export default function DashboardPage() {
               </div>
             </div>
             {/* 그래프 카드 3개 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {/* 매출 추이 그래프 */}
-              <div className="bg-white/90 rounded-2xl shadow-xl p-6 border border-blue-100 flex flex-col">
-                <div className="font-bold text-blue-900 mb-2">최근 7일 매출 추이</div>
-                <svg width="100%" height="120" viewBox="0 0 220 120">
+              <div className="bg-white/90 rounded-2xl shadow-xl px-4 pt-3 pb-2 border border-blue-100 flex flex-col min-h-[220px]">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-bold text-blue-900 text-lg md:text-xl">최근 7일 매출 추이</div>
+                  <div className="text-xs text-gray-500">단위: 원</div>
+                </div>
+                <div className="flex justify-between w-full px-1">
+                  <span className="text-xs text-blue-700">최소 {salesStats.min.toLocaleString()}원</span>
+                  <span className="text-xs text-blue-700">최대 {salesStats.max.toLocaleString()}원</span>
+                </div>
+                <svg width="100%" height="110" viewBox="0 0 340 110" className="block">
                   <polyline
                     fill="none"
                     stroke="#2563eb"
-                    strokeWidth="3"
-                    points={salesTrend.map((v, i) => `${20 + i * 30},${100 - (v - 300000) / 4000}`).join(' ')}
+                    strokeWidth="4"
+                    points={salesTrend.map((v, i) => `${40 + i * 45},${90 - (v - 300000) / 4000}`).join(' ')}
                   />
                   {salesTrend.map((v, i) => (
-                    <circle key={i} cx={20 + i * 30} cy={100 - (v - 300000) / 4000} r="3" fill="#2563eb" />
+                    <circle key={i} cx={40 + i * 45} cy={90 - (v - 300000) / 4000} r={i === salesTrend.length - 1 ? 7 : 5} fill={i === salesTrend.length - 1 ? '#f472b6' : '#2563eb'}>
+                      <title>{`${trendLabels[i]}: ${v.toLocaleString()}원`}</title>
+                    </circle>
                   ))}
                   {trendLabels.map((label, i) => (
-                    <text key={label} x={20 + i * 30} y={115} fontSize="10" textAnchor="middle" fill="#888">{label}</text>
+                    <text key={label} x={40 + i * 45} y={105} fontSize="13" fontWeight="bold" textAnchor="middle" fill="#2563eb">{label}</text>
                   ))}
                 </svg>
-                <div className="text-xs text-blue-700 mt-2">단위: 원</div>
+                <div className="flex justify-between text-xs text-blue-900 mt-1 font-semibold">
+                  <span>7일 합계: {salesStats.sum.toLocaleString()}원</span>
+                  <span>평균: {Math.round(salesStats.avg).toLocaleString()}원</span>
+                  <span>전일 대비: {salesStats.diff >= 0 ? '+' : ''}{salesStats.diff.toLocaleString()}원 ({salesStats.diffRate >= 0 ? '+' : ''}{salesStats.diffRate.toFixed(1)}%)</span>
+                </div>
               </div>
               {/* 클릭수 추이 그래프 */}
-              <div className="bg-white/90 rounded-2xl shadow-xl p-6 border border-blue-100 flex flex-col">
-                <div className="font-bold text-blue-900 mb-2">최근 7일 클릭수 추이</div>
-                <svg width="100%" height="120" viewBox="0 0 220 120">
+              <div className="bg-white/90 rounded-2xl shadow-xl px-4 pt-3 pb-2 border border-blue-100 flex flex-col min-h-[220px]">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-bold text-blue-900 text-lg md:text-xl">최근 7일 클릭수 추이</div>
+                  <div className="text-xs text-gray-500">단위: 회</div>
+                </div>
+                <div className="flex justify-between w-full px-1">
+                  <span className="text-xs text-blue-700">최소 {clicksStats.min.toLocaleString()}회</span>
+                  <span className="text-xs text-blue-700">최대 {clicksStats.max.toLocaleString()}회</span>
+                </div>
+                <svg width="100%" height="110" viewBox="0 0 340 110" className="block" style={{ overflow: 'visible' }}>
                   <polyline
                     fill="none"
                     stroke="#3b82f6"
-                    strokeWidth="3"
-                    points={clicksTrend.map((v, i) => `${20 + i * 30},${100 - (v - 200) * 0.5}`).join(' ')}
+                    strokeWidth="4"
+                    points={clicksTrend.map((v, i) => `${40 + i * 45},${getYClick(v)}`).join(' ')}
                   />
                   {clicksTrend.map((v, i) => (
-                    <circle key={i} cx={20 + i * 30} cy={100 - (v - 200) * 0.5} r="3" fill="#3b82f6" />
+                    <circle key={i} cx={40 + i * 45} cy={getYClick(v)} r={i === clicksTrend.length - 1 ? 7 : 5} fill={i === clicksTrend.length - 1 ? '#f472b6' : '#3b82f6'}>
+                      <title>{`${trendLabels[i]}: ${v.toLocaleString()}회`}</title>
+                    </circle>
                   ))}
                   {trendLabels.map((label, i) => (
-                    <text key={label} x={20 + i * 30} y={115} fontSize="10" textAnchor="middle" fill="#888">{label}</text>
+                    <text key={label} x={40 + i * 45} y={105} fontSize="13" fontWeight="bold" textAnchor="middle" fill="#3b82f6">{label}</text>
                   ))}
                 </svg>
-                <div className="text-xs text-blue-700 mt-2">단위: 회</div>
+                <div className="flex justify-between text-xs text-blue-900 mt-1 font-semibold">
+                  <span>7일 합계: {clicksStats.sum.toLocaleString()}회</span>
+                  <span>평균: {Math.round(clicksStats.avg).toLocaleString()}회</span>
+                  <span>전일 대비: {clicksStats.diff >= 0 ? '+' : ''}{clicksStats.diff.toLocaleString()}회 ({clicksStats.diffRate >= 0 ? '+' : ''}{clicksStats.diffRate.toFixed(1)}%)</span>
+                </div>
               </div>
               {/* 전환율 추이 그래프 */}
-              <div className="bg-white/90 rounded-2xl shadow-xl p-6 border border-blue-100 flex flex-col">
-                <div className="font-bold text-blue-900 mb-2">최근 7일 전환율 추이</div>
-                <svg width="100%" height="120" viewBox="0 0 220 120">
+              <div className="bg-white/90 rounded-2xl shadow-xl px-4 pt-3 pb-2 border border-blue-100 flex flex-col min-h-[220px]">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-bold text-blue-900 text-lg md:text-xl">최근 7일 전환율 추이</div>
+                  <div className="text-xs text-gray-500">단위: %</div>
+                </div>
+                <div className="flex justify-between w-full px-1">
+                  <span className="text-xs text-green-600">최소 {convStats.min.toFixed(2)}%</span>
+                  <span className="text-xs text-green-600">최대 {convStats.max.toFixed(2)}%</span>
+                </div>
+                <svg width="100%" height="110" viewBox="0 0 340 110" className="block">
                   <polyline
                     fill="none"
                     stroke="#22c55e"
-                    strokeWidth="3"
-                    points={conversionTrend.map((v, i) => `${20 + i * 30},${100 - (v - 3) * 20}`).join(' ')}
+                    strokeWidth="4"
+                    points={conversionTrend.map((v, i) => `${40 + i * 45},${90 - (v - 3) * 20}`).join(' ')}
                   />
                   {conversionTrend.map((v, i) => (
-                    <circle key={i} cx={20 + i * 30} cy={100 - (v - 3) * 20} r="3" fill="#22c55e" />
+                    <circle key={i} cx={40 + i * 45} cy={90 - (v - 3) * 20} r={i === conversionTrend.length - 1 ? 7 : 5} fill={i === conversionTrend.length - 1 ? '#f472b6' : '#22c55e'}>
+                      <title>{`${trendLabels[i]}: ${v.toFixed(2)}%`}</title>
+                    </circle>
                   ))}
                   {trendLabels.map((label, i) => (
-                    <text key={label} x={20 + i * 30} y={115} fontSize="10" textAnchor="middle" fill="#888">{label}</text>
+                    <text key={label} x={40 + i * 45} y={105} fontSize="13" fontWeight="bold" textAnchor="middle" fill="#22c55e">{label}</text>
                   ))}
                 </svg>
-                <div className="text-xs text-blue-700 mt-2">단위: %</div>
+                <div className="flex justify-between text-xs text-blue-900 mt-1 font-semibold">
+                  <span>7일 합계: {convStats.sum.toFixed(2)}%</span>
+                  <span>평균: {convStats.avg.toFixed(2)}%</span>
+                  <span>전일 대비: {convStats.diff >= 0 ? '+' : ''}{convStats.diff.toFixed(2)}% ({convStats.diffRate >= 0 ? '+' : ''}{convStats.diffRate.toFixed(1)}%)</span>
+                </div>
               </div>
             </div>
             {/* 캠페인별 상세 테이블 */}
