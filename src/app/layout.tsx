@@ -26,9 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="bg-gray-50 min-h-screen">
+      <body className="bg-[#0b0c24] text-white min-h-screen">
         {/* 네비게이션바 */}
-        <nav className="sticky top-0 z-30 w-full bg-[#10112a]/80 backdrop-blur border-b border-blue-900 shadow-2xl">
+        <nav className="sticky top-0 z-30 w-full bg-[#181b3a] backdrop-blur border-b border-[#2d2f5d] shadow-md">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
             {/* 왼쪽: 선정링크 로고 */}
             <Link href="/" className="flex items-center">
