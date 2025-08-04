@@ -1,0 +1,92 @@
+{
+  "name": "Lynkable",
+  "shortName": "링커블",
+  "description": "한국 브랜드와 동남아시아 인플루언서를 연결하는 글로벌 공동구매 플랫폼",
+  "startUrl": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/",
+  "display": "standalone",
+  "backgroundColor": "#0f172a",
+  "themeColor": "#2563eb",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ko",
+  "dir": "ltr",
+  "categories": ["business", "social", "lifestyle"],
+  "icons": [
+    {
+      "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/screenshots/campaign.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "캠페인 생성",
+      "short_name": "캠페인",
+      "description": "새로운 캠페인을 생성합니다",
+      "url": "/campaigns/new",
+      "icons": [
+        {
+          "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "인플루언서 찾기",
+      "short_name": "인플루언서",
+      "description": "인플루언서를 검색합니다",
+      "url": "/influencers",
+      "icons": [
+        {
+          "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "대시보드",
+      "short_name": "대시보드",
+      "description": "내 대시보드를 확인합니다",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "채팅",
+      "short_name": "채팅",
+      "description": "실시간 채팅을 시작합니다",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+} 
