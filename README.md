@@ -31,6 +31,33 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 방법 1: Vercel 웹사이트를 통한 배포 (권장)
+
+1. [Vercel](https://vercel.com)에 가입하고 로그인합니다.
+2. "New Project" 버튼을 클릭합니다.
+3. GitHub, GitLab, 또는 Bitbucket에서 이 프로젝트를 import합니다.
+4. 프로젝트 설정에서 다음 환경 변수를 추가합니다:
+   - `NEXT_PUBLIC_SUPABASE_URL`: `https://cqxduukezbedattyvsky.supabase.co`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxeGR1dWtlemJlZGF0dHl2c2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzNTM3NzcsImV4cCI6MjA2NjkyOTc3N30.qob76qhvDLn9mAQXOk07DYiRst1eJxY9PDbDgyR0pWg`
+5. "Deploy" 버튼을 클릭합니다.
+
+### 방법 2: Vercel CLI를 통한 배포
+
+1. Node.js를 설치합니다: [https://nodejs.org](https://nodejs.org)
+2. Vercel CLI를 설치합니다:
+   ```bash
+   npm install -g vercel
+   ```
+3. 프로젝트 디렉토리에서 다음 명령어를 실행합니다:
+   ```bash
+   vercel
+   ```
+4. 프롬프트에 따라 설정을 완료합니다.
+
+### 환경 변수 설정
+
+배포 시 다음 환경 변수가 필요합니다:
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase 프로젝트 URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase 익명 키
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
