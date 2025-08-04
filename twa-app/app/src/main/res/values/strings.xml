@@ -3,7 +3,7 @@
     <string name="app_name">링커블</string>
     
     <string name="asset_statements">
-        [{"include": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/*"}]
+        [{"include": "https://sunjeong-link-ver2-44mi5z2z9-rudfhr71-gmailcoms-projects.vercel.app/.well-known/assetlinks.json"}]
     </string>
     
     <string name="web_manifest">
@@ -11,7 +11,7 @@
           "name": "Lynkable - 인플루언서 마케팅 플랫폼",
           "short_name": "링커블",
           "description": "한국 브랜드와 동남아시아 인플루언서를 연결하는 글로벌 공동구매 플랫폼",
-          "start_url": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/",
+          "start_url": "https://sunjeong-link-ver2-44mi5z2z9-rudfhr71-gmailcoms-projects.vercel.app/",
           "display": "standalone",
           "background_color": "#0f172a",
           "theme_color": "#2563eb",
@@ -22,13 +22,13 @@
           "categories": ["business", "social", "lifestyle"],
           "icons": [
             {
-              "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+              "src": "https://sunjeong-link-ver2-44mi5z2z9-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
               "sizes": "192x192",
               "type": "image/png",
               "purpose": "any maskable"
             },
             {
-              "src": "https://sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
+              "src": "https://sunjeong-link-ver2-44mi5z2z9-rudfhr71-gmailcoms-projects.vercel.app/logo/sunjeong_link_logo.png",
               "sizes": "512x512",
               "type": "image/png",
               "purpose": "any maskable"
@@ -36,4 +36,4 @@
           ]
         }
     </string>
-</resources> 
+</resources>

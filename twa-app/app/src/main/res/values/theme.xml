@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 다른 테마나 스타일이 이미 정의되어 있을 수 있습니다. 그 아래에 추가하세요. -->
+
+    <style name="Theme.SunjeongLinkTWA" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- 앱의 주요 색상을 정의합니다. 아래 색상들은 예시이며,
+             res/values/colors.xml 파일에 실제로 정의되어 있어야 합니다.
+             만약 colors.xml에 없다면 기본 색상을 사용하거나 직접 추가해야 합니다. -->
+
+        <!-- 기본 브랜드 색상 -->
+        <!-- <item name="colorPrimary">@color/purple_500</item> -->
+        <!-- <item name="colorPrimaryVariant">@color/purple_700</item> -->
+        <!-- <item name="colorOnPrimary">@color/white</item> -->
+
+        <!-- 보조 브랜드 색상 -->
+        <!-- <item name="colorSecondary">@color/teal_200</item> -->
+        <!-- <item name="colorSecondaryVariant">@color/teal_700</item> -->
+        <!-- <item name="colorOnSecondary">@color/black</item> -->
+
+        <!-- 상태 표시줄 색상 (API 레벨 L 이상) -->
+        <!-- <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item> -->
+
+        <!-- 여기에 앱 테마와 관련된 다른 커스텀 속성들을 추가할 수 있습니다. -->
+        <!-- 예: <item name="android:windowBackground">@color/my_app_background</item> -->
+    </style>
+
+    <!-- 만약 야간 모드(Night Mode)를 위한 별도 테마를 만들고 싶다면, -->
+    <!-- res/values-night/themes.xml 파일에 동일한 이름("Theme.SunjeongLinkTWA")으로 테마를 정의하고 -->
+    <!-- 야간 모드에 맞는 색상 값으로 아래 항목들을 수정할 수 있습니다. -->
+
+</resources>

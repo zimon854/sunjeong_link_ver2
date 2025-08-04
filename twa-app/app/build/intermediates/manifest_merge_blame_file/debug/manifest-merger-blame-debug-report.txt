@@ -1,0 +1,189 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.sunjeonglink.lynkable"
+4    android:versionCode="4"
+5    android:versionName="1.0.4" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:5:5-67
+11-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:5:22-64
+12
+13    <queries>
+13-->[com.google.androidbrowserhelper:androidbrowserhelper:2.5.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\52fb1f27fdabbe655ed34ff99599acca\transformed\androidbrowserhelper-2.5.0\AndroidManifest.xml:26:5-34:15
+14        <intent>
+14-->[com.google.androidbrowserhelper:androidbrowserhelper:2.5.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\52fb1f27fdabbe655ed34ff99599acca\transformed\androidbrowserhelper-2.5.0\AndroidManifest.xml:27:9-33:18
+15            <action android:name="android.intent.action.VIEW" />
+15-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:17-69
+15-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:25-66
+16
+17            <category android:name="android.intent.category.BROWSABLE" />
+17-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:17-78
+17-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:27-75
+18
+19            <data android:scheme="https" />
+19-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:17-34:108
+19-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:23-45
+20        </intent>
+21    </queries>
+22
+23    <permission
+23-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+24        android:name="com.sunjeonglink.lynkable.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+24-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+25        android:protectionLevel="signature" />
+25-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+26
+27    <uses-permission android:name="com.sunjeonglink.lynkable.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+27-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+27-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+28
+29    <application
+29-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:7:5-47:19
+30        android:allowBackup="true"
+30-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:8:9-35
+31        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+31-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+32        android:dataExtractionRules="@xml/data_extraction_rules"
+32-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:9:9-65
+33        android:debuggable="true"
+34        android:extractNativeLibs="true"
+35        android:fullBackupContent="@xml/backup_rules"
+35-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:10:9-54
+36        android:icon="@mipmap/ic_launcher"
+36-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:11:9-43
+37        android:label="@string/app_name"
+37-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:12:9-41
+38        android:roundIcon="@mipmap/ic_launcher_round"
+38-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:13:9-54
+39        android:supportsRtl="true"
+39-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:14:9-35
+40        android:testOnly="true"
+41        android:theme="@style/Theme.SunjeongLinkTWA" >
+41-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:15:9-53
+42        <activity
+42-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:18:9-37:20
+43            android:name="com.sunjeonglink.twa.MainActivity"
+43-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:19:13-61
+44            android:exported="true"
+44-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:20:13-36
+45            android:launchMode="singleTask"
+45-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:21:13-44
+46            android:theme="@style/Theme.SunjeongLinkTWA" >
+46-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:22:13-57
+47            <intent-filter>
+47-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:24:13-27:29
+48                <action android:name="android.intent.action.MAIN" />
+48-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:25:17-69
+48-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:25:25-66
+49
+50                <category android:name="android.intent.category.LAUNCHER" />
+50-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:26:17-77
+50-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:26:27-74
+51            </intent-filter>
+52            <intent-filter>
+52-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:29:13-35:29
+53                <action android:name="android.intent.action.VIEW" />
+53-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:17-69
+53-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:25-66
+54
+55                <category android:name="android.intent.category.DEFAULT" />
+55-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:31:17-76
+55-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:31:27-73
+56                <category android:name="android.intent.category.BROWSABLE" />
+56-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:17-78
+56-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:27-75
+57
+58                <data
+58-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:17-34:108
+59                    android:host="sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app"
+59-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:34:23-105
+60                    android:scheme="https" />
+60-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:23-45
+61            </intent-filter>
+62        </activity>
+63
+64        <meta-data
+64-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:39:9-41:59
+65            android:name="asset_statements"
+65-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:40:13-44
+66            android:resource="@string/asset_statements" />
+66-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:41:13-56
+67        <meta-data
+67-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:43:9-45:55
+68            android:name="web_manifest"
+68-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:44:13-40
+69            android:resource="@string/web_manifest" />
+69-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:45:13-52
+70
+71        <provider
+71-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+72            android:name="androidx.startup.InitializationProvider"
+72-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+73            android:authorities="com.sunjeonglink.lynkable.androidx-startup"
+73-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+74            android:exported="false" >
+74-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+75            <meta-data
+75-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+76                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+76-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+77                android:value="androidx.startup" />
+77-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+78            <meta-data
+78-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\6df68167d9332988b29087a0f07be325\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:29:13-31:52
+79                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+79-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\6df68167d9332988b29087a0f07be325\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:30:17-78
+80                android:value="androidx.startup" />
+80-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\6df68167d9332988b29087a0f07be325\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:31:17-49
+81            <meta-data
+81-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+82                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+82-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+83                android:value="androidx.startup" />
+83-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+84        </provider>
+85
+86        <receiver
+86-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+87            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+87-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+88            android:directBootAware="false"
+88-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+89            android:enabled="true"
+89-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+90            android:exported="true"
+90-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+91            android:permission="android.permission.DUMP" >
+91-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+92            <intent-filter>
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+93                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+93-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+93-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+94            </intent-filter>
+95            <intent-filter>
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+96                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+96-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+96-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+97            </intent-filter>
+98            <intent-filter>
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+99                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+99-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+99-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+100            </intent-filter>
+101            <intent-filter>
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+102                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\d33429e145eaaec07f3c3c0c9a1f7980\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+103            </intent-filter>
+104        </receiver>
+105    </application>
+106
+107</manifest>
