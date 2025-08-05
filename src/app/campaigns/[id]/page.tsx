@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { supabase } from '../../../lib/supabaseClient';
+import { createClient } from '../../../lib/supabaseClient';
 import Image from 'next/image';
 
 interface Campaign {
@@ -33,7 +33,8 @@ const dummyReviews = [
   { from: '인플루언서B', rating: 4.5, comment: '정산도 빠르고 피드백이 명확해서 좋았습니다.' },
 ];
 
-export default function CampaignDetailPage() {
+export default function CampaignDetailPage({ params }: { params: { id: string } }) {
+  const supabase = createClient();
   const params = useParams();
   const id = params?.id;
   const [campaign, setCampaign] = useState<Campaign | null>(null);

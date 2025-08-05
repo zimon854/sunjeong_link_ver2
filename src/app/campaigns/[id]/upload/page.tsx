@@ -1,9 +1,10 @@
 "use client";
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { supabase } from '../../../../lib/supabaseClient';
+import { createClient } from '../../../../lib/supabaseClient';
 
-export default function ContentUploadPage() {
+export default function UploadPage({ params }: { params: { id: string } }) {
+  const supabase = createClient();
   const params = useParams();
   const router = useRouter();
   const campaignId = params?.id;

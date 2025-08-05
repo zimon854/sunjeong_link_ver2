@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { supabase } from '../../../../lib/supabaseClient';
+import { createClient } from '../../../../lib/supabaseClient';
 
 interface Content {
   id: number;
@@ -11,7 +11,8 @@ interface Content {
   feedback: string;
 }
 
-export default function CampaignAdminPage() {
+export default function AdminPage({ params }: { params: { id: string } }) {
+  const supabase = createClient();
   const params = useParams();
   const campaignId = params?.id;
   const [contents, setContents] = useState<Content[]>([]);
