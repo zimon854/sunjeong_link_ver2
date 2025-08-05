@@ -1,8 +1,10 @@
-   1     [{
-   2       "relation": ["delegate_permission/common.handle_all_urls"],
-   3       "target": {
-   4         "namespace": "android_app",
-   5         "package_name": "com.sunjeonglink.lynkable",
-   6         "sha256_cert_fingerprints": ["98:3B:23:11:00:D8:31:1A:71:36:26:C4:01:B9:9D:D7:1F:26:A7:3E:B8:83:5B:6E:D0:21:A0:6E:05:C9:64:A9"]
-   7       }
-   8     }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.sunjeonglink.lynkable",
+      "sha256_cert_fingerprints": ["98:3B:23:11:00:D8:31:1A:71:36:26:C4:01:B9:9D:D7:1F:26:A7:3E:B8:83:5B:6E:D0:21:A0:6E:05:C9:64:A9"]
+    }
+  }
+]

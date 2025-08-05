@@ -1,209 +1,919 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabaseClient';
+import { createClient } from '@/lib/supabaseClient';
 
-// --- 더미 데이터 (생략: 기존과 동일) ---
-const user = {
-  name: "홍길동",
-  email: "hong@brand.com",
-  type: "브랜드",
-  profileImg: "/sunjeong_link_logo.png",
-};
-const myCampaigns = [
-  { id: 1, title: "비건 뷰티 마스크팩 공동구매", status: "진행중" },
-  { id: 2, title: "프리미엄 헤어오일 체험단", status: "종료" },
-];
-const joinedCampaigns = [
-  { id: 3, title: "친환경 주방세제 런칭 캠페인", status: "진행중" },
-];
-const notifications = [
-  { id: 1, text: "[알림] 캠페인 '비건 뷰티 마스크팩'이 승인되었습니다.", date: "2024-06-01" },
-  { id: 2, text: "[알림] 새로운 메시지가 도착했습니다.", date: "2024-06-02" },
-];
-const messages = [
-  { id: 1, from: "인플루언서A", text: "참여 문의드립니다!", date: "2024-06-02" },
-];
-// --- 성과 대시보드용 더미 데이터 ---
-function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-function randomFloat(min: number, max: number, fixed = 2) {
-  return parseFloat((Math.random() * (max - min) + min).toFixed(fixed));
-}
-const periodOptions = [
-  { value: 'today', label: '오늘' },
-  { value: 'week', label: '이번주' },
-  { value: 'month', label: '이번달' },
-];
-const dummyCampaigns = [
-  {
-    id: 1,
-    title: '비건 뷰티 마스크팩',
-    status: '진행중',
-    participants: randomInt(50, 200),
-    sales: randomInt(1000000, 5000000),
-    clicks: randomInt(500, 2000),
-    conversion: randomFloat(2, 10),
-  },
-  {
-    id: 2,
-    title: '프리미엄 헤어오일',
-    status: '종료',
-    participants: randomInt(20, 100),
-    sales: randomInt(500000, 2000000),
-    clicks: randomInt(200, 1000),
-    conversion: randomFloat(1, 8),
-  },
-  {
-    id: 3,
-    title: '친환경 주방세제',
-    status: '진행중',
-    participants: randomInt(30, 150),
-    sales: randomInt(800000, 3000000),
-    clicks: randomInt(300, 1500),
-    conversion: randomFloat(2, 12),
-  },
-];
-const trendLabels = Array.from({ length: 7 }, (_, i) => `${i + 1}일`);
-const trendData = {
-  sales: Array.from({ length: 7 }, () => randomInt(500000, 2000000)),
-  participants: Array.from({ length: 7 }, () => randomInt(10, 80)),
-  clicks: Array.from({ length: 7 }, () => randomInt(100, 500)),
-};
-
-// --- 추가 더미 데이터 (PRD 기반) ---
-const dummyPerformance = [
-  {
-    campaign: '비건 뷰티 마스크팩',
-    clicks: 1800,
-    conversions: 120,
-    sales: 3200000,
-    roi: 2.1,
-    influencers: 5,
-    contents: 7,
-    reviews: [
-      { from: 'Mina', rating: 5, comment: '협업이 원활하고 결과가 좋아요!' },
-      { from: 'Somchai', rating: 4.5, comment: '피드백이 빨라서 좋았습니다.' },
-    ],
-  },
-  {
-    campaign: '프리미엄 헤어오일',
-    clicks: 950,
-    conversions: 60,
-    sales: 1700000,
-    roi: 1.7,
-    influencers: 3,
-    contents: 4,
-    reviews: [
-      { from: 'Nicha', rating: 4.8, comment: '팔로워 반응이 좋았어요.' },
-    ],
-  },
-  {
-    campaign: '친환경 주방세제',
-    clicks: 1200,
-    conversions: 80,
-    sales: 2100000,
-    roi: 1.9,
-    influencers: 4,
-    contents: 5,
-    reviews: [
-      { from: 'Mina', rating: 5, comment: '지속적으로 판매가 일어나요.' },
-    ],
-  },
-];
-const dummyInfluencers = [
-  {
-    name: 'Mina',
-    campaigns: 2,
-    totalSales: 3500000,
-    avgConversion: 5.2,
-    avgRating: 4.9,
-  },
-  {
-    name: 'Nicha',
-    campaigns: 1,
-    totalSales: 1700000,
-    avgConversion: 6.1,
-    avgRating: 4.8,
-  },
-  {
-    name: 'Somchai',
-    campaigns: 1,
-    totalSales: 2100000,
-    avgConversion: 6.7,
-    avgRating: 4.7,
-  },
-];
-const dummyAI = {
-  bottleneck: '전환율이 2~3일차에 급감, 콘텐츠 포맷 다양화 필요',
-  suggestion: '짧은 릴스/숏폼 영상 활용, 인플루언서별 맞춤 피드백 제공',
-  reorder: 'ROI 1.8 이상 캠페인은 리오더 추천',
-};
-// --- 기존 KPI 집계 확장 ---
-const totalSales = dummyCampaigns.reduce((sum, c) => sum + c.sales, 0);
-const totalParticipants = dummyCampaigns.reduce((sum, c) => sum + c.participants, 0);
-const totalClicks = dummyCampaigns.reduce((sum, c) => sum + c.clicks, 0);
-const totalConversions = dummyPerformance.reduce((sum, c) => sum + c.conversions, 0);
-const totalROI = dummyPerformance.reduce((sum, c) => sum + c.roi, 0);
-const totalCampaigns = dummyPerformance.length;
-const totalInfluencers = dummyInfluencers.length;
-const totalContents = dummyPerformance.reduce((sum, c) => sum + c.contents, 0);
-const avgConversion = dummyCampaigns.length ? (
-  dummyCampaigns.reduce((sum, c) => sum + c.conversion, 0) / dummyCampaigns.length
-) : 0;
-const avgROI = totalCampaigns ? (totalROI / totalCampaigns) : 0;
-
-// --- 그래프용 더미 데이터 ---
-const salesTrend = [320000, 410000, 380000, 500000, 470000, 530000, 600000];
-const clicksTrend = [200, 350, 300, 400, 380, 420, 500];
-const conversionTrend = [3.2, 4.1, 3.8, 5.0, 4.7, 5.3, 6.0];
-
-// --- 그래프 통계 계산 함수 ---
-function getStats(arr: number[]) {
-  const sum = arr.reduce((a, b) => a + b, 0);
-  const avg = arr.length ? sum / arr.length : 0;
-  const min = Math.min(...arr);
-  const max = Math.max(...arr);
-  const last = arr[arr.length - 1];
-  const prev = arr.length > 1 ? arr[arr.length - 2] : last;
-  const diff = last - prev;
-  const diffRate = prev ? (diff / prev) * 100 : 0;
-  return { sum, avg, min, max, last, diff, diffRate };
-}
-const salesStats = getStats(salesTrend);
-const clicksStats = getStats(clicksTrend);
-const convStats = getStats(conversionTrend);
-
-// 클릭수 그래프 y축 스케일링 함수
-function getYClick(v: number) {
-  const minY = 20, maxY = 90;
-  const min = clicksStats.min, max = clicksStats.max;
-  if (max === min) return (minY + maxY) / 2;
-  // 값이 클수록 y가 작아야 위로 올라감
-  return maxY - ((v - min) / (max - min)) * (maxY - minY);
-}
-
-export default function DashboardPage() {
   const [mainTab, setMainTab] = useState<'service'|'analytics'>('service');
   const [tab, setTab] = useState<'my'|'joined'>('my');
   const [period, setPeriod] = useState('today');
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [joinedCampaigns, setJoinedCampaigns] = useState<any[]>([]); // 참여 캠페인 (아직 더미)
+  const [notifications, setNotifications] = useState<any[]>([]); // 알림 (아직 더미)
+  const [messages, setMessages] = useState<any[]>([]); // 메시지 (아직 더미)
+
+  const supabase = createClient();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser(data.user);
-        fetchProfile(data.user.id);
-      }
-    });
-  }, []);
+    const fetchUserAndProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUser(user);
+        // 프로필 정보 가져오기
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('full_name, username, avatar_url, website') // 필요한 필드만 선택
+          .eq('id', user.id)
+          .single();
+        if (!profileError && profileData) {
+          setProfile(profileData);
+        }
 
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (!error && data) setProfile(data);
+        // 사용자가 만든 캠페인 불러오기 (campaigns 테이블에 user_id 컬럼이 있다고 가정)
+        const { data: myCampaignsData, error: myCampaignsError } = await supabase
+          .from('campaigns')
+          .select('id, title, status')
+          .eq('user_id', user.id);
+        if (!myCampaignsError && myCampaignsData) {
+          setMyCampaigns(myCampaignsData);
+        }
+
+        // TODO: 참여 캠페인, 알림, 메시지 데이터도 Supabase에서 불러오도록 구현 필요
+        // 현재는 더미 데이터 사용
+        setJoinedCampaigns([
+          { id: 3, title: "친환경 주방세제 런칭 캠페인", status: "진행중" },
+        ]);
+        setNotifications([
+          { id: 1, text: "[알림] 캠페인 '비건 뷰티 마스크팩'이 승인되었습니다.", date: "2024-06-01" },
+          { id: 2, text: "[알림] 새로운 메시지가 도착했습니다.", date: "2024-06-02" },
+        ]);
+        setMessages([
+          { id: 1, from: "인플루언서A", text: "참여 문의드립니다!", date: "2024-06-02" },
+        ]);
+      }
+    };
+    fetchUserAndProfile();
+  }, [supabase]);
+
+  // --- 성과 대시보드용 더미 데이터 (임시 유지) ---
+  function randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function randomFloat(min: number, max: number, fixed = 2) {
+    return parseFloat((Math.random() * (max - min) + min).toFixed(fixed));
+  }
+  const periodOptions = [
+    { value: 'today', label: '오늘' },
+    { value: 'week', label: '이번주' },
+    { value: 'month', label: '이번달' },
+  ];
+  const dummyCampaigns = [
+    {
+      id: 1,
+      title: '비건 뷰티 마스크팩',
+      status: '진행중',
+      participants: randomInt(50, 200),
+      sales: randomInt(1000000, 5000000),
+      clicks: randomInt(500, 2000),
+      conversion: randomFloat(2, 10),
+    },
+    {
+      id: 2,
+      title: '프리미엄 헤어오일',
+      status: '종료',
+      participants: randomInt(20, 100),
+      sales: randomInt(500000, 2000000),
+      clicks: randomInt(200, 1000),
+      conversion: randomFloat(1, 8),
+    },
+    {
+      id: 3,
+      title: '친환경 주방세제',
+      status: '진행중',
+      participants: randomInt(30, 150),
+      sales: randomInt(800000, 3000000),
+      clicks: randomInt(300, 1500),
+      conversion: randomFloat(2, 12),
+    },
+  ];
+  const trendLabels = Array.from({ length: 7 }, (_, i) => `${i + 1}일`);
+  const trendData = {
+    sales: Array.from({ length: 7 }, () => randomInt(500000, 2000000)),
+    participants: Array.from({ length: 7 }, () => randomInt(10, 80)),
+    clicks: Array.from({ length: 7 }, () => randomInt(100, 500)),
   };
+
+  // --- 추가 더미 데이터 (PRD 기반) ---
+  const dummyPerformance = [
+    {
+      campaign: '비건 뷰티 마스크팩',
+      clicks: 1800,
+      conversions: 120,
+      sales: 3200000,
+      roi: 2.1,
+      influencers: 5,
+      contents: 7,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '협업이 원활하고 결과가 좋아요!' },
+        { from: 'Somchai', rating: 4.5, comment: '피드백이 빨라서 좋았습니다.' },
+      ],
+    },
+    {
+      campaign: '프리미엄 헤어오일',
+      clicks: 950,
+      conversions: 60,
+      sales: 1700000,
+      roi: 1.7,
+      influencers: 3,
+      contents: 4,
+      reviews: [
+        { from: 'Nicha', rating: 4.8, comment: '팔로워 반응이 좋았어요!' },
+      ],
+    },
+    {
+      campaign: '친환경 주방세제',
+      clicks: 1200,
+      conversions: 80,
+      sales: 2100000,
+      roi: 1.9,
+      influencers: 4,
+      contents: 5,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '지속적으로 판매가 일어나요!' },
+      ],
+    },
+  ];
+  const dummyInfluencers = [
+    {
+      name: 'Mina',
+      campaigns: 2,
+      totalSales: 3500000,
+      avgConversion: 5.2,
+      avgRating: 4.9,
+    },
+    {
+      name: 'Nicha',
+      campaigns: 1,
+      totalSales: 1700000,
+      avgConversion: 6.1,
+      avgRating: 4.8,
+    },
+    {
+      name: 'Somchai',
+      campaigns: 1,
+      totalSales: 2100000,
+      avgConversion: 6.7,
+      avgRating: 4.7,
+    },
+  ];
+  const dummyAI = {
+    bottleneck: '전환율이 2~3일차에 급감, 콘텐츠 포맷 다양화 필요',
+    suggestion: '짧은 릴스/숏폼 영상 활용, 인플루언서별 맞춤 피드백 제공',
+    reorder: 'ROI 1.8 이상 캠페인은 리오더 추천',
+  };
+  // --- 기존 KPI 집계 확장 ---
+  const totalSales = dummyCampaigns.reduce((sum, c) => sum + c.sales, 0);
+  const totalParticipants = dummyCampaigns.reduce((sum, c) => sum + c.participants, 0);
+  const totalClicks = dummyCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+  const totalConversions = dummyPerformance.reduce((sum, c) => sum + c.conversions, 0);
+  const totalROI = dummyPerformance.reduce((sum, c) => sum + c.roi, 0);
+  const totalCampaigns = dummyPerformance.length;
+  const totalInfluencers = dummyInfluencers.length;
+  const totalContents = dummyPerformance.reduce((sum, c) => sum + c.contents, 0);
+  const avgConversion = dummyCampaigns.length ? (
+    dummyCampaigns.reduce((sum, c) => sum + c.conversion, 0) / dummyCampaigns.length
+  ) : 0;
+  const avgROI = totalCampaigns ? (totalROI / totalCampaigns) : 0;
+
+  // --- 그래프용 더미 데이터 ---
+  const salesTrend = [320000, 410000, 380000, 500000, 470000, 530000, 600000];
+  const clicksTrend = [200, 350, 300, 400, 380, 420, 500];
+  const conversionTrend = [3.2, 4.1, 3.8, 5.0, 4.7, 5.3, 6.0];
+
+  // --- 그래프 통계 계산 함수 ---
+  function getStats(arr: number[]) {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    const avg = arr.length ? sum / arr.length : 0;
+    const min = Math.min(...arr);
+    const max = Math.max(...arr);
+    const last = arr[arr.length - 1];
+    const prev = arr.length > 1 ? arr[arr.length - 2] : last;
+    const diff = last - prev;
+    const diffRate = prev ? (diff / prev) * 100 : 0;
+    return { sum, avg, min, max, last, diff, diffRate };
+  }
+  const salesStats = getStats(salesTrend);
+  const clicksStats = getStats(clicksTrend);
+  const convStats = getStats(conversionTrend);
+
+  // 클릭수 그래프 y축 스케일링 함수
+  function getYClick(v: number) {
+    const minY = 20, maxY = 90;
+    const min = clicksStats.min, max = clicksStats.max;
+    if (max === min) return (minY + maxY) / 2;
+    // 값이 클수록 y가 작아야 위로 올라감
+    return maxY - ((v - min) / (max - min)) * (maxY - minY);
+  }
+
+  const [mainTab, setMainTab] = useState<'service'|'analytics'>('service');
+  const [tab, setTab] = useState<'my'|'joined'>('my');
+  const [period, setPeriod] = useState('today');
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [joinedCampaigns, setJoinedCampaigns] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+
+  // --- 성과 대시보드용 더미 데이터 (임시 유지) ---
+  function randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function randomFloat(min: number, max: number, fixed = 2) {
+    return parseFloat((Math.random() * (max - min) + min).toFixed(fixed));
+  }
+  const periodOptions = [
+    { value: 'today', label: '오늘' },
+    { value: 'week', label: '이번주' },
+    { value: 'month', label: '이번달' },
+  ];
+  const dummyCampaigns = [
+    {
+      id: 1,
+      title: '비건 뷰티 마스크팩',
+      status: '진행중',
+      participants: randomInt(50, 200),
+      sales: randomInt(1000000, 5000000),
+      clicks: randomInt(500, 2000),
+      conversion: randomFloat(2, 10),
+    },
+    {
+      id: 2,
+      title: '프리미엄 헤어오일',
+      status: '종료',
+      participants: randomInt(20, 100),
+      sales: randomInt(500000, 2000000),
+      clicks: randomInt(200, 1000),
+      conversion: randomFloat(1, 8),
+    },
+    {
+      id: 3,
+      title: '친환경 주방세제',
+      status: '진행중',
+      participants: randomInt(30, 150),
+      sales: randomInt(800000, 3000000),
+      clicks: randomInt(300, 1500),
+      conversion: randomFloat(2, 12),
+    },
+  ];
+  const trendLabels = Array.from({ length: 7 }, (_, i) => `${i + 1}일`);
+  const trendData = {
+    sales: Array.from({ length: 7 }, () => randomInt(500000, 2000000)),
+    participants: Array.from({ length: 7 }, () => randomInt(10, 80)),
+    clicks: Array.from({ length: 7 }, () => randomInt(100, 500)),
+  };
+
+  // --- 추가 더미 데이터 (PRD 기반) ---
+  const dummyPerformance = [
+    {
+      campaign: '비건 뷰티 마스크팩',
+      clicks: 1800,
+      conversions: 120,
+      sales: 3200000,
+      roi: 2.1,
+      influencers: 5,
+      contents: 7,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '협업이 원활하고 결과가 좋아요!' },
+        { from: 'Somchai', rating: 4.5, comment: '피드백이 빨라서 좋았습니다.' },
+      ],
+    },
+    {
+      campaign: '프리미엄 헤어오일',
+      clicks: 950,
+      conversions: 60,
+      sales: 1700000,
+      roi: 1.7,
+      influencers: 3,
+      contents: 4,
+      reviews: [
+        { from: 'Nicha', rating: 4.8, comment: '팔로워 반응이 좋았어요.' },
+      ],
+    },
+    {
+      campaign: '친환경 주방세제',
+      clicks: 1200,
+      conversions: 80,
+      sales: 2100000,
+      roi: 1.9,
+      influencers: 4,
+      contents: 5,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '지속적으로 판매가 일어나요.' },
+      ],
+    },
+  ];
+  const dummyInfluencers = [
+    {
+      name: 'Mina',
+      campaigns: 2,
+      totalSales: 3500000,
+      avgConversion: 5.2,
+      avgRating: 4.9,
+    },
+    {
+      name: 'Nicha',
+      campaigns: 1,
+      totalSales: 1700000,
+      avgConversion: 6.1,
+      avgRating: 4.8,
+    },
+    {
+      name: 'Somchai',
+      campaigns: 1,
+      totalSales: 2100000,
+      avgConversion: 6.7,
+      avgRating: 4.7,
+    },
+  ];
+  const dummyAI = {
+    bottleneck: '전환율이 2~3일차에 급감, 콘텐츠 포맷 다양화 필요',
+    suggestion: '짧은 릴스/숏폼 영상 활용, 인플루언서별 맞춤 피드백 제공',
+    reorder: 'ROI 1.8 이상 캠페인은 리오더 추천',
+  };
+  // --- 기존 KPI 집계 확장 ---
+  const totalSales = dummyCampaigns.reduce((sum, c) => sum + c.sales, 0);
+  const totalParticipants = dummyCampaigns.reduce((sum, c) => sum + c.participants, 0);
+  const totalClicks = dummyCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+  const totalConversions = dummyPerformance.reduce((sum, c) => sum + c.conversions, 0);
+  const totalROI = dummyPerformance.reduce((sum, c) => sum + c.roi, 0);
+  const totalCampaigns = dummyPerformance.length;
+  const totalInfluencers = dummyInfluencers.length;
+  const totalContents = dummyPerformance.reduce((sum, c) => sum + c.contents, 0);
+  const avgConversion = dummyCampaigns.length ? (
+    dummyCampaigns.reduce((sum, c) => sum + c.conversion, 0) / dummyCampaigns.length
+  ) : 0;
+  const avgROI = totalCampaigns ? (totalROI / totalCampaigns) : 0;
+
+  // --- 그래프용 더미 데이터 ---
+  const salesTrend = [320000, 410000, 380000, 500000, 470000, 530000, 600000];
+  const clicksTrend = [200, 350, 300, 400, 380, 420, 500];
+  const conversionTrend = [3.2, 4.1, 3.8, 5.0, 4.7, 5.3, 6.0];
+
+  // --- 그래프 통계 계산 함수 ---
+  function getStats(arr: number[]) {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    const avg = arr.length ? sum / arr.length : 0;
+    const min = Math.min(...arr);
+    const max = Math.max(...arr);
+    const last = arr[arr.length - 1];
+    const prev = arr.length > 1 ? arr[arr.length - 2] : last;
+    const diff = last - prev;
+    const diffRate = prev ? (diff / prev) * 100 : 0;
+    return { sum, avg, min, max, last, diff, diffRate };
+  }
+  const salesStats = getStats(salesTrend);
+  const clicksStats = getStats(clicksTrend);
+  const convStats = getStats(conversionTrend);
+
+  // 클릭수 그래프 y축 스케일링 함수
+  function getYClick(v: number) {
+    const minY = 20, maxY = 90;
+    const min = clicksStats.min, max = clicksStats.max;
+    if (max === min) return (minY + maxY) / 2;
+    // 값이 클수록 y가 작아야 위로 올라감
+    return maxY - ((v - min) / (max - min)) * (maxY - minY);
+  }
+
+  // --- 알림/메시지 더미 데이터 (임시 유지) ---
+  const notificationsDummy = [
+    { id: 1, text: "[알림] 캠페인 '비건 뷰티 마스크팩'이 승인되었습니다.", date: "2024-06-01" },
+    { id: 2, text: "[알림] 새로운 메시지가 도착했습니다.", date: "2024-06-02" },
+  ];
+  const messagesDummy = [
+    { id: 1, from: "인플루언서A", text: "참여 문의드립니다!", date: "2024-06-02" },
+  ];
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [joinedCampaigns, setJoinedCampaigns] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+
+  // --- 성과 대시보드용 더미 데이터 (임시 유지) ---
+  function randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function randomFloat(min: number, max: number, fixed = 2) {
+    return parseFloat((Math.random() * (max - min) + min).toFixed(fixed));
+  }
+  const periodOptions = [
+    { value: 'today', label: '오늘' },
+    { value: 'week', label: '이번주' },
+    { value: 'month', label: '이번달' },
+  ];
+  const dummyCampaigns = [
+    {
+      id: 1,
+      title: '비건 뷰티 마스크팩',
+      status: '진행중',
+      participants: randomInt(50, 200),
+      sales: randomInt(1000000, 5000000),
+      clicks: randomInt(500, 2000),
+      conversion: randomFloat(2, 10),
+    },
+    {
+      id: 2,
+      title: '프리미엄 헤어오일',
+      status: '종료',
+      participants: randomInt(20, 100),
+      sales: randomInt(500000, 2000000),
+      clicks: randomInt(200, 1000),
+      conversion: randomFloat(1, 8),
+    },
+    {
+      id: 3,
+      title: '친환경 주방세제',
+      status: '진행중',
+      participants: randomInt(30, 150),
+      sales: randomInt(800000, 3000000),
+      clicks: randomInt(300, 1500),
+      conversion: randomFloat(2, 12),
+    },
+  ];
+  const trendLabels = Array.from({ length: 7 }, (_, i) => `${i + 1}일`);
+  const trendData = {
+    sales: Array.from({ length: 7 }, () => randomInt(500000, 2000000)),
+    participants: Array.from({ length: 7 }, () => randomInt(10, 80)),
+    clicks: Array.from({ length: 7 }, () => randomInt(100, 500)),
+  };
+
+  // --- 추가 더미 데이터 (PRD 기반) ---
+  const dummyPerformance = [
+    {
+      campaign: '비건 뷰티 마스크팩',
+      clicks: 1800,
+      conversions: 120,
+      sales: 3200000,
+      roi: 2.1,
+      influencers: 5,
+      contents: 7,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '협업이 원활하고 결과가 좋아요!' },
+        { from: 'Somchai', rating: 4.5, comment: '피드백이 빨라서 좋았습니다.' },
+      ],
+    },
+    {
+      campaign: '프리미엄 헤어오일',
+      clicks: 950,
+      conversions: 60,
+      sales: 1700000,
+      roi: 1.7,
+      influencers: 3,
+      contents: 4,
+      reviews: [
+        { from: 'Nicha', rating: 4.8, comment: '팔로워 반응이 좋았어요.' },
+      ],
+    },
+    {
+      campaign: '친환경 주방세제',
+      clicks: 1200,
+      conversions: 80,
+      sales: 2100000,
+      roi: 1.9,
+      influencers: 4,
+      contents: 5,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '지속적으로 판매가 일어나요.' },
+      ],
+    },
+  ];
+  const dummyInfluencers = [
+    {
+      name: 'Mina',
+      campaigns: 2,
+      totalSales: 3500000,
+      avgConversion: 5.2,
+      avgRating: 4.9,
+    },
+    {
+      name: 'Nicha',
+      campaigns: 1,
+      totalSales: 1700000,
+      avgConversion: 6.1,
+      avgRating: 4.8,
+    },
+    {
+      name: 'Somchai',
+      campaigns: 1,
+      totalSales: 2100000,
+      avgConversion: 6.7,
+      avgRating: 4.7,
+    },
+  ];
+  const dummyAI = {
+    bottleneck: '전환율이 2~3일차에 급감, 콘텐츠 포맷 다양화 필요',
+    suggestion: '짧은 릴스/숏폼 영상 활용, 인플루언서별 맞춤 피드백 제공',
+    reorder: 'ROI 1.8 이상 캠페인은 리오더 추천',
+  };
+  // --- 기존 KPI 집계 확장 ---
+  const totalSales = dummyCampaigns.reduce((sum, c) => sum + c.sales, 0);
+  const totalParticipants = dummyCampaigns.reduce((sum, c) => sum + c.participants, 0);
+  const totalClicks = dummyCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+  const totalConversions = dummyPerformance.reduce((sum, c) => sum + c.conversions, 0);
+  const totalROI = dummyPerformance.reduce((sum, c) => sum + c.roi, 0);
+  const totalCampaigns = dummyPerformance.length;
+  const totalInfluencers = dummyInfluencers.length;
+  const totalContents = dummyPerformance.reduce((sum, c) => sum + c.contents, 0);
+  const avgConversion = dummyCampaigns.length ? (
+    dummyCampaigns.reduce((sum, c) => sum + c.conversion, 0) / dummyCampaigns.length
+  ) : 0;
+  const avgROI = totalCampaigns ? (totalROI / totalCampaigns) : 0;
+
+  // --- 그래프용 더미 데이터 ---
+  const salesTrend = [320000, 410000, 380000, 500000, 470000, 530000, 600000];
+  const clicksTrend = [200, 350, 300, 400, 380, 420, 500];
+  const conversionTrend = [3.2, 4.1, 3.8, 5.0, 4.7, 5.3, 6.0];
+
+  // --- 그래프 통계 계산 함수 ---
+  function getStats(arr: number[]) {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    const avg = arr.length ? sum / arr.length : 0;
+    const min = Math.min(...arr);
+    const max = Math.max(...arr);
+    const last = arr[arr.length - 1];
+    const prev = arr.length > 1 ? arr[arr.length - 2] : last;
+    const diff = last - prev;
+    const diffRate = prev ? (diff / prev) * 100 : 0;
+    return { sum, avg, min, max, last, diff, diffRate };
+  }
+  const salesStats = getStats(salesTrend);
+  const clicksStats = getStats(clicksTrend);
+  const convStats = getStats(conversionTrend);
+
+  // 클릭수 그래프 y축 스케일링 함수
+  function getYClick(v: number) {
+    const minY = 20, maxY = 90;
+    const min = clicksStats.min, max = clicksStats.max;
+    if (max === min) return (minY + maxY) / 2;
+    // 값이 클수록 y가 작아야 위로 올라감
+    return maxY - ((v - min) / (max - min)) * (maxY - minY);
+  }
+
+  // --- 알림/메시지 더미 데이터 (임시 유지) ---
+  const notificationsDummy = [
+    { id: 1, text: "[알림] 캠페인 '비건 뷰티 마스크팩'이 승인되었습니다.", date: "2024-06-01" },
+    { id: 2, text: "[알림] 새로운 메시지가 도착했습니다.", date: "2024-06-02" },
+  ];
+  const messagesDummy = [
+    { id: 1, from: "인플루언서A", text: "참여 문의드립니다!", date: "2024-06-02" },
+  ];
+    const [mainTab, setMainTab] = useState<'service'|'analytics'>('service');
+  const [tab, setTab] = useState<'my'|'joined'>('my');
+  const [period, setPeriod] = useState('today');
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [joinedCampaigns, setJoinedCampaigns] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+
+  // --- 성과 대시보드용 더미 데이터 (임시 유지) ---
+  function randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function randomFloat(min: number, max: number, fixed = 2) {
+    return parseFloat((Math.random() * (max - min) + min).toFixed(fixed));
+  }
+  const periodOptions = [
+    { value: 'today', label: '오늘' },
+    { value: 'week', label: '이번주' },
+    { value: 'month', label: '이번달' },
+  ];
+  const dummyCampaigns = [
+    {
+      id: 1,
+      title: '비건 뷰티 마스크팩',
+      status: '진행중',
+      participants: randomInt(50, 200),
+      sales: randomInt(1000000, 5000000),
+      clicks: randomInt(500, 2000),
+      conversion: randomFloat(2, 10),
+    },
+    {
+      id: 2,
+      title: '프리미엄 헤어오일',
+      status: '종료',
+      participants: randomInt(20, 100),
+      sales: randomInt(500000, 2000000),
+      clicks: randomInt(200, 1000),
+      conversion: randomFloat(1, 8),
+    },
+    {
+      id: 3,
+      title: '친환경 주방세제',
+      status: '진행중',
+      participants: randomInt(30, 150),
+      sales: randomInt(800000, 3000000),
+      clicks: randomInt(300, 1500),
+      conversion: randomFloat(2, 12),
+    },
+  ];
+  const trendLabels = Array.from({ length: 7 }, (_, i) => `${i + 1}일`);
+  const trendData = {
+    sales: Array.from({ length: 7 }, () => randomInt(500000, 2000000)),
+    participants: Array.from({ length: 7 }, () => randomInt(10, 80)),
+    clicks: Array.from({ length: 7 }, () => randomInt(100, 500)),
+  };
+
+  // --- 추가 더미 데이터 (PRD 기반) ---
+  const dummyPerformance = [
+    {
+      campaign: '비건 뷰티 마스크팩',
+      clicks: 1800,
+      conversions: 120,
+      sales: 3200000,
+      roi: 2.1,
+      influencers: 5,
+      contents: 7,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '협업이 원활하고 결과가 좋아요!' },
+        { from: 'Somchai', rating: 4.5, comment: '피드백이 빨라서 좋았습니다.' },
+      ],
+    },
+    {
+      campaign: '프리미엄 헤어오일',
+      clicks: 950,
+      conversions: 60,
+      sales: 1700000,
+      roi: 1.7,
+      influencers: 3,
+      contents: 4,
+      reviews: [
+        { from: 'Nicha', rating: 4.8, comment: '팔로워 반응이 좋았어요!' },
+      ],
+    },
+    {
+      campaign: '친환경 주방세제',
+      clicks: 1200,
+      conversions: 80,
+      sales: 2100000,
+      roi: 1.9,
+      influencers: 4,
+      contents: 5,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '지속적으로 판매가 일어나요!' },
+      ],
+    },
+  ];
+  const dummyInfluencers = [
+    {
+      name: 'Mina',
+      campaigns: 2,
+      totalSales: 3500000,
+      avgConversion: 5.2,
+      avgRating: 4.9,
+    },
+    {
+      name: 'Nicha',
+      campaigns: 1,
+      totalSales: 1700000,
+      avgConversion: 6.1,
+      avgRating: 4.8,
+    },
+    {
+      name: 'Somchai',
+      campaigns: 1,
+      totalSales: 2100000,
+      avgConversion: 6.7,
+      avgRating: 4.7,
+    },
+  ];
+  const dummyAI = {
+    bottleneck: '전환율이 2~3일차에 급감, 콘텐츠 포맷 다양화 필요',
+    suggestion: '짧은 릴스/숏폼 영상 활용, 인플루언서별 맞춤 피드백 제공',
+    reorder: 'ROI 1.8 이상 캠페인은 리오더 추천',
+  };
+  // --- 기존 KPI 집계 확장 ---
+  const totalSales = dummyCampaigns.reduce((sum, c) => sum + c.sales, 0);
+  const totalParticipants = dummyCampaigns.reduce((sum, c) => sum + c.participants, 0);
+  const totalClicks = dummyCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+  const totalConversions = dummyPerformance.reduce((sum, c) => sum + c.conversions, 0);
+  const totalROI = dummyPerformance.reduce((sum, c) => sum + c.roi, 0);
+  const totalCampaigns = dummyPerformance.length;
+  const totalInfluencers = dummyInfluencers.length;
+  const totalContents = dummyPerformance.reduce((sum, c) => sum + c.contents, 0);
+  const avgConversion = dummyCampaigns.length ? (
+    dummyCampaigns.reduce((sum, c) => sum + c.conversion, 0) / dummyCampaigns.length
+  ) : 0;
+  const avgROI = totalCampaigns ? (totalROI / totalCampaigns) : 0;
+
+  // --- 그래프용 더미 데이터 ---
+  const salesTrend = [320000, 410000, 380000, 500000, 470000, 530000, 600000];
+  const clicksTrend = [200, 350, 300, 400, 380, 420, 500];
+  const conversionTrend = [3.2, 4.1, 3.8, 5.0, 4.7, 5.3, 6.0];
+
+  // --- 그래프 통계 계산 함수 ---
+  function getStats(arr: number[]) {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    const avg = arr.length ? sum / arr.length : 0;
+    const min = Math.min(...arr);
+    const max = Math.max(...arr);
+    const last = arr[arr.length - 1];
+    const prev = arr.length > 1 ? arr[arr.length - 2] : last;
+    const diff = last - prev;
+    const diffRate = prev ? (diff / prev) * 100 : 0;
+    return { sum, avg, min, max, last, diff, diffRate };
+  }
+  const salesStats = getStats(salesTrend);
+  const clicksStats = getStats(clicksTrend);
+  const convStats = getStats(conversionTrend);
+
+  // 클릭수 그래프 y축 스케일링 함수
+  function getYClick(v: number) {
+    const minY = 20, maxY = 90;
+    const min = clicksStats.min, max = clicksStats.max;
+    if (max === min) return (minY + maxY) / 2;
+    // 값이 클수록 y가 작아야 위로 올라감
+    return maxY - ((v - min) / (max - min)) * (maxY - minY);
+  }
+
+  // --- 알림/메시지 더미 데이터 (임시 유지) ---
+  const notificationsDummy = [
+    { id: 1, text: "[알림] 캠페인 '비건 뷰티 마스크팩'이 승인되었습니다.", date: "2024-06-01" },
+    { id: 2, text: "[알림] 새로운 메시지가 도착했습니다.", date: "2024-06-02" },
+  ];
+  const messagesDummy = [
+    { id: 1, from: "인플루언서A", text: "참여 문의드립니다!", date: "2024-06-02" },
+  ];
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [joinedCampaigns, setJoinedCampaigns] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+
+  // --- 성과 대시보드용 더미 데이터 (임시 유지) ---
+  function randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function randomFloat(min: number, max: number, fixed = 2) {
+    return parseFloat((Math.random() * (max - min) + min).toFixed(fixed));
+  }
+  const periodOptions = [
+    { value: 'today', label: '오늘' },
+    { value: 'week', label: '이번주' },
+    { value: 'month', label: '이번달' },
+  ];
+  const dummyCampaigns = [
+    {
+      id: 1,
+      title: '비건 뷰티 마스크팩',
+      status: '진행중',
+      participants: randomInt(50, 200),
+      sales: randomInt(1000000, 5000000),
+      clicks: randomInt(500, 2000),
+      conversion: randomFloat(2, 10),
+    },
+    {
+      id: 2,
+      title: '프리미엄 헤어오일',
+      status: '종료',
+      participants: randomInt(20, 100),
+      sales: randomInt(500000, 2000000),
+      clicks: randomInt(200, 1000),
+      conversion: randomFloat(1, 8),
+    },
+    {
+      id: 3,
+      title: '친환경 주방세제',
+      status: '진행중',
+      participants: randomInt(30, 150),
+      sales: randomInt(800000, 3000000),
+      clicks: randomInt(300, 1500),
+      conversion: randomFloat(2, 12),
+    },
+  ];
+  const trendLabels = Array.from({ length: 7 }, (_, i) => `${i + 1}일`);
+  const trendData = {
+    sales: Array.from({ length: 7 }, () => randomInt(500000, 2000000)),
+    participants: Array.from({ length: 7 }, () => randomInt(10, 80)),
+    clicks: Array.from({ length: 7 }, () => randomInt(100, 500)),
+  };
+
+  // --- 추가 더미 데이터 (PRD 기반) ---
+  const dummyPerformance = [
+    {
+      campaign: '비건 뷰티 마스크팩',
+      clicks: 1800,
+      conversions: 120,
+      sales: 3200000,
+      roi: 2.1,
+      influencers: 5,
+      contents: 7,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '협업이 원활하고 결과가 좋아요!' },
+        { from: 'Somchai', rating: 4.5, comment: '피드백이 빨라서 좋았습니다.' },
+      ],
+    },
+    {
+      campaign: '프리미엄 헤어오일',
+      clicks: 950,
+      conversions: 60,
+      sales: 1700000,
+      roi: 1.7,
+      influencers: 3,
+      contents: 4,
+      reviews: [
+        { from: 'Nicha', rating: 4.8, comment: '팔로워 반응이 좋았어요.' },
+      ],
+    },
+    {
+      campaign: '친환경 주방세제',
+      clicks: 1200,
+      conversions: 80,
+      sales: 2100000,
+      roi: 1.9,
+      influencers: 4,
+      contents: 5,
+      reviews: [
+        { from: 'Mina', rating: 5, comment: '지속적으로 판매가 일어나요!' },
+      ],
+    },
+  ];
+  const dummyInfluencers = [
+    {
+      name: 'Mina',
+      campaigns: 2,
+      totalSales: 3500000,
+      avgConversion: 5.2,
+      avgRating: 4.9,
+    },
+    {
+      name: 'Nicha',
+      campaigns: 1,
+      totalSales: 1700000,
+      avgConversion: 6.1,
+      avgRating: 4.8,
+    },
+    {
+      name: 'Somchai',
+      campaigns: 1,
+      totalSales: 2100000,
+      avgConversion: 6.7,
+      avgRating: 4.7,
+    },
+  ];
+  const dummyAI = {
+    bottleneck: '전환율이 2~3일차에 급감, 콘텐츠 포맷 다양화 필요',
+    suggestion: '짧은 릴스/숏폼 영상 활용, 인플루언서별 맞춤 피드백 제공',
+    reorder: 'ROI 1.8 이상 캠페인은 리오더 추천',
+  };
+  // --- 기존 KPI 집계 확장 ---
+  const totalSales = dummyCampaigns.reduce((sum, c) => sum + c.sales, 0);
+  const totalParticipants = dummyCampaigns.reduce((sum, c) => sum + c.participants, 0);
+  const totalClicks = dummyCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+  const totalConversions = dummyPerformance.reduce((sum, c) => sum + c.conversions, 0);
+  const totalROI = dummyPerformance.reduce((sum, c) => sum + c.roi, 0);
+  const totalCampaigns = dummyPerformance.length;
+  const totalInfluencers = dummyInfluencers.length;
+  const totalContents = dummyPerformance.reduce((sum, c) => sum + c.contents, 0);
+  const avgConversion = dummyCampaigns.length ? (
+    dummyCampaigns.reduce((sum, c) => sum + c.conversion, 0) / dummyCampaigns.length
+  ) : 0;
+  const avgROI = totalCampaigns ? (totalROI / totalCampaigns) : 0;
+
+  // --- 그래프용 더미 데이터 ---
+  const salesTrend = [320000, 410000, 380000, 500000, 470000, 530000, 600000];
+  const clicksTrend = [200, 350, 300, 400, 380, 420, 500];
+  const conversionTrend = [3.2, 4.1, 3.8, 5.0, 4.7, 5.3, 6.0];
+
+  // --- 그래프 통계 계산 함수 ---
+  function getStats(arr: number[]) {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    const avg = arr.length ? sum / arr.length : 0;
+    const min = Math.min(...arr);
+    const max = Math.max(...arr);
+    const last = arr[arr.length - 1];
+    const prev = arr.length > 1 ? arr[arr.length - 2] : last;
+    const diff = last - prev;
+    const diffRate = prev ? (diff / prev) * 100 : 0;
+    return { sum, avg, min, max, last, diff, diffRate };
+  }
+  const salesStats = getStats(salesTrend);
+  const clicksStats = getStats(clicksTrend);
+  const convStats = getStats(conversionTrend);
+
+  // 클릭수 그래프 y축 스케일링 함수
+  function getYClick(v: number) {
+    const minY = 20, maxY = 90;
+    const min = clicksStats.min, max = clicksStats.max;
+    if (max === min) return (minY + maxY) / 2;
+    // 값이 클수록 y가 작아야 위로 올라감
+    return maxY - ((v - min) / (max - min)) * (maxY - minY);
+  }
+
+  // --- 알림/메시지 더미 데이터 (임시 유지) ---
+  const notificationsDummy = [
+    { id: 1, text: "[알림] 캠페인 '비건 뷰티 마스크팩'이 승인되었습니다.", date: "2024-06-01" },
+    { id: 2, text: "[알림] 새로운 메시지가 도착했습니다.", date: "2024-06-02" },
+  ];
+  const messagesDummy = [
+    { id: 1, from: "인플루언서A", text: "참여 문의드립니다!", date: "2024-06-02" },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#2563eb] flex flex-col md:flex-row">

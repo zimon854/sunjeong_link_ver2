@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 // @ts-ignore
 import withPWA from 'next-pwa';
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 const nextConfig: NextConfig = {
   /* config options here */
   eslint: {
@@ -12,7 +14,7 @@ const nextConfig: NextConfig = {
     dest: 'public',
     register: true,
     skipWaiting: true,
-    disable: false,
+    disable: isDevelopment, // 개발 모드에서 PWA 비활성화
     buildExcludes: [/middleware-manifest\.json$/],
     runtimeCaching: [
       {
