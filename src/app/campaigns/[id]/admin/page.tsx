@@ -11,7 +11,7 @@ interface Content {
   feedback: string;
 }
 
-export default function AdminPage({ params }: { params: { id: string } }) {
+export default function AdminPage({ params }: any) {
   const supabase = createClient();
   
   const campaignId = params?.id;

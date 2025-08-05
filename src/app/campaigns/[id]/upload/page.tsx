@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { createClient } from '../../../../lib/supabaseClient';
 
-export default function UploadPage({ params }: { params: { id: string } }) {
+export default function UploadPage({ params }: any) {
   const supabase = createClient();
   
   const router = useRouter();

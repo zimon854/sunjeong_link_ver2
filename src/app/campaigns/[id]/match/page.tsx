@@ -13,7 +13,7 @@ interface Match {
   status: string;
 }
 
-export default function MatchPage({ params }: { params: { id: string } }) {
+export default function MatchPage({ params }: any) {
   const supabase = createClient();
   
   const campaignId = params?.id;

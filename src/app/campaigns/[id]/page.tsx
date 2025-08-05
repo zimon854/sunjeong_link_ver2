@@ -33,7 +33,7 @@ const dummyReviews = [
   { from: '인플루언서B', rating: 4.5, comment: '정산도 빠르고 피드백이 명확해서 좋았습니다.' },
 ];
 
-export default function CampaignDetailPage({ params }: { params: { id: string } }) {
+export default function CampaignDetailPage({ params }: any) {
   const supabase = createClient();
   
   const id = params?.id;
