@@ -143,13 +143,13 @@ export default function RootLayout({
               
               {/* 데스크톱 메뉴 (모바일에서는 완전히 숨김) */}
               <div className="hidden lg:flex items-center gap-6 text-[15px] font-medium text-white">
-                <NavMenu href="/auth" label="로그인/회원가입" desc="서비스 이용을 위한 계정 생성/로그인" />
                 <NavMenu href="/campaigns" label="캠페인 리스트" desc="진행 중인 모든 캠페인 한눈에 보기" />
                 <NavMenu href="/campaigns/new" label="캠페인 생성" desc="브랜드/셀러용 신규 캠페인 등록" />
                 <NavMenu href="/influencers" label="인플루언서 리스트" desc="인플루언서 한눈에 보기" />
                 <NavMenu href="/chat" label="실시간 채팅" desc="브랜드-인플루언서 실시간 소통" />
                 <NavMenu href="/profile" label="내 프로필 관리" desc="이름, 역할, 소개, 프로필 이미지 관리" />
                 <NavMenu href="/dashboard" label="내 대시보드" desc="내 서비스 현황 한눈에 보기" />
+                <AuthButton />
               </div>
             </div>
           </nav>

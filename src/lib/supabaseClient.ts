@@ -1,8 +1,10 @@
-// src/lib/supabaseClient.ts
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
+import { Database } from './database.types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://cqxduukezbedattyvsky.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxeGR1dWtlemJlZGF0dHl2c2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzNTM3NzcsImV4cCI6MjA2NjkyOTc3N30.qob76qhvDLn9mAQXOk07DYiRst1eJxY9PDbDgyR0pWg'
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
- 
+export function createClient() {
+  // Create a supabase client on the browser with project's credentials
+  return createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}

@@ -22,7 +22,7 @@ import {
   LineElement,
   ArcElement,
 } from 'chart.js';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabaseClient';
 import { useRouter } from "next/navigation";
 
 ChartJS.register(
@@ -51,6 +51,7 @@ const OTHER_USER_ID = '상대_유저_UUID'; // 상대방 UUID
 const categories = ["뷰티", "라이프", "푸드", "패션"];
 
 export default function Home() {
+  const supabase = createClient();
   // Hydration mismatch 방지: 클라이언트에서만 연도 렌더링
   const [year, setYear] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);

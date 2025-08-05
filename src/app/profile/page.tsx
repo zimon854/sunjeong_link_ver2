@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { createClient } from '../../lib/supabaseClient';
 
 // 더미 실적 데이터 (실제 연동 시 DB에서 fetch)
 const dummyStats = {
@@ -11,6 +11,7 @@ const dummyStats = {
 };
 
 export default function ProfilePage() {
+  const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>({ name: '', role: '', bio: '', image: '' });
   const [image, setImage] = useState<File | null>(null);

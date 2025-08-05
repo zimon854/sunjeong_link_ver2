@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { createClient } from '../../lib/supabaseClient';
 
 interface Message {
   id: number;
@@ -11,6 +11,7 @@ interface Message {
 }
 
 export default function ChatPage() {
+  const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [roomId, setRoomId] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
