@@ -3,6 +3,6 @@
    3       "target": {
    4         "namespace": "android_app",
    5         "package_name": "com.sunjeonglink.lynkable",
-   6         "sha256_cert_fingerprints": ["0D:CA:9C:31:68:32:B2:8E:33:22:AC:F4:1B:DD:EC:83:F9:F8:44:3C:52:3F:BC:06:04:6E:E3:66:41:D6:D4:00"]
+   6         "sha256_cert_fingerprints": ["98:3B:23:11:00:D8:31:1A:71:36:26:C4:01:B9:9D:D7:1F:26:A7:3E:B8:83:5B:6E:D0:21:A0:6E:05:C9:64:A9"]
    7       }
    8     }]

@@ -31,8 +31,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https"
-                      android:host="sunjeong-link-ver2-7xyua5cwu-rudfhr71-gmailcoms-projects.vercel.app" />
+                      android:host="sunjeong-link-ver2.vercel.app" />
             </intent-filter>
+            
+            <!-- DEFAULT_URL을 명시적으로 추가 -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+                android:value="https://sunjeong-link-ver2.vercel.app/" />
             
         </activity>
         
@@ -46,4 +51,4 @@
             
     </application>
 
-</manifest> 
+</manifest>
