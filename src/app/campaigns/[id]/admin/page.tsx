@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+
 import { createClient } from '../../../../lib/supabaseClient';
 
 interface Content {
@@ -13,7 +13,7 @@ interface Content {
 
 export default function AdminPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
-  const params = useParams();
+  
   const campaignId = params?.id;
   const [contents, setContents] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+
 import { createClient } from '../../../../lib/supabaseClient';
 
 export default function UploadPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
-  const params = useParams();
+  
   const router = useRouter();
   const campaignId = params?.id;
   const [file, setFile] = useState<File | null>(null);

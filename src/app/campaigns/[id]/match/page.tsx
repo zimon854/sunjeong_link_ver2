@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+
 import { createClient } from '../../../../lib/supabaseClient';
 import type { User } from '@supabase/auth-js';
 
@@ -15,7 +15,7 @@ interface Match {
 
 export default function MatchPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
-  const params = useParams();
+  
   const campaignId = params?.id;
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
