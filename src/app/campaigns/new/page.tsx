@@ -1,61 +1,117 @@
-"use client";
+'use client';
 import React, { useState } from 'react';
 
 const categories = ["뷰티", "라이프", "푸드", "패션"];
-const statuses = ["진행중", "종료"];
 
 export default function CampaignCreatePage() {
   const [title, setTitle] = useState("");
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState(categories[0]);
   const [price, setPrice] = useState("");
-  const [status, setStatus] = useState(statuses[0]);
   const [desc, setDesc] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     // 실제 저장 대신 더미 alert
-    alert(`캠페인 생성 완료!\n\n캠페인명: ${title}\n브랜드: ${brand}\n카테고리: ${category}\n가격: ${price}\n상태: ${status}\n설명: ${desc}`);
+    setTimeout(() => {
+      setLoading(false);
+      alert(`캠페인 생성 완료!\n\n캠페인명: ${title}\n브랜드: ${brand}\n카테고리: ${category}\n가격: ${price}\n설명: ${desc}`);
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0c23] to-[#181826] flex items-center justify-center py-10 px-2 md:px-0">
-      <form
-        className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-blue-900/30 p-8"
-        onSubmit={handleSubmit}
-      >
-        <h1 className="text-3xl md:text-4xl font-extrabold text-blue-700 mb-2 text-center tracking-tight">캠페인 생성</h1>
-        <p className="text-blue-200 text-center mb-8">브랜드와 인플루언서가 함께하는 새로운 캠페인을 시작하세요!</p>
-        <div className="mb-4">
-          <label className="block font-semibold mb-1 text-gray-800">캠페인명 <span className="text-pink-600">*</span></label>
-          <input type="text" className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400" value={title} onChange={e => setTitle(e.target.value)} required />
+    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#2563eb] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">새로운 캠페인 생성</h1>
+          <p className="text-blue-200/80 text-lg">브랜드와 인플루언서를 연결할 멋진 캠페인을 만들어보세요.</p>
         </div>
-        <div className="mb-4">
-          <label className="block font-semibold mb-1 text-gray-800">브랜드명 <span className="text-pink-600">*</span></label>
-          <input type="text" className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400" value={brand} onChange={e => setBrand(e.target.value)} required />
-        </div>
-        <div className="mb-4">
-          <label className="block font-semibold mb-1 text-gray-800">카테고리 <span className="text-pink-600">*</span></label>
-          <select className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400" value={category} onChange={e => setCategory(e.target.value)}>
-            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block font-semibold mb-1 text-gray-800">가격(원) <span className="text-pink-600">*</span></label>
-          <input type="number" className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400" value={price} onChange={e => setPrice(e.target.value)} required min={0} />
-        </div>
-        <div className="mb-4">
-          <label className="block font-semibold mb-1 text-gray-800">상태 <span className="text-pink-600">*</span></label>
-          <select className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400" value={status} onChange={e => setStatus(e.target.value)}>
-            {statuses.map(st => <option key={st} value={st}>{st}</option>)}
-          </select>
-        </div>
-        <div className="mb-6">
-          <label className="block font-semibold mb-1 text-gray-800">설명</label>
-          <textarea className="w-full border rounded-lg px-3 py-2 min-h-[80px] focus:ring-2 focus:ring-blue-400" value={desc} onChange={e => setDesc(e.target.value)} />
-        </div>
-        <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition text-lg shadow">캠페인 생성</button>
-      </form>
+        <form
+          className="bg-[#181830]/90 backdrop-blur-md rounded-3xl p-8 md:p-10 shadow-2xl border border-blue-500/20 space-y-6"
+          onSubmit={handleSubmit}
+        >
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-blue-200/90 mb-2">캠페인명 <span className="text-red-400">*</span></label>
+            <input 
+              id="title" 
+              type="text" 
+              className="w-full px-4 py-3 bg-blue-950/30 border border-blue-400/30 rounded-xl text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              value={title} 
+              onChange={e => setTitle(e.target.value)} 
+              placeholder="예: 여름맞이 쿨링 선크림 체험단"
+              required 
+            />
+          </div>
+
+          <div>
+            <label htmlFor="brand" className="block text-sm font-medium text-blue-200/90 mb-2">브랜드명 <span className="text-red-400">*</span></label>
+            <input 
+              id="brand" 
+              type="text" 
+              className="w-full px-4 py-3 bg-blue-950/30 border border-blue-400/30 rounded-xl text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              value={brand} 
+              onChange={e => setBrand(e.target.value)} 
+              placeholder="브랜드 이름을 입력하세요"
+              required 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium text-blue-200/90 mb-2">카테고리 <span className="text-red-400">*</span></label>
+              <select 
+                id="category" 
+                className="w-full px-4 py-3 bg-blue-950/30 border border-blue-400/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                value={category} 
+                onChange={e => setCategory(e.target.value)}
+              >
+                {categories.map(cat => <option key={cat} value={cat} className="bg-blue-900">{cat}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-blue-200/90 mb-2">제품 가격(원) <span className="text-red-400">*</span></label>
+              <input 
+                id="price" 
+                type="number" 
+                className="w-full px-4 py-3 bg-blue-950/30 border border-blue-400/30 rounded-xl text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                value={price} 
+                onChange={e => setPrice(e.target.value)} 
+                placeholder="숫자만 입력"
+                required 
+                min={0} 
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="desc" className="block text-sm font-medium text-blue-200/90 mb-2">캠페인 설명</label>
+            <textarea 
+              id="desc" 
+              className="w-full px-4 py-3 bg-blue-950/30 border border-blue-400/30 rounded-xl text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition min-h-[120px]"
+              value={desc} 
+              onChange={e => setDesc(e.target.value)} 
+              placeholder="캠페인에 대한 상세한 설명을 입력해주세요. (제품 특징, 참여 방법 등)"
+            />
+          </div>
+
+          <div className="pt-4">
+            <button 
+              type="submit" 
+              className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-lg"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>생성 중...</span>
+                </div>
+              ) : '캠페인 등록하기'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

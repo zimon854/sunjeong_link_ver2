@@ -1,0 +1,496 @@
+/* PWA 안드로이드 최적화 스타일 */
+
+/* Safe Area 지원 */
+html {
+  /* Safe Area 변수 설정 */
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+}
+
+/* PWA 전용 스타일 */
+@media (display-mode: standalone) {
+  /* PWA 모드일 때 적용되는 스타일 */
+  
+  /* 상태바 영역 */
+  .pwa-safe-top {
+    padding-top: var(--safe-area-inset-top);
+  }
+  
+  .pwa-safe-bottom {
+    padding-bottom: var(--safe-area-inset-bottom);
+  }
+  
+  .pwa-safe-left {
+    padding-left: var(--safe-area-inset-left);
+  }
+  
+  .pwa-safe-right {
+    padding-right: var(--safe-area-inset-right);
+  }
+  
+  /* 전체 safe area */
+  .pwa-safe-area {
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+  }
+  
+  /* PWA에서 pull-to-refresh 방지 */
+  body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* PWA 전용 상태바 스타일 */
+  .pwa-status-bar {
+    background-color: #0f172a;
+    height: var(--safe-area-inset-top);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+  }
+}
+
+/* 터치 최적화 */
+.touch-optimized {
+  min-height: 48px; /* 최소 터치 타겟 크기 */
+}
+
+@media (pointer: coarse) {
+  /* 터치 디바이스에서만 적용 */
+  button, 
+  input, 
+  select, 
+  textarea {
+    min-height: 48px;
+  }
+  
+  /* 터치 피드백 개선 */
+  button:active,
+  .btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* 안드로이드 특화 스타일 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS가 아닌 경우 (주로 안드로이드) */
+  .android-optimized {
+    /* 안드로이드 Material Design 스타일 */
+    border-radius: 8px;
+  }
+}
+
+/* 키보드가 나타날 때 레이아웃 조정 */
+@media screen and (max-height: 600px) {
+  .keyboard-adjust {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .keyboard-adjust .logo-area {
+    margin-bottom: 1rem;
+  }
+  
+  .keyboard-adjust h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* 가로 모드 최적화 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .landscape-optimized {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .landscape-optimized .logo-area {
+    margin-bottom: 0.5rem;
+  }
+  
+  .landscape-optimized .logo-area h1 {
+    font-size: 1.25rem;
+  }
+  
+  .landscape-optimized .social-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  
+  .landscape-optimized .social-buttons button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* 반응형 폰트 크기 */
+.responsive-text {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.responsive-heading {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+/* PWA 설치 프롬프트 스타일 */
+.pwa-install-prompt {
+  position: fixed;
+  bottom: var(--safe-area-inset-bottom, 1rem);
+  left: 1rem;
+  right: 1rem;
+  background: rgba(24, 24, 48, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 16px;
+  padding: 1rem;
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.pwa-install-prompt.show {
+  transform: translateY(0);
+}
+
+/* 스크롤 바 숨기기 (모바일에서) */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+/* Material Design 스타일 리플 효과 */
+.material-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.material-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.material-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* 네트워크 상태 표시 */
+.network-status {
+  position: fixed;
+  top: var(--safe-area-inset-top, 0);
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #ef4444;
+  z-index: 9999;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+
+.network-status.offline {
+  transform: translateY(0);
+}
+
+.network-status.online {
+  background: #10b981;
+}
+
+/* 로딩 상태 최적화 */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .auth-card {
+    border: 2px solid #ffffff;
+    background: #000000;
+  }
+  
+  .btn-primary {
+    background: #ffffff;
+    color: #000000;
+    border: 2px solid #ffffff;
+  }
+}
+
+/* PWA 앱바 스타일 */
+.pwa-app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+@media (display-mode: standalone) {
+  .pwa-app-bar {
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0;
+    right: 0;
+  }
+}
+
+/* Android Material Design 네비게이션 */
+.pwa-navigation {
+  background: linear-gradient(135deg, #181b3a 0%, #1e293b 100%);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(37, 99, 235, 0.2);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* PWA 전용 뒤로가기 제스처 */
+.pwa-gesture-area {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 100vh;
+  z-index: 1000;
+  background: transparent;
+}
+
+@media (display-mode: standalone) {
+  .pwa-gesture-area {
+    display: block;
+  }
+}
+
+@media not (display-mode: standalone) {
+  .pwa-gesture-area {
+    display: none;
+  }
+}
+
+/* 네이티브 앱 스타일 카드 */
+.native-card {
+  background: rgba(24, 24, 48, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.native-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* 네이티브 스타일 버튼 */
+.native-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.native-button:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.native-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.native-button:hover::before {
+  left: 100%;
+}
+
+/* 스와이프 액션 스타일 */
+.swipe-action {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.swipe-action.swiping {
+  transition: none;
+}
+
+.swipe-action.swipe-left {
+  transform: translateX(-100px);
+}
+
+.swipe-action.swipe-right {
+  transform: translateX(100px);
+}
+
+/* 풀스크린 모드 스타일 */
+.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #0f172a;
+}
+
+/* PWA 로딩 스타일 개선 */
+.pwa-loading {
+  background: linear-gradient(45deg, #0f172a, #1e293b, #2563eb);
+  background-size: 400% 400%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 네이티브 스타일 토스트/알림 */
+.native-toast {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 16px);
+  left: 16px;
+  right: 16px;
+  background: rgba(24, 24, 48, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 10000;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.native-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 안드로이드 스타일 입력 필드 */
+.android-input {
+  background: rgba(37, 99, 235, 0.1);
+  border: 2px solid transparent;
+  border-bottom: 2px solid rgba(37, 99, 235, 0.3);
+  border-radius: 8px 8px 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.android-input:focus {
+  border-bottom-color: #3b82f6;
+  background: rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
+}
+
+.android-input::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  transition: all 0.3s ease;
+}
+
+.android-input:focus::after {
+  width: 100%;
+  left: 0;
+}
+
+/* 햅틱 피드백 시각 효과 */
+.haptic-feedback {
+  animation: hapticPulse 0.15s ease;
+}
+
+@keyframes hapticPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+/* PWA 네이티브 전환 애니메이션 */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

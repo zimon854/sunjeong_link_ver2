@@ -2,13 +2,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import logoInstagram from '@/logo/인스타그램.svg';
-import logoTiktok from '@/logo/틱톡.svg';
-import logoYoutubeShorts from '@/logo/유튜브 쇼츠.svg';
-import logoAmazon from '@/logo/아마존.svg';
-import logoPayoneer from '@/logo/페이오니아.svg';
-import logoShopify from '@/logo/쇼피파이.svg';
-import logoQ10 from '@/logo/Q10.svg';
+import AdaptiveLayout from '@/components/AdaptiveLayout';
+import { useNativeToast } from '@/hooks/useNativeToast';
+import { usePWAFeatures } from '@/hooks/usePWAFeatures';
+import logoInstagram from '@/public/logo/인스타그램.svg';
+import logoTiktok from '@/public/logo/틱톡.svg';
+import logoYoutubeShorts from '@/public/logo/유튜브 쇼츠.svg';
+import logoAmazon from '@/public/logo/아마존.svg';
+import logoPayoneer from '@/public/logo/페이오니아.svg';
+import logoShopify from '@/public/logo/쇼피파이.svg';
+import logoQ10 from '@/public/logo/Q10.svg';
 import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -68,6 +71,10 @@ export default function Home() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  
+  // PWA 기능들 추가
+  const { showSuccess, showError, showInfo } = useNativeToast();
+  const { deviceInfo, isAppMode, hapticFeedback, useSwipeGesture } = usePWAFeatures();
 
   useEffect(() => {
     setYear(new Date().getFullYear());
@@ -199,13 +206,21 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+    
+    // PWA에서 햅틱 피드백
+    if (isAppMode) {
+      hapticFeedback('light');
+    }
+    
     let imagePath = "";
     if (image) {
       const { data, error } = await supabase.storage
         .from("campaigns")
         .upload(`thumbnails/${Date.now()}_${image.name}`, image);
       if (error) {
-        setMessage("이미지 업로드 실패: " + error.message);
+        const errorMsg = "이미지 업로드 실패: " + error.message;
+        setMessage(errorMsg);
+        showError?.(errorMsg);
         setLoading(false);
         return;
       }
@@ -226,9 +241,19 @@ export default function Home() {
     ]);
     setLoading(false);
     if (error) {
-      setMessage("캠페인 등록 실패: " + error.message);
+      const errorMsg = "캠페인 등록 실패: " + error.message;
+      setMessage(errorMsg);
+      showError?.(errorMsg);
     } else {
-      setMessage("캠페인 등록 완료!");
+      const successMsg = "캠페인 등록 완료!";
+      setMessage(successMsg);
+      showSuccess?.(successMsg);
+      
+      // PWA에서 성공 햅틱 피드백
+      if (isAppMode) {
+        hapticFeedback('medium');
+      }
+      
       // 등록된 캠페인 상세페이지로 이동
       setTimeout(() => {
         router.push("/campaigns");
@@ -236,8 +261,27 @@ export default function Home() {
     }
   };
 
+  // PWA 스와이프 제스처 설정
+  useSwipeGesture(
+    () => {
+      // 오른쪽 스와이프 - 뒤로가기
+      if (isAppMode) {
+        showInfo?.("뒤로가기");
+        router.back();
+      }
+    },
+    () => {
+      // 왼쪽 스와이프 - 캠페인 페이지로
+      if (isAppMode) {
+        showInfo?.("캠페인 페이지로 이동");
+        router.push('/campaigns');
+      }
+    }
+  );
+
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-[#0a0a23] to-[#181826] text-white">
+    <AdaptiveLayout title="링커블 - 홈">
+      <div className="w-full text-white">
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center h-[60vh] text-center px-4 w-full">
         <div className="absolute inset-0 -z-10">
@@ -248,7 +292,7 @@ export default function Home() {
           강력한 <span className="text-blue-400">확산!</span>
         </h1>
         <p className="mb-8 text-sm md:text-2xl text-gray-200 px-4">SNS와 인플루언서로 만드는 새로운 마케팅 성공 공식</p>
-        <a href="#consult" className="px-4 md:px-8 py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-sm md:text-lg font-semibold transition transform hover:scale-105 active:scale-95">
+        <a href="#consult" className="px-4 md:px-8 py-3 rounded-full text-white bg-blue-500 hover:bg-white-600 text-sm md:text-lg font-semibold transition transform hover:scale-105 active:scale-95">
           무료 컨설팅 신청
         </a>
       </section>
@@ -473,7 +517,7 @@ export default function Home() {
               <div className="flex-1">
                 <div className="mb-2 font-semibold text-gray-200 text-xs md:text-base">담당자명*</div>
                 <input
-                  className="w-full p-3 rounded bg-[#181820] text-white placeholder-gray-400 text-xs md:text-base"
+                  className="w-full p-3 rounded bg-[#181820] text-black placeholder-gray-500 text-xs md:text-base"
                   placeholder="담당자명을 입력해주세요."
                   required
                 />
@@ -481,7 +525,7 @@ export default function Home() {
               <div className="flex-1">
                 <div className="mb-2 font-semibold text-gray-200 text-xs md:text-base">연락처*</div>
                 <input
-                  className="w-full p-3 rounded bg-[#181820] text-white placeholder-gray-400 text-xs md:text-base"
+                  className="w-full p-3 rounded bg-[#181820] text-black placeholder-gray-500 text-xs md:text-base"
                   placeholder="연락처를 입력해주세요."
                   required
                 />
@@ -491,7 +535,7 @@ export default function Home() {
             <div>
               <div className="mb-2 font-semibold text-gray-200 text-xs md:text-base">이메일*</div>
               <input
-                className="w-full p-3 rounded bg-[#181820] text-white placeholder-gray-400 text-xs md:text-base"
+                className="w-full p-3 rounded bg-[#181820] text-black placeholder-gray-500 text-xs md:text-base"
                 placeholder="이메일을 입력해주세요."
                 required
               />
@@ -557,11 +601,12 @@ export default function Home() {
       </section>
 
      
-      {/* Footer */}
-      <footer className="py-6 md:py-8 text-center text-gray-400 text-xs md:text-sm border-t border-gray-800 mt-6 md:mt-8 w-full">
-        &copy; {year ?? ''} 링커블. All rights reserved.
-      </footer>
-    </div>
+        {/* Footer */}
+        <footer className="py-6 md:py-8 text-center text-gray-400 text-xs md:text-sm border-t border-gray-800 mt-6 md:mt-8 w-full">
+          &copy; {year ?? ''} 링커블. All rights reserved.
+        </footer>
+      </div>
+    </AdaptiveLayout>
   );
 }
 

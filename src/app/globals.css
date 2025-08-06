@@ -1,3 +1,76 @@
+/* PWA 안드로이드 최적화 스타일 임포트 */
+@import '../styles/pwa.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* 색상 팔레트 */
+  --background-start-rgb: 15, 23, 42;  /* slate-900 */
+  --background-end-rgb: 30, 41, 59;    /* slate-800 */
+  --card-rgb: 24, 24, 48; /* #181830 */
+  --primary-rgb: 59, 130, 246; /* blue-500 */
+  --primary-hover-rgb: 37, 99, 235; /* blue-600 */
+  --secondary-rgb: 148, 163, 184; /* slate-400 */
+
+  --text-primary-rgb: 241, 245, 249; /* slate-100 */
+  --text-secondary-rgb: 161, 172, 189; /* slate-400 */
+  --text-link-rgb: 96, 165, 250; /* blue-400 */
+
+  --border-rgb: 45, 57, 80; /* #2d3950 */
+
+  /* 폰트 */
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+
+  /* 레이아웃 */
+  --border-radius: 0.75rem; /* 12px */
+  --card-padding: 1.5rem; /* 24px */
+}
+
+@layer base {
+  body {
+    color: rgb(var(--text-primary-rgb));
+    background: linear-gradient(
+        to bottom right,
+        rgb(var(--background-start-rgb)),
+        rgb(var(--background-end-rgb))
+      );
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  h1 { @apply text-4xl; }
+  h2 { @apply text-3xl; }
+  h3 { @apply text-2xl; }
+  h4 { @apply text-xl; }
+
+  p {
+    @apply text-base leading-relaxed;
+    color: rgb(var(--text-secondary-rgb));
+  }
+
+  a {
+    color: rgb(var(--text-link-rgb));
+    @apply hover:underline;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200;
+    background-color: rgb(var(--primary-rgb));
+  }
+  .btn-primary:hover {
+    background-color: rgb(var(--primary-hover-rgb));
+    @apply shadow-lg transform -translate-y-0.5;
+  }
+
+  .card {
+    background-color: rgba(var(--card-rgb), 0.9);
+    @apply rounded-2xl shadow-2xl border border-white/10 backdrop-blur-md p-6;
+  }
+}

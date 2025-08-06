@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 
 import { createClient } from '../../../../lib/supabaseClient';
 
+import { useRouter } from 'next/navigation';
+
 export default function UploadPage({ params }: any) {
   const supabase = createClient();
   

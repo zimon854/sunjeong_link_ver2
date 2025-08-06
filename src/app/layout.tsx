@@ -5,6 +5,8 @@ import Image from "next/image";
 import Script from "next/script";
 import MobileTabNavigation from "./components/MobileTabNavigation";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import NetworkStatus from "../components/NetworkStatus";
+import AuthButton from "../components/AuthButton";
 
 export const metadata: Metadata = {
   title: "Lynkable - 인플루언서 마케팅 플랫폼",
@@ -126,9 +128,12 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-foreground min-h-screen">
         <div className="flex flex-col min-h-screen">
+          {/* PWA 전용 상태바 */}
+          <div className="pwa-status-bar"></div>
+          
           {/* 네비게이션바 */}
-          <nav className="sticky top-0 z-50 w-full bg-[#181b3a] backdrop-blur border-b border-[#2d2f5d] shadow-md">
-            <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 py-4">
+          <nav className="sticky top-0 z-50 w-full bg-[#181b3a]/95 backdrop-blur-xl border-b border-[#2d2f5d]/50 shadow-lg pwa-safe-top">
+            <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 py-3 md:py-4">
               {/* 왼쪽: 링커블 로고 */}
               <Link href="/" className="flex items-center">
                 <Image
@@ -165,6 +170,7 @@ export default function RootLayout({
           </div>
         </div>
         <PWAInstallPrompt />
+        <NetworkStatus />
       </body>
     </html>
   );

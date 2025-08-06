@@ -1,94 +1,168 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
-// 목업 인플루언서 데이터
 type Influencer = {
   id: string;
   name: string;
   avatar: string;
   country: string;
+  countryCode: string; // ISO 3166-1 alpha-2 code
   follower: number;
   categories: string[];
   campaigns: number;
   rating: number;
   bio: string;
+  isOnline: boolean;
 };
 
 const mockInfluencers: Influencer[] = [
   {
     id: '1',
     name: 'Nicha',
-    avatar: '/logo/유튜브 쇼츠.svg',
+    avatar: '/campaign_sample/sample1.jpeg',
     country: 'Thailand',
+    countryCode: 'th',
     follower: 12000,
     categories: ['뷰티', '라이프스타일'],
     campaigns: 8,
     rating: 4.8,
-    bio: 'K-뷰티와 라이프스타일을 사랑하는 태국 인플루언서. 다양한 브랜드와 협업 경험 보유.'
+    bio: 'K-뷰티와 라이프스타일을 사랑하는 태국 인플루언서. 다양한 브랜드와 협업 경험 보유.',
+    isOnline: true,
   },
   {
     id: '2',
     name: 'Mina',
-    avatar: '/logo/인스타그램.svg',
+    avatar: '/campaign_sample/sample2.jpeg',
     country: 'Thailand',
+    countryCode: 'th',
     follower: 35000,
     categories: ['패션', '뷰티'],
     campaigns: 12,
     rating: 4.9,
-    bio: '트렌디한 패션과 뷰티 콘텐츠로 팔로워와 소통하는 크리에이터.'
+    bio: '트렌디한 패션과 뷰티 콘텐츠로 팔로워와 소통하는 크리에이터.',
+    isOnline: false,
   },
   {
     id: '3',
     name: 'Somchai',
-    avatar: '/logo/틱톡.svg',
+    avatar: '/campaign_sample/sample3.jpeg',
     country: 'Thailand',
+    countryCode: 'th',
     follower: 8000,
     categories: ['푸드', '여행'],
     campaigns: 5,
     rating: 4.7,
-    bio: '여행과 음식 리뷰를 전문으로 하는 태국 인플루언서.'
+    bio: '여행과 음식 리뷰를 전문으로 하는 태국 인플루언서.',
+    isOnline: true,
+  },
+  {
+    id: '4',
+    name: 'John D.',
+    avatar: '/campaign_sample/sample4.jpeg',
+    country: 'USA',
+    countryCode: 'us',
+    follower: 250000,
+    categories: ['테크', '게이밍'],
+    campaigns: 25,
+    rating: 4.9,
+    bio: 'Latest tech reviews and gameplay streams. Connecting brands with gamers.',
+    isOnline: true,
   },
 ];
 
 export default function InfluencersPage() {
+  const [influencers, setInfluencers] = useState(mockInfluencers);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredInfluencers = influencers.filter(inf => 
+    inf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    inf.categories.some(cat => cat.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#2563eb] py-12 px-4">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center drop-shadow-lg">인플루언서 리스트</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockInfluencers.map((inf) => (
+    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#2563eb] py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">인플루언서 찾기</h1>
+          <p className="text-lg text-blue-200/80 max-w-3xl mx-auto">전 세계의 인플루언서와 협업하여 브랜드를 성장시키세요. 국가, 카테고리, 팔로워 수 등 다양한 조건으로 검색할 수 있습니다.</p>
+        </div>
+
+        <div className="mb-10">
+          <div className="relative max-w-2xl mx-auto">
+            <input 
+              type="text"
+              placeholder="인플루언서 이름 또는 카테고리 검색... (예: 뷰티)"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-6 py-4 rounded-full bg-black/30 text-white placeholder-blue-300/50 border-2 border-blue-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/50 outline-none transition-all duration-300 shadow-lg"
+            />
+            <svg className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-blue-300/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {filteredInfluencers.map((inf) => (
             <div
               key={inf.id}
-              className="bg-white/90 rounded-2xl shadow-xl p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200 border border-blue-100"
+              className="bg-gradient-to-br from-[#1e293b] to-[#121826] rounded-2xl shadow-2xl border border-blue-500/20 hover:border-blue-400/70 transition-all duration-300 flex flex-col text-white group transform hover:-translate-y-2 hover:shadow-blue-500/20"
             >
-              <img
-                src={inf.avatar}
-                alt={inf.name}
-                className="w-20 h-20 rounded-full border-4 border-blue-200 shadow mb-4 bg-white object-contain"
-              />
-              <div className="text-xl font-semibold text-gray-900 mb-1">{inf.name}</div>
-              <div className="text-sm text-blue-700 font-medium mb-2">{inf.country} · 팔로워 {inf.follower.toLocaleString()}명</div>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {inf.categories.map((cat) => (
-                  <span key={cat} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">
-                    #{cat}
-                  </span>
-                ))}
+              <div className="p-6">
+                <div className="flex items-center gap-5 mb-5">
+                  <div className="relative">
+                    <Image
+                      src={inf.avatar}
+                      alt={inf.name}
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 rounded-full border-4 border-blue-500/50 object-cover shadow-lg"
+                    />
+                    {inf.isOnline && <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-[#1e293b] animate-pulse" title="온라인"></div>}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">{inf.name}</h2>
+                    <div className="flex items-center gap-2 text-blue-300/80">
+                      <Image src={`https://flagcdn.com/w20/${inf.countryCode}.png`} alt={inf.country} width={20} height={15} />
+                      <span>{inf.country}</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-blue-200/90 text-sm mb-5 min-h-[40px] line-clamp-2">{inf.bio}</p>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {inf.categories.map((cat) => (
+                    <span key={cat} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">
+                      #{cat}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between text-center bg-black/20 p-3 rounded-xl mb-6">
+                  <div>
+                    <div className="font-bold text-lg">{inf.follower.toLocaleString()}</div>
+                    <div className="text-xs text-blue-300/60">팔로워</div>
+                  </div>
+                  <div>
+                    <div className="font-bold text-lg">{inf.campaigns}</div>
+                    <div className="text-xs text-blue-300/60">캠페인</div>
+                  </div>
+                  <div>
+                    <div className="font-bold text-lg flex items-center gap-1"> <svg width="16" height="16" fill="#fbbf24" viewBox="0 0 20 20" className="-mt-0.5"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z"/></svg> {inf.rating}</div>
+                    <div className="text-xs text-blue-300/60">평점</div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-                <span>캠페인 {inf.campaigns}회</span>
-                <span className="text-yellow-500">★ {inf.rating}</span>
+              <div className="bg-black/30 p-4 rounded-b-2xl mt-auto flex gap-3">
+                <Link href={`/influencers/${inf.id}`} className="flex-1 text-center bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-blue-500/40 transform hover:scale-105 active:scale-100">
+                  프로필 보기
+                </Link>
+                <button className="flex-1 text-center bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-green-500/40 transform hover:scale-105 active:scale-100">
+                  메시지 보내기
+                </button>
               </div>
-              <p className="text-gray-600 text-center text-sm mb-3 line-clamp-2">{inf.bio}</p>
-              <Link href={`/influencers/${inf.id}`} className="mt-auto w-full">
-                <span className="block bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-blue-800 transition-colors font-bold text-center">
-                  PR 페이지 보기
-                </span>
-              </Link>
             </div>
           ))}
         </div>
       </div>
     </div>
   );
-} 
+}

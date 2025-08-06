@@ -1,8 +1,9 @@
-"use client";
+'use client';
 import React, { useEffect, useState } from 'react';
-
-import { createClient } from '../../../lib/supabaseClient';
+import { createClient } from '@/lib/supabaseClient';
 import Image from 'next/image';
+import Link from 'next/link';
+import AdaptiveLayout from '@/components/AdaptiveLayout';
 
 interface Campaign {
   id: number;
@@ -14,9 +15,9 @@ interface Campaign {
   status: string;
   category: string;
   shopify_url: string;
+  description: string;
 }
 
-// 더미 KPI/콘텐츠/리뷰 데이터 (실제 연동 전 임시)
 const dummyKPI = {
   views: 1200,
   clicks: 340,
@@ -35,7 +36,6 @@ const dummyReviews = [
 
 export default function CampaignDetailPage({ params }: any) {
   const supabase = createClient();
-  
   const id = params?.id;
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,87 +50,125 @@ export default function CampaignDetailPage({ params }: any) {
     fetchCampaign();
   }, [id]);
 
-  if (loading) return <div className="max-w-lg mx-auto mt-20 text-blue-200">로딩 중...</div>;
-  if (!campaign) return <div className="max-w-lg mx-auto mt-20 text-blue-200">캠페인을 찾을 수 없습니다.</div>;
+  if (loading) {
+    return (
+      <AdaptiveLayout title="로딩 중...">
+        <div className="flex justify-center items-center h-screen">
+          <div className="w-12 h-12 border-4 border-blue-300/30 border-t-blue-400 rounded-full animate-spin"></div>
+        </div>
+      </AdaptiveLayout>
+    );
+  }
+
+  if (!campaign) {
+    return (
+      <AdaptiveLayout title="오류">
+        <div className="text-center text-blue-300/70 py-20">
+          <p className="text-2xl mb-2">🚫</p>
+          <p>캠페인을 찾을 수 없습니다.</p>
+          <Link href="/campaigns" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg">캠페인 목록으로</Link>
+        </div>
+      </AdaptiveLayout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0c23] to-[#181826] py-10 px-2 md:px-0 flex items-center justify-center">
-      <div className="w-full max-w-2xl bg-white/90 rounded-3xl shadow-2xl border border-blue-900/30 p-8">
-        {/* 캠페인 대표 이미지 */}
-      {campaign.image && (
-          <Image
-            src={campaign.image.startsWith('http') ? campaign.image : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${campaign.image}`}
-          alt={campaign.title}
-            width={600}
-            height={224}
-            className="w-full h-56 object-cover rounded-xl mb-6 border"
-            priority
-          />
+    <AdaptiveLayout title={campaign.title} showBackButton={true}>
+      <div className="w-full max-w-4xl mx-auto text-white">
+        {campaign.image && (
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl border border-blue-500/20">
+            <Image
+              src={campaign.image.startsWith('http') ? campaign.image : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${campaign.image}`}
+              alt={campaign.title}
+              width={800}
+              height={400}
+              className="w-full h-auto object-cover"
+              priority
+            />
+          </div>
         )}
-        {/* 캠페인 기본 정보 카드 */}
-        <h2 className="text-3xl font-extrabold text-blue-700 mb-2 text-center">{campaign.title}</h2>
-        <div className="flex flex-wrap gap-2 justify-center mb-2">
-          <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">{campaign.brand}</span>
-          <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-semibold">{campaign.category}</span>
-          <span className={`px-3 py-1 rounded-full text-xs font-bold border ${campaign.status === '진행중' ? 'bg-green-100 text-green-700 border-green-300' : 'bg-gray-200 text-gray-600 border-gray-400'}`}>{campaign.status}</span>
-        </div>
-        <div className="flex justify-center gap-6 mb-4 text-blue-900 font-semibold text-base">
-          <span>가격 <span className="text-pink-500 font-bold">{campaign.price?.toLocaleString()}원</span></span>
-          <span>참여자 <span className="text-blue-600 font-bold">{campaign.participants}명</span></span>
-        </div>
-        <div className="mb-4 text-blue-200 text-center text-sm">Shopify URL: <a href={campaign.shopify_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{campaign.shopify_url}</a></div>
-        {/* KPI 카드 */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-          <div className="bg-gradient-to-br from-blue-100 to-blue-300 rounded-xl p-3 text-center shadow">
-            <div className="text-xs text-blue-700 font-bold mb-1">조회수</div>
-            <div className="text-xl font-extrabold text-blue-900">{dummyKPI.views.toLocaleString()}</div>
+
+        <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-lg border border-blue-500/20">
+          <div className="flex flex-wrap gap-3 mb-4">
+            <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.brand}</span>
+            <span className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.category}</span>
+            <span className={`px-3 py-1 rounded-full text-sm font-bold ${campaign.status === '진행중' ? 'bg-green-500/30 text-green-300' : 'bg-gray-500/30 text-gray-300'}`}>{campaign.status}</span>
           </div>
-          <div className="bg-gradient-to-br from-blue-100 to-blue-300 rounded-xl p-3 text-center shadow">
-            <div className="text-xs text-blue-700 font-bold mb-1">클릭수</div>
-            <div className="text-xl font-extrabold text-blue-900">{dummyKPI.clicks.toLocaleString()}</div>
-          </div>
-          <div className="bg-gradient-to-br from-blue-100 to-blue-300 rounded-xl p-3 text-center shadow">
-            <div className="text-xs text-blue-700 font-bold mb-1">전환수</div>
-            <div className="text-xl font-extrabold text-blue-900">{dummyKPI.conversions.toLocaleString()}</div>
-          </div>
-          <div className="bg-gradient-to-br from-blue-100 to-blue-300 rounded-xl p-3 text-center shadow">
-            <div className="text-xs text-blue-700 font-bold mb-1">매출</div>
-            <div className="text-xl font-extrabold text-blue-900">{dummyKPI.sales.toLocaleString()}원</div>
-          </div>
-          <div className="bg-gradient-to-br from-blue-100 to-blue-300 rounded-xl p-3 text-center shadow">
-            <div className="text-xs text-blue-700 font-bold mb-1">ROI</div>
-            <div className="text-xl font-extrabold text-blue-900">{dummyKPI.roi}배</div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">{campaign.title}</h1>
+          <p className="text-blue-200/80 mb-6">{campaign.description}</p>
+          <div className="flex items-center justify-between bg-blue-950/30 p-4 rounded-xl">
+            <div>
+              <p className="text-sm text-blue-300/70">제품 가격</p>
+              <p className="text-2xl font-bold text-white">{campaign.price?.toLocaleString()}원</p>
+            </div>
+            <div>
+              <p className="text-sm text-blue-300/70">총 참여자</p>
+              <p className="text-2xl font-bold text-white">{campaign.participants}명</p>
+            </div>
+            <a href={campaign.shopify_url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Shopify 스토어</a>
           </div>
         </div>
-        {/* 인플루언서 콘텐츠 리스트 */}
+
         <div className="mb-8">
-          <h3 className="text-lg font-bold text-blue-800 mb-2">인플루언서 콘텐츠</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {dummyContents.map(content => (
-              <div key={content.id} className="bg-white rounded-xl border border-blue-100 shadow p-3 flex flex-col">
-                <img src={content.media_url} alt="콘텐츠" className="w-full h-32 object-cover rounded mb-2" />
-                <div className="text-sm text-gray-700 mb-1">{content.caption}</div>
-                <div className={`text-xs font-bold ${content.approval_status === 'approved' ? 'text-green-600' : content.approval_status === 'pending' ? 'text-yellow-600' : 'text-red-600'}`}>{content.approval_status === 'approved' ? '승인됨' : content.approval_status === 'pending' ? '대기중' : '반려됨'}</div>
-              </div>
-            ))}
+          <h2 className="text-2xl font-bold mb-4">캠페인 성과 (KPI)</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <KPI_Card label="조회수" value={dummyKPI.views.toLocaleString()} />
+            <KPI_Card label="클릭수" value={dummyKPI.clicks.toLocaleString()} />
+            <KPI_Card label="전환수" value={dummyKPI.conversions.toLocaleString()} />
+            <KPI_Card label="매출" value={`${dummyKPI.sales.toLocaleString()}원`} />
+            <KPI_Card label="ROI" value={`${dummyKPI.roi}배`} />
           </div>
         </div>
-        {/* 브랜드 리뷰 */}
-        <div className="mb-2">
-          <h3 className="text-lg font-bold text-blue-800 mb-2">브랜드 리뷰</h3>
-          <ul className="space-y-2">
-            {dummyReviews.map((r, i) => (
-              <li key={i} className="bg-blue-50 rounded-lg px-4 py-3 shadow flex flex-col md:flex-row md:items-center md:justify-between border border-blue-100">
-                <div className="font-semibold text-gray-700">{r.from}</div>
-                <div className="flex items-center gap-1 text-yellow-500 text-sm font-bold">★ {r.rating}</div>
-                <div className="text-gray-600 text-sm mt-1 md:mt-0">{r.comment}</div>
-              </li>
-            ))}
-          </ul>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-blue-500/20">
+            <h3 className="text-xl font-bold mb-4">인플루언서 콘텐츠</h3>
+            <div className="space-y-4">
+              {dummyContents.map(content => (
+                <div key={content.id} className="bg-blue-950/30 rounded-xl p-4 flex items-center gap-4">
+                  <Image src={content.media_url} alt="콘텐츠" width={80} height={80} className="w-20 h-20 object-cover rounded-lg" />
+                  <div className="flex-1">
+                    <p className="text-blue-200/90">{content.caption}</p>
+                    <p className={`text-sm font-bold ${content.approval_status === 'approved' ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {content.approval_status === 'approved' ? '승인됨' : '대기중'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-blue-500/20">
+            <h3 className="text-xl font-bold mb-4">브랜드 리뷰</h3>
+            <ul className="space-y-4">
+              {dummyReviews.map((r, i) => (
+                <li key={i} className="bg-blue-950/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold text-blue-200/90">{r.from}</p>
+                    <div className="flex items-center gap-1 text-amber-400 text-sm font-bold">★ {r.rating}</div>
+                  </div>
+                  <p className="text-blue-300/80 text-sm">{r.comment}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        {/* 참여/콘텐츠 업로드 버튼 */}
-        <button className="mt-6 w-full bg-green-600 text-white px-4 py-3 rounded-lg font-bold text-lg hover:bg-green-700 transition shadow">콘텐츠 업로드/참여</button>
+
+        <div className="mt-10 text-center">
+          <Link href={`/campaigns/${id}/upload`} className="w-full max-w-md inline-block px-6 py-4 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 text-lg">
+            콘텐츠 업로드 / 참여하기
+          </Link>
+        </div>
       </div>
+    </AdaptiveLayout>
+  );
+}
+
+function KPI_Card({ label, value }: { label: string, value: string | number }) {
+  return (
+    <div className="bg-blue-950/40 backdrop-blur-sm rounded-xl p-4 text-center shadow-lg border border-blue-800/50">
+      <p className="text-sm text-blue-300/70 font-semibold mb-1">{label}</p>
+      <p className="text-2xl font-bold text-white">{value}</p>
     </div>
   );
-} 
+}
