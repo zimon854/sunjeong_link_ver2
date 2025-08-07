@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { createClient } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import Image from 'next/image';
 
@@ -12,24 +12,27 @@ interface Message {
   created_at: string;
 }
 
-// 가상 사용자 데이터
+// 가상 사용자 데이터 (실제 앱에서는 Supabase profiles 테이블에서 가져와야 합니다)
 const mockUsers: { [key: string]: { name: string; avatar: string } } = {
-  'user1': { name: '브랜드 담당자', avatar: '/profile_sample.jpg' },
-  'user2': { name: '인플루언서 Mina', avatar: '/campaign_sample/sample2.jpeg' },
+  'user1_uuid': { name: '브랜드 담당자', avatar: '/profile_sample.jpg' }, // 실제 Supabase UUID로 대체
+  'user2_uuid': { name: '인플루언서 Mina', avatar: '/campaign_sample/sample2.jpeg' }, // 실제 Supabase UUID로 대체
 };
 
 export default function ChatPage() {
   const supabase = createClient();
   const [user, setUser] = useState<any>(null);
-  const [roomId, setRoomId] = useState<string>('room1'); // 기본 채팅방
+  const [roomId, setRoomId] = useState<string>(''); // 기본 채팅방
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [rooms, setRooms] = useState<string[]>(['room1', 'room2']); // 가상 채팅방 목록
+  const [rooms, setRooms] = useState<string[]>([]); // 가상 채팅방 목록
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUser(data.user);
+      if (data.user) {
+        setUser(data.user);
+        fetchRooms(data.user.id); // 로그인한 사용자의 ID로 채팅방 목록을 가져옵니다.
+      }
     });
   }, []);
 
@@ -49,6 +52,13 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const fetchRooms = async (userId: string) => {
+    // 실제 Supabase 환경에서는 user_id가 포함된 채팅방 목록을 가져와야 합니다.
+    // 여기서는 임시로 하드코딩된 채팅방 목록을 사용합니다.
+    setRooms(['room1', 'room2']); // 예시: 실제로는 DB에서 가져와야 함
+    if (rooms.length > 0 && !roomId) setRoomId(rooms[0]); // 첫 번째 채팅방을 기본으로 설정
+  };
+
   const fetchMessages = async (currentRoomId: string) => {
     const { data, error } = await supabase.from('messages').select('*').eq('room_id', currentRoomId).order('created_at', { ascending: true });
     if (!error && data) setMessages(data);
@@ -61,9 +71,12 @@ export default function ChatPage() {
     setInput('');
   };
 
-  const getOtherUserId = (roomId: string) => {
-    // 실제 앱에서는 채팅방 ID에서 상대방 ID를 추출하는 로직 필요
-    return roomId === 'room1' ? 'user2' : 'user1';
+  const getOtherUserId = (currentRoomId: string) => {
+    // 실제 앱에서는 채팅방 ID와 로그인한 사용자 ID를 기반으로 상대방 ID를 결정해야 합니다.
+    // 여기서는 임시로 mockUsers의 키를 사용합니다.
+    if (currentRoomId === 'room1') return 'user2_uuid';
+    if (currentRoomId === 'room2') return 'user1_uuid';
+    return 'user1_uuid'; // 기본값
   }
 
   if (!user) {

@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { FiBell, FiMessageSquare, FiPlusCircle, FiList, FiUser, FiBarChart2 } from 'react-icons/fi';
 

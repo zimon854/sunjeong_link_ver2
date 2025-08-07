@@ -1,21 +1,95 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabaseClient';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { signInWithProvider } from './actions';
 import Link from 'next/link';
 import { FiLogIn, FiUserPlus, FiGithub, FiMessageCircle } from 'react-icons/fi';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
 
-export default function AuthPage() {
+// InputField 컴포넌트를 AuthPage 밖으로 분리
+const InputField = ({ type, placeholder, value, onChange }: { type: string, placeholder: string, value: string, onChange: (val: string) => void }) => (
+  <input
+    type={type}
+    placeholder={placeholder}
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    required
+    className="w-full px-4 py-3 bg-black/20 rounded-lg border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/50 outline-none transition"
+  />
+);
+
+// TabButton 컴포넌트를 AuthPage 밖으로 분리
+const TabButton = ({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) => (
+  <button onClick={onClick} className={`w-1/2 py-2.5 rounded-md flex items-center justify-center gap-2 font-semibold transition-all duration-200 ${isActive ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-white/5'}`}>
+    {icon} {label}
+  </button>
+);
+
+// SocialButton 컴포넌트를 AuthPage 밖으로 분리
+const SocialButton = ({ icon, label, onClick, provider }: { icon: React.ReactNode, label: string, onClick: () => void, provider: string }) => {
+  const baseStyle = "w-full flex items-center justify-center gap-3 py-3 rounded-lg font-semibold transition-all duration-200";
+  const providerStyles: { [key: string]: string } = {
+    google: "bg-white/90 hover:bg-white text-gray-800",
+    github: "bg-gray-800 hover:bg-gray-700 text-white",
+    facebook: "bg-blue-600 hover:bg-blue-700 text-white",
+  };
+  return (
+    <button onClick={onClick} className={`${baseStyle} ${providerStyles[provider]}`}>
+      {icon} {label}
+    </button>
+  );
+};
+
+// AuthForm 컴포넌트를 AuthPage 밖으로 분리하고 필요한 props를 받도록 수정
+const AuthForm = ({ isLogin, email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, username, setUsername, handleLogin, handleSignUp, loading }: {
+  isLogin: boolean;
+  email: string;
+  setEmail: (email: string) => void;
+  password: string;
+  setPassword: (password: string) => void;
+  confirmPassword: string;
+  setConfirmPassword: (confirmPassword: string) => void;
+  username: string;
+  setUsername: (username: string) => void;
+  handleLogin: (e: React.FormEvent) => Promise<void>;
+  handleSignUp: (e: React.FormEvent) => Promise<void>;
+  loading: boolean;
+}) => (
+  <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-6">
+    {!isLogin && (
+      <InputField type="text" placeholder="사용자 이름" value={username} onChange={setUsername} />
+    )}
+    <InputField type="email" placeholder="이메일" value={email} onChange={setEmail} />
+    <InputField type="password" placeholder="비밀번호" value={password} onChange={setPassword} />
+    {!isLogin && (
+      <InputField type="password" placeholder="비밀번호 확인" value={confirmPassword} onChange={setConfirmPassword} />
+    )}
+    <button type="submit" className="w-full btn-primary" disabled={loading}>
+      {loading ? '처리 중...' : (isLogin ? '로그인' : '회원가입')}
+    </button>
+  </form>
+);
+
+// SearchParams를 사용하는 컴포넌트를 별도로 분리
+const AuthPageContent = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [loading, setLoading] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+
+  useEffect(() => {
+    const messageParam = searchParams.get('message');
+    if (messageParam) {
+      setMessage({ type: 'error', text: messageParam });
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +116,7 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signUp({ email, password, options: { data: { username } } });
     setLoading(false);
     if (error) {
+      console.error('Supabase SignUp Error:', error);
       setMessage({ type: 'error', text: error.message });
     } else {
       setMessage({ type: 'success', text: '회원가입 성공! 확인 메일을 발송했습니다.' });
@@ -51,25 +126,26 @@ export default function AuthPage() {
 
   const handleSocialLogin = async (provider: 'google' | 'github' | 'facebook') => {
     setLoading(true);
-    await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/dashboard` } });
-    // setLoading(false) is not called here as the page will redirect.
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({ 
+        provider, 
+        options: { 
+          redirectTo: `${window.location.origin}/auth/callback`
+        } 
+      });
+      
+      if (error) {
+        setMessage({ type: 'error', text: '소셜 로그인에 실패했습니다.' });
+        setLoading(false);
+      } else if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Social login error:', error);
+      setMessage({ type: 'error', text: '소셜 로그인 중 오류가 발생했습니다.' });
+      setLoading(false);
+    }
   };
-
-  const AuthForm = ({ isLogin }: { isLogin: boolean }) => (
-    <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-6">
-      {!isLogin && (
-        <InputField type="text" placeholder="사용자 이름" value={username} onChange={setUsername} />
-      )}
-      <InputField type="email" placeholder="이메일" value={email} onChange={setEmail} />
-      <InputField type="password" placeholder="비밀번호" value={password} onChange={setPassword} />
-      {!isLogin && (
-        <InputField type="password" placeholder="비밀번호 확인" value={confirmPassword} onChange={setConfirmPassword} />
-      )}
-      <button type="submit" className="w-full btn-primary" disabled={loading}>
-        {loading ? '처리 중...' : (isLogin ? '로그인' : '회원가입')}
-      </button>
-    </form>
-  );
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -84,7 +160,27 @@ export default function AuthPage() {
             <TabButton icon={<FiUserPlus />} label="회원가입" isActive={authMode === 'signup'} onClick={() => setAuthMode('signup')} />
           </div>
           
-          {authMode === 'login' ? <AuthForm isLogin /> : <AuthForm isLogin={false} />}
+          {authMode === 'login' ? 
+            <AuthForm 
+              isLogin={true} 
+              email={email} setEmail={setEmail} 
+              password={password} setPassword={setPassword} 
+              confirmPassword={confirmPassword} setConfirmPassword={setConfirmPassword} 
+              username={username} setUsername={setUsername} 
+              handleLogin={handleLogin} handleSignUp={handleSignUp} 
+              loading={loading} 
+            /> 
+            : 
+            <AuthForm 
+              isLogin={false} 
+              email={email} setEmail={setEmail} 
+              password={password} setPassword={setPassword} 
+              confirmPassword={confirmPassword} setConfirmPassword={setConfirmPassword} 
+              username={username} setUsername={setUsername} 
+              handleLogin={handleLogin} handleSignUp={handleSignUp} 
+              loading={loading} 
+            />
+          }
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -110,36 +206,19 @@ export default function AuthPage() {
       </div>
     </div>
   );
-}
-
-// --- Sub-components ---
-const InputField = ({ type, placeholder, value, onChange }: { type: string, placeholder: string, value: string, onChange: (val: string) => void }) => (
-  <input
-    type={type}
-    placeholder={placeholder}
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    required
-    className="w-full px-4 py-3 bg-black/20 rounded-lg border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/50 outline-none transition"
-  />
-);
-
-const TabButton = ({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) => (
-  <button onClick={onClick} className={`w-1/2 py-2.5 rounded-md flex items-center justify-center gap-2 font-semibold transition-all duration-200 ${isActive ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-white/5'}`}>
-    {icon} {label}
-  </button>
-);
-
-const SocialButton = ({ icon, label, onClick, provider }: { icon: React.ReactNode, label: string, onClick: () => void, provider: string }) => {
-  const baseStyle = "w-full flex items-center justify-center gap-3 py-3 rounded-lg font-semibold transition-all duration-200";
-  const providerStyles: { [key: string]: string } = {
-    google: "bg-white/90 hover:bg-white text-gray-800",
-    github: "bg-gray-800 hover:bg-gray-700 text-white",
-    facebook: "bg-blue-600 hover:bg-blue-700 text-white",
-  };
-  return (
-    <button onClick={onClick} className={`${baseStyle} ${providerStyles[provider]}`}>
-      {icon} {label}
-    </button>
-  );
 };
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-secondary">로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <AuthPageContent />
+    </Suspense>
+  );
+}

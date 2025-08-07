@@ -1,10 +1,6 @@
-import { createBrowserClient } from '@supabase/ssr'
-import { Database } from './database.types'
+// This file is deprecated - use @/lib/supabase/client or @/lib/supabase/server instead
+import { createClient as createBrowserClient } from '@/lib/supabase/client'
 
 export function createClient() {
-  // Create a supabase client on the browser with project's credentials
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  return createBrowserClient()
 }

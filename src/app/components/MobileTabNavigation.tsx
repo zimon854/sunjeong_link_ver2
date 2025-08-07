@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 import { getDeviceInfo } from "@/lib/device";
 
 // 모바일 하단 탭 네비게이션 컴포넌트 - PWA 최적화

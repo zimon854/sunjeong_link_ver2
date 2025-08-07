@@ -25,7 +25,7 @@ import {
   LineElement,
   ArcElement,
 } from 'chart.js';
-import { createClient } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from "next/navigation";
 
 ChartJS.register(
