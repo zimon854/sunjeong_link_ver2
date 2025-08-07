@@ -51,7 +51,8 @@ function getStats(arr: number[]) {
 
 function getYClick(v: number) {
   const minY = 20, maxY = 90;
-  const min = clicksTrend.min, max = clicksTrend.max;
+  const clicksStats = getStats(clicksTrend);
+  const min = clicksStats.min, max = clicksStats.max;
   if (max === min) return (minY + maxY) / 2;
   return maxY - ((v - min) / (max - min)) * (maxY - minY);
 }
@@ -180,7 +181,9 @@ export default function PerformanceDashboardPage() {
 // --- Sub-components ---
 const KPI_Card = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string | number }) => (
   <div className="card flex items-center gap-4 p-4">
-    <div className="p-3 bg-blue-500/10 rounded-lg">{React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6 text-blue-400" })}</div>
+    <div className="p-3 bg-blue-500/10 rounded-lg">
+      <div className="w-6 h-6 text-blue-400">{icon}</div>
+    </div>
     <div>
       <p className="text-secondary text-sm font-semibold">{label}</p>
       <p className="text-2xl font-bold text-primary">{value}</p>

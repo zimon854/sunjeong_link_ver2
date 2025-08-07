@@ -134,7 +134,7 @@ const CampaignItem = ({ id, title, status }: { id: number, title: string, status
 
 const QuickMenuLink = ({ href, icon, label }: { href: string, icon: React.ReactNode, label: string }) => (
   <Link href={href} className="flex flex-col items-center justify-center p-4 bg-black/20 rounded-lg hover:bg-black/40 transition-colors text-secondary hover:text-primary">
-    {React.cloneElement(icon as React.ReactElement, { className: "w-7 h-7 mb-2" })}
+    <div className="w-7 h-7 mb-2">{icon}</div>
     <span className="font-semibold text-sm">{label}</span>
   </Link>
 );
