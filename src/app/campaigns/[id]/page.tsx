@@ -4,18 +4,18 @@ import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
+import { Database } from '@/lib/database.types';
 
-interface Campaign {
-  id: number;
-  title: string;
-  brand: string;
-  image: string;
-  price: number;
-  participants: number;
-  status: string;
-  category: string;
-  shopify_url: string;
-  description: string;
+type Campaign = Database['public']['Tables']['campaigns']['Row'];
+type Influencer = Database['public']['Tables']['influencers']['Row'];
+type CampaignParticipant = Database['public']['Tables']['campaign_participants']['Row'];
+type CampaignReview = Database['public']['Tables']['campaign_reviews']['Row'];
+
+interface CampaignWithParticipants extends Campaign {
+  participants_data: (CampaignParticipant & {
+    influencer: Influencer;
+  })[];
+  reviews_data: CampaignReview[];
 }
 
 const dummyKPI = {
@@ -25,30 +25,101 @@ const dummyKPI = {
   sales: 420000,
   roi: 3.2,
 };
-const dummyContents = [
-  { id: 1, media_url: '/campaign_sample/sample1.jpeg', caption: '인플루언서A 콘텐츠', approval_status: 'approved' },
-  { id: 2, media_url: '/campaign_sample/sample2.jpeg', caption: '인플루언서B 콘텐츠', approval_status: 'pending' },
-];
-const dummyReviews = [
-  { from: '인플루언서A', rating: 5, comment: '브랜드와 소통이 원활하고, 캠페인 운영이 체계적이에요!' },
-  { from: '인플루언서B', rating: 4.5, comment: '정산도 빠르고 피드백이 명확해서 좋았습니다.' },
-];
 
-export default function CampaignDetailPage({ params }: any) {
+export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = createClient();
-  const id = params?.id;
-  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [id, setId] = useState<string | null>(null);
+  const [campaign, setCampaign] = useState<CampaignWithParticipants | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setId(resolvedParams.id);
+    };
+    getParams();
+  }, [params]);
 
   useEffect(() => {
     if (!id) return;
-    const fetchCampaign = async () => {
-      const { data, error } = await supabase.from('campaigns').select('*').eq('id', Number(id)).single();
-      if (!error && data) setCampaign(data);
+    
+    const fetchCampaignData = async () => {
+      // Fetch campaign with participants and reviews
+      const { data: campaignData, error: campaignError } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('id', Number(id))
+        .single();
+
+      if (campaignError || !campaignData) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch participants with influencer data
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('campaign_participants')
+        .select(`
+          *,
+          influencer:influencers(*)
+        `)
+        .eq('campaign_id', Number(id));
+
+      // Fetch reviews
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from('campaign_reviews')
+        .select('*')
+        .eq('campaign_id', Number(id));
+
+      if (!participantsError && !reviewsError) {
+        setCampaign({
+          ...campaignData,
+          participants_data: participantsData || [],
+          reviews_data: reviewsData || []
+        });
+      }
+      
       setLoading(false);
     };
-    fetchCampaign();
-  }, [id]);
+
+    fetchCampaignData();
+
+    // Set up real-time subscription for campaign updates
+    const channel = supabase
+      .channel(`campaign-${id}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'campaign_participants',
+          filter: `campaign_id=eq.${id}`
+        },
+        () => {
+          // Refetch data when participants change
+          fetchCampaignData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'campaign_reviews',
+          filter: `campaign_id=eq.${id}`
+        },
+        () => {
+          // Refetch data when reviews change
+          fetchCampaignData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, supabase]);
 
   if (loading) {
     return (
@@ -103,55 +174,194 @@ export default function CampaignDetailPage({ params }: any) {
             </div>
             <div>
               <p className="text-sm text-blue-300/70">총 참여자</p>
-              <p className="text-2xl font-bold text-white">{campaign.participants}명</p>
+              <p className="text-2xl font-bold text-white">{campaign.participants_data?.length || 0}명</p>
             </div>
-            <a href={campaign.shopify_url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Shopify 스토어</a>
+            {campaign.shopify_url && (
+              <a href={campaign.shopify_url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Shopify 스토어</a>
+            )}
           </div>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">캠페인 성과 (KPI)</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <KPI_Card label="조회수" value={dummyKPI.views.toLocaleString()} />
-            <KPI_Card label="클릭수" value={dummyKPI.clicks.toLocaleString()} />
-            <KPI_Card label="전환수" value={dummyKPI.conversions.toLocaleString()} />
-            <KPI_Card label="매출" value={`${dummyKPI.sales.toLocaleString()}원`} />
-            <KPI_Card label="ROI" value={`${dummyKPI.roi}배`} />
-          </div>
+        {/* 탭 메뉴 */}
+        <div className="mb-8 bg-black/20 p-2 rounded-xl flex justify-center gap-2">
+          {[
+            { id: 'overview', label: '개요' },
+            { id: 'participants', label: '참여 인플루언서' },
+            { id: 'reviews', label: '리뷰' },
+            { id: 'performance', label: '성과' }
+          ].map(tab => (
+            <button 
+              key={tab.id} 
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-blue-300/70 hover:bg-white/10'}`}>
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-blue-500/20">
-            <h3 className="text-xl font-bold mb-4">인플루언서 콘텐츠</h3>
-            <div className="space-y-4">
-              {dummyContents.map(content => (
-                <div key={content.id} className="bg-blue-950/30 rounded-xl p-4 flex items-center gap-4">
-                  <Image src={content.media_url} alt="콘텐츠" width={80} height={80} className="w-20 h-20 object-cover rounded-lg" />
-                  <div className="flex-1">
-                    <p className="text-blue-200/90">{content.caption}</p>
-                    <p className={`text-sm font-bold ${content.approval_status === 'approved' ? 'text-green-400' : 'text-yellow-400'}`}>
-                      {content.approval_status === 'approved' ? '승인됨' : '대기중'}
-                    </p>
-                  </div>
+        {/* 탭 콘텐츠 */}
+        <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-blue-500/20 min-h-[400px]">
+          {activeTab === 'overview' && (
+            <div>
+              <h3 className="text-2xl font-bold mb-6">캠페인 개요</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+                <KPI_Card label="조회수" value={dummyKPI.views.toLocaleString()} />
+                <KPI_Card label="클릭수" value={dummyKPI.clicks.toLocaleString()} />
+                <KPI_Card label="전환수" value={dummyKPI.conversions.toLocaleString()} />
+                <KPI_Card label="매출" value={`${dummyKPI.sales.toLocaleString()}원`} />
+                <KPI_Card label="ROI" value={`${dummyKPI.roi}배`} />
+              </div>
+              <div className="bg-blue-950/30 rounded-xl p-6">
+                <h4 className="text-lg font-semibold mb-3">상세 설명</h4>
+                <p className="text-blue-200/90 leading-relaxed">{campaign.description}</p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'participants' && (
+            <div>
+              <h3 className="text-2xl font-bold mb-6">참여 인플루언서 ({campaign.participants_data?.length || 0}명)</h3>
+              {campaign.participants_data && campaign.participants_data.length > 0 ? (
+                <div className="grid gap-6">
+                  {campaign.participants_data.map((participant) => (
+                    <div key={participant.id} className="bg-blue-950/30 rounded-xl p-6 border border-blue-500/20">
+                      <div className="flex items-center gap-4 mb-4">
+                        <Link href={`/influencers/${participant.influencer.id}`}>
+                          <Image
+                            src={participant.influencer.avatar || '/campaign_sample/sample1.jpeg'}
+                            alt={participant.influencer.name}
+                            width={60}
+                            height={60}
+                            className="w-15 h-15 rounded-full object-cover border-2 border-blue-500/60 hover:scale-105 transition"
+                          />
+                        </Link>
+                        <div className="flex-1">
+                          <Link href={`/influencers/${participant.influencer.id}`} className="text-lg font-semibold text-blue-200 hover:text-blue-100 transition">
+                            {participant.influencer.name}
+                          </Link>
+                          <div className="flex items-center gap-2 text-sm text-blue-300/70">
+                            <Image src={`https://flagcdn.com/w20/${participant.influencer.country_code}.png`} alt={participant.influencer.country} width={16} height={12} />
+                            <span>{participant.influencer.country}</span>
+                            <span>•</span>
+                            <span>{participant.influencer.follower_count.toLocaleString()} 팔로워</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            participant.approval_status === 'approved' ? 'bg-green-500/30 text-green-300' :
+                            participant.approval_status === 'pending' ? 'bg-yellow-500/30 text-yellow-300' :
+                            'bg-gray-500/30 text-gray-300'
+                          }`}>
+                            {participant.approval_status === 'approved' ? '승인됨' : 
+                             participant.approval_status === 'pending' ? '검토중' : '대기'}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {participant.content_url && (
+                        <div className="flex items-center gap-4 bg-blue-950/40 rounded-lg p-4">
+                          <Image 
+                            src={participant.content_url} 
+                            alt="콘텐츠" 
+                            width={80} 
+                            height={80} 
+                            className="w-20 h-20 object-cover rounded-lg" 
+                          />
+                          <div className="flex-1">
+                            <p className="text-blue-200/90 text-sm">{participant.content_caption}</p>
+                            {participant.performance_metrics && (
+                              <div className="flex gap-4 mt-2 text-xs text-blue-300/70">
+                                <span>조회: {participant.performance_metrics.views || 0}</span>
+                                <span>좋아요: {participant.performance_metrics.likes || 0}</span>
+                                <span>댓글: {participant.performance_metrics.comments || 0}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="text-center py-12 text-blue-300/50">
+                  <p className="text-xl mb-2">👥</p>
+                  <p>아직 참여한 인플루언서가 없습니다.</p>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
-          <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-blue-500/20">
-            <h3 className="text-xl font-bold mb-4">브랜드 리뷰</h3>
-            <ul className="space-y-4">
-              {dummyReviews.map((r, i) => (
-                <li key={i} className="bg-blue-950/30 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-blue-200/90">{r.from}</p>
-                    <div className="flex items-center gap-1 text-amber-400 text-sm font-bold">★ {r.rating}</div>
+          {activeTab === 'reviews' && (
+            <div>
+              <h3 className="text-2xl font-bold mb-6">브랜드 리뷰</h3>
+              {campaign.reviews_data && campaign.reviews_data.length > 0 ? (
+                <div className="space-y-4">
+                  {campaign.reviews_data.map((review) => (
+                    <div key={review.id} className="bg-blue-950/30 rounded-xl p-4 border-l-4 border-blue-500">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-semibold text-blue-200/90">{review.reviewer_name}</p>
+                        <div className="flex items-center gap-1 text-amber-400 text-sm font-bold">
+                          {'★'.repeat(Math.floor(review.rating))} {review.rating}
+                        </div>
+                      </div>
+                      <p className="text-blue-300/80 text-sm italic">&ldquo;{review.comment}&rdquo;</p>
+                      <p className="text-xs text-blue-300/50 mt-2">
+                        {new Date(review.created_at).toLocaleDateString('ko-KR')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-blue-300/50">
+                  <p className="text-xl mb-2">💬</p>
+                  <p>아직 작성된 리뷰가 없습니다.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'performance' && (
+            <div>
+              <h3 className="text-2xl font-bold mb-6">성과 분석</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+                <KPI_Card label="조회수" value={dummyKPI.views.toLocaleString()} />
+                <KPI_Card label="클릭수" value={dummyKPI.clicks.toLocaleString()} />
+                <KPI_Card label="전환수" value={dummyKPI.conversions.toLocaleString()} />
+                <KPI_Card label="매출" value={`${dummyKPI.sales.toLocaleString()}원`} />
+                <KPI_Card label="ROI" value={`${dummyKPI.roi}배`} />
+              </div>
+              
+              {/* 인플루언서별 성과 */}
+              <div className="bg-blue-950/30 rounded-xl p-6">
+                <h4 className="text-lg font-semibold mb-4">인플루언서별 성과</h4>
+                {campaign.participants_data && campaign.participants_data.length > 0 ? (
+                  <div className="space-y-3">
+                    {campaign.participants_data.map((participant) => (
+                      <div key={participant.id} className="flex items-center justify-between bg-blue-950/50 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <Image
+                            src={participant.influencer.avatar || '/campaign_sample/sample1.jpeg'}
+                            alt={participant.influencer.name}
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                          <span className="font-medium">{participant.influencer.name}</span>
+                        </div>
+                        <div className="flex gap-4 text-sm text-blue-300/70">
+                          <span>조회: {participant.performance_metrics?.views || 0}</span>
+                          <span>좋아요: {participant.performance_metrics?.likes || 0}</span>
+                          <span>댓글: {participant.performance_metrics?.comments || 0}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-blue-300/80 text-sm">{r.comment}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
+                ) : (
+                  <p className="text-blue-300/50 text-center py-4">성과 데이터가 없습니다.</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 text-center">

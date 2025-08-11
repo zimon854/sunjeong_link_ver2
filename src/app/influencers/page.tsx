@@ -1,21 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
+import { Database } from '@/lib/database.types';
 
-type Influencer = {
-  id: string;
-  name: string;
-  avatar: string;
-  country: string;
-  countryCode: string; // ISO 3166-1 alpha-2 code
-  follower: number;
-  categories: string[];
-  campaigns: number;
-  rating: number;
-  bio: string;
-  isOnline: boolean;
-};
+type Influencer = Database['public']['Tables']['influencers']['Row'];
 
 const mockInfluencers: Influencer[] = [
   {
@@ -23,62 +13,111 @@ const mockInfluencers: Influencer[] = [
     name: 'Nicha',
     avatar: '/campaign_sample/sample1.jpeg',
     country: 'Thailand',
-    countryCode: 'th',
-    follower: 12000,
+    country_code: 'th',
+    follower_count: 12000,
     categories: ['뷰티', '라이프스타일'],
-    campaigns: 8,
+    campaigns_count: 8,
     rating: 4.8,
     bio: 'K-뷰티와 라이프스타일을 사랑하는 태국 인플루언서. 다양한 브랜드와 협업 경험 보유.',
-    isOnline: true,
+    is_online: true,
+    social_handles: { instagram: '@nicha_beauty', tiktok: '@nicha_lifestyle' },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
     id: '2',
     name: 'Mina',
     avatar: '/campaign_sample/sample2.jpeg',
     country: 'Thailand',
-    countryCode: 'th',
-    follower: 35000,
+    country_code: 'th',
+    follower_count: 35000,
     categories: ['패션', '뷰티'],
-    campaigns: 12,
+    campaigns_count: 12,
     rating: 4.9,
     bio: '트렌디한 패션과 뷰티 콘텐츠로 팔로워와 소통하는 크리에이터.',
-    isOnline: false,
+    is_online: false,
+    social_handles: { instagram: '@mina_fashion', tiktok: '@mina_style' },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
     id: '3',
     name: 'Somchai',
     avatar: '/campaign_sample/sample3.jpeg',
     country: 'Thailand',
-    countryCode: 'th',
-    follower: 8000,
+    country_code: 'th',
+    follower_count: 8000,
     categories: ['푸드', '여행'],
-    campaigns: 5,
+    campaigns_count: 5,
     rating: 4.7,
     bio: '여행과 음식 리뷰를 전문으로 하는 태국 인플루언서.',
-    isOnline: true,
+    is_online: true,
+    social_handles: { instagram: '@somchai_food', youtube: '@somchai_travel' },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
     id: '4',
     name: 'John D.',
     avatar: '/campaign_sample/sample4.jpeg',
     country: 'USA',
-    countryCode: 'us',
-    follower: 250000,
+    country_code: 'us',
+    follower_count: 250000,
     categories: ['테크', '게이밍'],
-    campaigns: 25,
+    campaigns_count: 25,
     rating: 4.9,
     bio: 'Latest tech reviews and gameplay streams. Connecting brands with gamers.',
-    isOnline: true,
+    is_online: true,
+    social_handles: { youtube: '@johnd_tech', tiktok: '@johnd_gaming' },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
 ];
 
 export default function InfluencersPage() {
-  const [influencers, setInfluencers] = useState(mockInfluencers);
+  const supabase = createClient();
+  const [influencers, setInfluencers] = useState<Influencer[]>(mockInfluencers);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInfluencers = async () => {
+      const { data, error } = await supabase
+        .from('influencers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        setInfluencers(data);
+      } else {
+        // Use mock data as fallback
+        setInfluencers(mockInfluencers);
+      }
+      setLoading(false);
+    };
+
+    fetchInfluencers();
+
+    // Set up real-time subscription for new influencers
+    const channel = supabase
+      .channel('influencers')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'influencers' },
+        () => {
+          fetchInfluencers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const filteredInfluencers = influencers.filter(inf => 
     inf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    inf.categories.some(cat => cat.toLowerCase().includes(searchTerm.toLowerCase()))
+    inf.categories?.some(cat => cat.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -112,25 +151,25 @@ export default function InfluencersPage() {
                 <div className="flex items-center gap-5 mb-5">
                   <div className="relative">
                     <Image
-                      src={inf.avatar}
+                      src={inf.avatar || '/campaign_sample/sample1.jpeg'}
                       alt={inf.name}
                       width={80}
                       height={80}
                       className="w-20 h-20 rounded-full border-4 border-blue-500/50 object-cover shadow-lg"
                     />
-                    {inf.isOnline && <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-[#1e293b] animate-pulse" title="온라인"></div>}
+                    {inf.is_online && <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-[#1e293b] animate-pulse" title="온라인"></div>}
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">{inf.name}</h2>
                     <div className="flex items-center gap-2 text-blue-300/80">
-                      <Image src={`https://flagcdn.com/w20/${inf.countryCode}.png`} alt={inf.country} width={20} height={15} />
+                      <Image src={`https://flagcdn.com/w20/${inf.country_code}.png`} alt={inf.country} width={20} height={15} />
                       <span>{inf.country}</span>
                     </div>
                   </div>
                 </div>
                 <p className="text-blue-200/90 text-sm mb-5 min-h-[40px] line-clamp-2">{inf.bio}</p>
                 <div className="flex flex-wrap gap-2 mb-5">
-                  {inf.categories.map((cat) => (
+                  {inf.categories?.map((cat) => (
                     <span key={cat} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">
                       #{cat}
                     </span>
@@ -138,11 +177,11 @@ export default function InfluencersPage() {
                 </div>
                 <div className="flex items-center justify-between text-center bg-black/20 p-3 rounded-xl mb-6">
                   <div>
-                    <div className="font-bold text-lg">{inf.follower.toLocaleString()}</div>
+                    <div className="font-bold text-lg">{inf.follower_count.toLocaleString()}</div>
                     <div className="text-xs text-blue-300/60">팔로워</div>
                   </div>
                   <div>
-                    <div className="font-bold text-lg">{inf.campaigns}</div>
+                    <div className="font-bold text-lg">{inf.campaigns_count}</div>
                     <div className="text-xs text-blue-300/60">캠페인</div>
                   </div>
                   <div>

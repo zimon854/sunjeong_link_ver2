@@ -1,6 +1,7 @@
 'use client';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import AuthButton from "./AuthButton"; // AuthButton을 가져옵니다.
 
 function NavLink({ href, label, isActive }: { href: string; label: string; isActive: boolean }) {
@@ -26,7 +27,7 @@ export default function NavBar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center">
-            <img src="/logo/sunjeong_link_logo.png" alt="선정링크 로고" className="h-10 w-auto object-contain" />
+            <Image src="/logo/sunjeong_link_logo.png" alt="선정링크 로고" width={120} height={40} className="h-10 w-auto object-contain" />
           </Link>
           <div className="hidden md:flex items-center gap-4">
             {menus.map(m => (

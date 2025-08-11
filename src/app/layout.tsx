@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
 import Image from "next/image";
-import Script from "next/script";
 import MobileTabNavigation from "./components/MobileTabNavigation";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import NetworkStatus from "../components/NetworkStatus";

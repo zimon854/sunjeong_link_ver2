@@ -68,22 +68,3 @@ export async function signOut() {
   redirect('/auth')
 }
 
-export async function signInWithProvider(provider: 'google' | 'github' | 'facebook') {
-  const supabase = await createClient()
-  
-  const { error, data } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
-    },
-  })
-
-  if (error) {
-    console.error('OAuth error:', error)
-    redirect('/auth?message=소셜 로그인에 실패했습니다.')
-  }
-
-  if (data.url) {
-    redirect(data.url)
-  }
-}

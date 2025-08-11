@@ -1,7 +1,7 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="com.sunjeonglink.lynkable"
-4    android:versionCode="4"
+4    android:versionCode="5"
 5    android:versionName="1.0.4" >
 6
 7    <uses-sdk
@@ -9,24 +9,24 @@
 9        android:targetSdkVersion="34" />
 10
 11    <uses-permission android:name="android.permission.INTERNET" />
-11-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:5:5-67
-11-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:5:22-64
+11-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:5:5-67
+11-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:5:22-64
 12
 13    <queries>
 13-->[com.google.androidbrowserhelper:androidbrowserhelper:2.5.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\52fb1f27fdabbe655ed34ff99599acca\transformed\androidbrowserhelper-2.5.0\AndroidManifest.xml:26:5-34:15
 14        <intent>
 14-->[com.google.androidbrowserhelper:androidbrowserhelper:2.5.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\52fb1f27fdabbe655ed34ff99599acca\transformed\androidbrowserhelper-2.5.0\AndroidManifest.xml:27:9-33:18
 15            <action android:name="android.intent.action.VIEW" />
-15-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:17-69
-15-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:25-66
+15-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:17-69
+15-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:25-66
 16
 17            <category android:name="android.intent.category.BROWSABLE" />
-17-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:17-78
-17-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:27-75
+17-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:17-78
+17-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:27-75
 18
 19            <data android:scheme="https" />
-19-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:17-34:70
-19-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:23-45
+19-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:17-34:70
+19-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:23-45
 20        </intent>
 21    </queries>
 22
@@ -42,88 +42,88 @@
 27-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 28
 29    <application
-29-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:7:5-52:19
+29-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:7:5-52:19
 30        android:allowBackup="true"
-30-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:8:9-35
+30-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:8:9-35
 31        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 31-->[androidx.core:core:1.12.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\cc90c0a82c88f691fba80bfb87eb7aea\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
 32        android:dataExtractionRules="@xml/data_extraction_rules"
-32-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:9:9-65
+32-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:9:9-65
 33        android:extractNativeLibs="true"
 34        android:fullBackupContent="@xml/backup_rules"
-34-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:10:9-54
+34-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:10:9-54
 35        android:icon="@mipmap/ic_launcher"
-35-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:11:9-43
+35-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:11:9-43
 36        android:label="@string/app_name"
-36-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:12:9-41
+36-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:12:9-41
 37        android:roundIcon="@mipmap/ic_launcher_round"
-37-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:13:9-54
+37-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:13:9-54
 38        android:supportsRtl="true"
-38-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:14:9-35
+38-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:14:9-35
 39        android:theme="@style/Theme.SunjeongLinkTWA" >
-39-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:15:9-53
+39-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:15:9-53
 40        <activity
-40-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:18:9-42:20
+40-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:18:9-42:20
 41            android:name="com.sunjeonglink.twa.MainActivity"
-41-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:19:13-61
+41-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:19:13-61
 42            android:exported="true"
-42-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:20:13-36
+42-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:20:13-36
 43            android:launchMode="singleTask"
-43-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:21:13-44
+43-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:21:13-44
 44            android:theme="@style/Theme.SunjeongLinkTWA" >
-44-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:22:13-57
+44-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:22:13-57
 45            <intent-filter>
-45-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:24:13-27:29
+45-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:24:13-27:29
 46                <action android:name="android.intent.action.MAIN" />
-46-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:25:17-69
-46-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:25:25-66
+46-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:25:17-69
+46-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:25:25-66
 47
 48                <category android:name="android.intent.category.LAUNCHER" />
-48-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:26:17-77
-48-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:26:27-74
+48-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:26:17-77
+48-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:26:27-74
 49            </intent-filter>
 50            <intent-filter>
-50-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:29:13-35:29
+50-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:29:13-35:29
 51                <action android:name="android.intent.action.VIEW" />
-51-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:17-69
-51-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:25-66
+51-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:17-69
+51-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:30:25-66
 52
 53                <category android:name="android.intent.category.DEFAULT" />
-53-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:31:17-76
-53-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:31:27-73
+53-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:31:17-76
+53-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:31:27-73
 54                <category android:name="android.intent.category.BROWSABLE" />
-54-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:17-78
-54-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:27-75
+54-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:17-78
+54-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:32:27-75
 55
 56                <data
-56-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:17-34:70
+56-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:17-34:70
 57                    android:host="sunjeong-link-ver2.vercel.app"
-57-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:34:23-67
+57-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:34:23-67
 58                    android:scheme="https" />
-58-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:23-45
+58-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:33:23-45
 59            </intent-filter>
 60
 61            <!-- DEFAULT_URL을 명시적으로 추가 -->
 62            <meta-data
-62-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:38:13-40:74
+62-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:38:13-40:74
 63                android:name="android.support.customtabs.trusted.DEFAULT_URL"
-63-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:39:17-78
+63-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:39:17-78
 64                android:value="https://sunjeong-link-ver2.vercel.app/" />
-64-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:40:17-71
+64-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:40:17-71
 65        </activity>
 66
 67        <meta-data
-67-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:44:9-46:59
+67-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:44:9-46:59
 68            android:name="asset_statements"
-68-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:45:13-44
+68-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:45:13-44
 69            android:resource="@string/asset_statements" />
-69-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:46:13-56
+69-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:46:13-56
 70        <meta-data
-70-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:48:9-50:55
+70-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:48:9-50:55
 71            android:name="web_manifest"
-71-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:49:13-40
+71-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:49:13-40
 72            android:resource="@string/web_manifest" />
-72-->C:\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:50:13-52
+72-->C:\Users\sunjeong_link_ver2-main\sunjeong_link_ver2-main\twa-app\app\src\main\AndroidManifest.xml:50:13-52
 73
 74        <provider
 74-->[androidx.emoji2:emoji2:1.2.0] C:\Users\카일\.gradle\caches\9.0-milestone-1\transforms\0851e9c33d577e8e880fa3ac052d1a0f\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20

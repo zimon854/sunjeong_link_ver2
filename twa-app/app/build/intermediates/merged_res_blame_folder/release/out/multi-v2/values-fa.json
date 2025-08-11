@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.sunjeonglink.lynkable.app-mergeReleaseResources-31:/values-fa/values-fa.xml",
+            "outputFile": "com.sunjeonglink.lynkable.app-mergeReleaseResources-2:/values-fa/values-fa.xml",
             "map": [
                 {
                     "source": "C:\\Users\\카일\\.gradle\\caches\\9.0-milestone-1\\transforms\\cc90c0a82c88f691fba80bfb87eb7aea\\transformed\\core-1.12.0\\res\\values-fa\\values-fa.xml",

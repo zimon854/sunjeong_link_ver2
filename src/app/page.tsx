@@ -5,13 +5,6 @@ import Link from "next/link";
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { useNativeToast } from '@/hooks/useNativeToast';
 import { usePWAFeatures } from '@/hooks/usePWAFeatures';
-import logoInstagram from '@/public/logo/인스타그램.svg';
-import logoTiktok from '@/public/logo/틱톡.svg';
-import logoYoutubeShorts from '@/public/logo/유튜브 쇼츠.svg';
-import logoAmazon from '@/public/logo/아마존.svg';
-import logoPayoneer from '@/public/logo/페이오니아.svg';
-import logoShopify from '@/public/logo/쇼피파이.svg';
-import logoQ10 from '@/public/logo/Q10.svg';
 import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -565,8 +558,8 @@ export default function Home() {
           <div className="bg-[#181830] rounded-2xl shadow-xl flex flex-col overflow-hidden hover:scale-105 transition">
             <img src="/news/news1.png" alt="news1" className="w-full h-[100px] md:h-[180px] object-cover" />
             <div className="flex-1 flex flex-col justify-between p-3 md:p-4">
-              <div className="mb-2 text-xs md:text-sm text-gray-100 font-semibold">선정에이전시, 설립 2년만에 특허-벤처-직무발명보상인증 '트리플크라운'</div>
-              <div className="text-xs text-gray-400 mb-4">"K-브랜드 해외진출의 새로운 솔루션 제시"</div>
+              <div className="mb-2 text-xs md:text-sm text-gray-100 font-semibold">선정에이전시, 설립 2년만에 특허-벤처-직무발명보상인증 &lsquo;트리플크라운&rsquo;</div>
+              <div className="text-xs text-gray-400 mb-4">&ldquo;K-브랜드 해외진출의 새로운 솔루션 제시&rdquo;</div>
               <a href="https://m.news.nate.com/view/20250502n13007" className="text-xs text-blue-400 hover:underline mt-auto">자세히 보기 &rarr;</a>
             </div>
           </div>
@@ -593,7 +586,7 @@ export default function Home() {
             <img src="/news/news4.png" alt="news4" className="w-full h-[100px] md:h-[180px] object-cover" />
             <div className="flex-1 flex flex-col justify-between p-3 md:p-4">
               <div className="mb-2 text-xs md:text-sm text-gray-100 font-semibold">가히로 뜬 코리아테크 </div>
-              <div className="text-xs text-gray-400 mb-4">왜 뷰티 플랫폼 '와이레스' 만들었나</div>
+              <div className="text-xs text-gray-400 mb-4">왜 뷰티 플랫폼 &lsquo;와이레스&rsquo; 만들었나</div>
               <a href="https://zdnet.co.kr/view/?no=20250107151911" className="text-xs text-blue-400 hover:underline mt-auto">자세히 보기 &rarr;</a>
             </div>
           </div>
@@ -667,15 +660,5 @@ function FeatureCard({ title, desc, color }: { title: string; desc: string; colo
   );
 }
 
-function NavMenu({ href, label, desc }: { href: string; label: string; desc: string }) {
-  return (
-    <Link href={href} className="group flex flex-col items-center justify-center min-w-[90px] px-3 py-1 rounded-xl hover:bg-blue-800/70 transition text-white font-semibold relative">
-      <span className="text-base whitespace-nowrap">{label}</span>
-      <span className="absolute left-1/2 -bottom-2 translate-x-[-50%] translate-y-full opacity-0 group-hover:opacity-100 bg-[#181830] text-blue-200 text-xs rounded px-2 py-1 shadow-lg pointer-events-none transition z-20 whitespace-nowrap">
-        {desc}
-      </span>
-    </Link>
-  );
-}
 
 

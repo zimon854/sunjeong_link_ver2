@@ -2,10 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { signInWithProvider } from './actions';
-import Link from 'next/link';
-import { FiLogIn, FiUserPlus, FiGithub, FiMessageCircle } from 'react-icons/fi';
-import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import { FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 // InputField 컴포넌트를 AuthPage 밖으로 분리
 const InputField = ({ type, placeholder, value, onChange }: { type: string, placeholder: string, value: string, onChange: (val: string) => void }) => (
@@ -26,20 +23,6 @@ const TabButton = ({ icon, label, isActive, onClick }: { icon: React.ReactNode, 
   </button>
 );
 
-// SocialButton 컴포넌트를 AuthPage 밖으로 분리
-const SocialButton = ({ icon, label, onClick, provider }: { icon: React.ReactNode, label: string, onClick: () => void, provider: string }) => {
-  const baseStyle = "w-full flex items-center justify-center gap-3 py-3 rounded-lg font-semibold transition-all duration-200";
-  const providerStyles: { [key: string]: string } = {
-    google: "bg-white/90 hover:bg-white text-gray-800",
-    github: "bg-gray-800 hover:bg-gray-700 text-white",
-    facebook: "bg-blue-600 hover:bg-blue-700 text-white",
-  };
-  return (
-    <button onClick={onClick} className={`${baseStyle} ${providerStyles[provider]}`}>
-      {icon} {label}
-    </button>
-  );
-};
 
 // AuthForm 컴포넌트를 AuthPage 밖으로 분리하고 필요한 props를 받도록 수정
 const AuthForm = ({ isLogin, email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, username, setUsername, handleLogin, handleSignUp, loading }: {
@@ -124,28 +107,6 @@ const AuthPageContent = () => {
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'github' | 'facebook') => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({ 
-        provider, 
-        options: { 
-          redirectTo: `${window.location.origin}/auth/callback`
-        } 
-      });
-      
-      if (error) {
-        setMessage({ type: 'error', text: '소셜 로그인에 실패했습니다.' });
-        setLoading(false);
-      } else if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Social login error:', error);
-      setMessage({ type: 'error', text: '소셜 로그인 중 오류가 발생했습니다.' });
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -182,20 +143,6 @@ const AuthPageContent = () => {
             />
           }
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-secondary">또는</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <SocialButton icon={<FaGoogle />} label="Google로 계속하기" onClick={() => handleSocialLogin('google')} provider="google" />
-            <SocialButton icon={<FiGithub />} label="GitHub으로 계속하기" onClick={() => handleSocialLogin('github')} provider="github" />
-            <SocialButton icon={<FaFacebook />} label="Facebook으로 계속하기" onClick={() => handleSocialLogin('facebook')} provider="facebook" />
-          </div>
 
           {message && (
             <div className={`mt-6 p-3 rounded-lg text-center text-sm ${message.type === 'success' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>

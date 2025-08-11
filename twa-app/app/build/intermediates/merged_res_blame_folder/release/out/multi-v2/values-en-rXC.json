@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.sunjeonglink.lynkable.app-mergeReleaseResources-31:/values-en-rXC/values-en-rXC.xml",
+            "outputFile": "com.sunjeonglink.lynkable.app-mergeReleaseResources-2:/values-en-rXC/values-en-rXC.xml",
             "map": [
                 {
                     "source": "C:\\Users\\카일\\.gradle\\caches\\9.0-milestone-1\\transforms\\19d7ce7155aa638adcc1e348078c32fb\\transformed\\browser-1.4.0\\res\\values-en-rXC\\values-en-rXC.xml",

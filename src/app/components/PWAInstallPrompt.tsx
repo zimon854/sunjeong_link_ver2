@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
@@ -50,10 +51,12 @@ export default function PWAInstallPrompt() {
     <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 p-4">
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
-          <img 
+          <Image 
             src="/logo/sunjeong_link_logo.png" 
             alt="링커블" 
-            className="w-12 h-12 rounded-lg"
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-lg object-contain"
           />
         </div>
         <div className="flex-1 min-w-0">
