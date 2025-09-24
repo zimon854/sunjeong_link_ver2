@@ -1,9 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 const dummyStats = {
   campaigns: 3,
@@ -13,34 +13,13 @@ const dummyStats = {
 };
 
 export default function ProfilePage() {
-  const supabase = createClient();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>({ name: '', role: '', bio: '', image: '' });
+  const { isAdmin, loading: authLoading } = useAdminAuth();
+  const [profile, setProfile] = useState<any>({ name: '관리자', role: 'admin', bio: '링커블 플랫폼 관리자', image: '' });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>('/logo/sunjeong_link_logo.png');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    const fetchUserAndProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (data) {
-          setProfile(data);
-          if (data.image) {
-            const { data: { publicUrl } } = supabase.storage.from('profiles').getPublicUrl(data.image);
-            setImagePreview(publicUrl);
-          }
-        }
-      } else {
-        // 로그인 페이지로 리디렉션 또는 메시지 표시
-      }
-    };
-    fetchUserAndProfile();
-  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -52,44 +31,43 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
     setLoading(true);
     setMessage('');
-    let imageUrl = profile.image;
 
-    if (imageFile) {
-      const { data, error } = await supabase.storage.from('profiles').upload(`img/${user.id}_${Date.now()}_${imageFile.name}`, imageFile, { upsert: true });
-      if (error) {
-        setMessage('이미지 업로드 실패: ' + error.message);
-        setLoading(false);
-        return;
+    // 관리자 프로필은 localStorage에만 저장
+    try {
+      const updatedProfile = { ...profile };
+      if (imageFile) {
+        // 실제로는 이미지를 업로드하지 않고 미리보기만 사용
+        updatedProfile.image = imagePreview;
       }
-      imageUrl = data.path;
-    }
 
-    const { error } = await supabase.from('profiles').upsert({
-      id: user.id,
-      name: profile.name,
-      role: profile.role,
-      bio: profile.bio,
-      image: imageUrl,
-    });
+      localStorage.setItem('adminProfile', JSON.stringify(updatedProfile));
+      setMessage('관리자 프로필이 성공적으로 저장되었습니다.');
+      setIsEditing(false);
+    } catch (error) {
+      setMessage('프로필 저장 실패');
+    }
 
     setLoading(false);
-    if (error) {
-      setMessage('프로필 저장 실패: ' + error.message);
-    } else {
-      setMessage('프로필이 성공적으로 저장되었습니다.');
-      setIsEditing(false);
-    }
   };
 
-  if (!user) {
+  if (authLoading) {
+    return (
+      <AdaptiveLayout title="프로필">
+        <div className="text-center text-blue-300/70 py-20">
+          <p>로딩 중...</p>
+        </div>
+      </AdaptiveLayout>
+    );
+  }
+
+  if (!isAdmin) {
     return (
       <AdaptiveLayout title="로그인 필요">
         <div className="text-center text-blue-300/70 py-20">
-          <p>프로필을 보려면 로그인이 필요합니다.</p>
-          <Link href="/auth" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg">로그인 페이지로</Link>
+          <p>프로필을 보려면 관리자 로그인이 필요합니다.</p>
+          <Link href="/auth" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg">관리자 로그인</Link>
         </div>
       </AdaptiveLayout>
     );
@@ -119,17 +97,19 @@ export default function ProfilePage() {
               {isEditing ? (
                 <input type="text" value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} className="text-4xl font-bold bg-transparent border-b-2 border-blue-500/50 focus:border-blue-400 outline-none mb-2 w-full" placeholder="이름" />
               ) : (
-                <h1 className="text-4xl font-bold mb-2">{profile.name || user.email}</h1>
+                <h1 className="text-4xl font-bold mb-2">{profile.name}</h1>
               )}
-              <p className="text-blue-300/80 mb-4">{user.email}</p>
+              <p className="text-blue-300/80 mb-4">admin@linkable.com</p>
               {isEditing ? (
-                <select value={profile.role} onChange={e => setProfile({...profile, role: e.target.value})} className="bg-blue-950/70 border border-blue-700 rounded-lg px-3 py-2 text-white w-full mb-4">
-                  <option value="" className="bg-blue-900">역할 선택</option>
-                  <option value="brand" className="bg-blue-900">브랜드</option>
-                  <option value="influencer" className="bg-blue-900">인플루언서</option>
-                </select>
+                <input
+                  type="text"
+                  value={profile.role}
+                  onChange={e => setProfile({...profile, role: e.target.value})}
+                  className="bg-blue-950/70 border border-blue-700 rounded-lg px-3 py-2 text-white w-full mb-4"
+                  placeholder="역할"
+                />
               ) : (
-                <p className="text-lg font-semibold text-green-400">{profile.role === 'brand' ? '브랜드' : profile.role === 'influencer' ? '인플루언서' : '역할 미설정'}</p>
+                <p className="text-lg font-semibold text-green-400">{profile.role || '관리자'}</p>
               )}
             </div>
           </div>

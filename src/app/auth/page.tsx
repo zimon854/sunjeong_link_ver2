@@ -1,8 +1,7 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { FiLogIn, FiUserPlus } from 'react-icons/fi';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { FiLogIn } from 'react-icons/fi';
 
 // InputField 컴포넌트를 AuthPage 밖으로 분리
 const InputField = ({ type, placeholder, value, onChange }: { type: string, placeholder: string, value: string, onChange: (val: string) => void }) => (
@@ -16,139 +15,105 @@ const InputField = ({ type, placeholder, value, onChange }: { type: string, plac
   />
 );
 
-// TabButton 컴포넌트를 AuthPage 밖으로 분리
-const TabButton = ({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) => (
-  <button onClick={onClick} className={`w-1/2 py-2.5 rounded-md flex items-center justify-center gap-2 font-semibold transition-all duration-200 ${isActive ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-white/5'}`}>
-    {icon} {label}
-  </button>
-);
-
-
-// AuthForm 컴포넌트를 AuthPage 밖으로 분리하고 필요한 props를 받도록 수정
-const AuthForm = ({ isLogin, email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, username, setUsername, handleLogin, handleSignUp, loading }: {
-  isLogin: boolean;
-  email: string;
-  setEmail: (email: string) => void;
-  password: string;
-  setPassword: (password: string) => void;
-  confirmPassword: string;
-  setConfirmPassword: (confirmPassword: string) => void;
+// AdminLoginForm 컴포넌트
+const AdminLoginForm = ({ username, setUsername, password, setPassword, handleLogin, loading }: {
   username: string;
   setUsername: (username: string) => void;
+  password: string;
+  setPassword: (password: string) => void;
   handleLogin: (e: React.FormEvent) => Promise<void>;
-  handleSignUp: (e: React.FormEvent) => Promise<void>;
   loading: boolean;
 }) => (
-  <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-6">
-    {!isLogin && (
-      <InputField type="text" placeholder="사용자 이름" value={username} onChange={setUsername} />
-    )}
-    <InputField type="email" placeholder="이메일" value={email} onChange={setEmail} />
+  <form onSubmit={handleLogin} className="space-y-6">
+    <InputField type="text" placeholder="관리자 ID" value={username} onChange={setUsername} />
     <InputField type="password" placeholder="비밀번호" value={password} onChange={setPassword} />
-    {!isLogin && (
-      <InputField type="password" placeholder="비밀번호 확인" value={confirmPassword} onChange={setConfirmPassword} />
-    )}
     <button type="submit" className="w-full btn-primary" disabled={loading}>
-      {loading ? '처리 중...' : (isLogin ? '로그인' : '회원가입')}
+      {loading ? '로그인 중...' : '관리자 로그인'}
     </button>
   </form>
 );
 
-// SearchParams를 사용하는 컴포넌트를 별도로 분리
+// Admin Login Component
 const AuthPageContent = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const supabase = createClient();
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [loading, setLoading] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
-
-  useEffect(() => {
-    const messageParam = searchParams.get('message');
-    if (messageParam) {
-      setMessage({ type: 'error', text: messageParam });
-    }
-  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 입력값 검증
+    if (!username || !password) {
+      setMessage({ type: 'error', text: '관리자 ID와 비밀번호를 모두 입력해주세요.' });
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      setMessage({ type: 'error', text: '이메일 또는 비밀번호가 올바르지 않습니다.' });
-    } else {
-      setMessage({ type: 'success', text: '로그인 성공! 대시보드로 이동합니다.' });
-      router.push('/dashboard');
+
+    try {
+      // 하드코딩된 admin 계정 검증
+      if (username === 'admin' && password === 'LinkAdmin2024!@#') {
+        setMessage({ type: 'success', text: '관리자 로그인 성공! 대시보드로 이동합니다.' });
+
+        // localStorage와 쿠키에 관리자 세션 저장
+        const authData = {
+          user: 'admin',
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('adminAuth', JSON.stringify(authData));
+
+        // 쿠키에도 저장 (미들웨어에서 사용)
+        document.cookie = `adminAuth=${JSON.stringify(authData)}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7일 유효
+
+        setTimeout(() => {
+          router.push('/dashboard');
+          router.refresh();
+        }, 1000);
+      } else {
+        setMessage({ type: 'error', text: '관리자 ID 또는 비밀번호가 올바르지 않습니다.' });
+      }
+    } catch (error) {
+      console.error('Unexpected login error:', error);
+      setMessage({ type: 'error', text: '예상치 못한 오류가 발생했습니다. 다시 시도해주세요.' });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setMessage({ type: 'error', text: '비밀번호가 일치하지 않습니다.' });
-      return;
-    }
-    setLoading(true);
-    setMessage(null);
-    const { error } = await supabase.auth.signUp({ email, password, options: { data: { username } } });
-    setLoading(false);
-    if (error) {
-      console.error('Supabase SignUp Error:', error);
-      setMessage({ type: 'error', text: error.message });
-    } else {
-      setMessage({ type: 'success', text: '회원가입 성공! 확인 메일을 발송했습니다.' });
-      setAuthMode('login');
-    }
-  };
 
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold">환영합니다</h1>
-          <p className="text-secondary mt-2">링커블과 함께 성장을 시작하세요.</p>
+          <h1 className="text-4xl font-extrabold">관리자 로그인</h1>
+          <p className="text-secondary mt-2">링커블 관리자 대시보드 접속</p>
         </div>
         <div className="card">
           <div className="flex justify-center mb-6 bg-black/20 p-1 rounded-lg">
-            <TabButton icon={<FiLogIn />} label="로그인" isActive={authMode === 'login'} onClick={() => setAuthMode('login')} />
-            <TabButton icon={<FiUserPlus />} label="회원가입" isActive={authMode === 'signup'} onClick={() => setAuthMode('signup')} />
+            <div className="w-full py-2.5 rounded-md flex items-center justify-center gap-2 font-semibold bg-primary text-white shadow-md">
+              <FiLogIn /> 관리자 로그인
+            </div>
           </div>
-          
-          {authMode === 'login' ? 
-            <AuthForm 
-              isLogin={true} 
-              email={email} setEmail={setEmail} 
-              password={password} setPassword={setPassword} 
-              confirmPassword={confirmPassword} setConfirmPassword={setConfirmPassword} 
-              username={username} setUsername={setUsername} 
-              handleLogin={handleLogin} handleSignUp={handleSignUp} 
-              loading={loading} 
-            /> 
-            : 
-            <AuthForm 
-              isLogin={false} 
-              email={email} setEmail={setEmail} 
-              password={password} setPassword={setPassword} 
-              confirmPassword={confirmPassword} setConfirmPassword={setConfirmPassword} 
-              username={username} setUsername={setUsername} 
-              handleLogin={handleLogin} handleSignUp={handleSignUp} 
-              loading={loading} 
-            />
-          }
 
+          <AdminLoginForm
+            username={username}
+            setUsername={setUsername}
+            password={password}
+            setPassword={setPassword}
+            handleLogin={handleLogin}
+            loading={loading}
+          />
 
           {message && (
             <div className={`mt-6 p-3 rounded-lg text-center text-sm ${message.type === 'success' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
               {message.text}
             </div>
           )}
+
         </div>
       </div>
     </div>
@@ -156,16 +121,5 @@ const AuthPageContent = () => {
 };
 
 export default function AuthPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-secondary">로딩 중...</p>
-        </div>
-      </div>
-    }>
-      <AuthPageContent />
-    </Suspense>
-  );
+  return <AuthPageContent />;
 }

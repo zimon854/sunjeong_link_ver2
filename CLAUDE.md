@@ -142,3 +142,16 @@ This is a bilingual (Korean/English) platform focusing on:
 - Group buying campaign management
 - Multi-platform social media integration (Instagram, TikTok, YouTube Shorts)
 - E-commerce integration (Shopify, Amazon, Q10, Payoneer)
+
+## Important Development Notes
+
+### Testing Framework
+- No test framework is currently configured
+- To add testing, consider Jest with Testing Library for unit/integration tests
+- Use `npm install --save-dev jest @testing-library/react @testing-library/jest-dom`
+
+### Development Considerations
+- ESLint errors don't fail builds (configured in next.config.ts)
+- PWA is disabled in development mode for easier debugging
+- Service worker registration only occurs in production builds
+- TypeScript strict mode is enabled with path aliases (`@/*` → `./src/*`)

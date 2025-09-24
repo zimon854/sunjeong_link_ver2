@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { FiBell, FiMessageSquare, FiPlusCircle, FiList, FiUser, FiBarChart2 } from 'react-icons/fi';
 
@@ -24,28 +23,40 @@ const dummyData = {
 };
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const supabase = createClient();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        const { data: profileData } = await supabase.from('profiles').select('name, role, image').eq('id', user.id).single();
-        if (profileData) setProfile(profileData);
+    // localStorage에서 관리자 세션 확인
+    const adminAuth = localStorage.getItem('adminAuth');
+    if (adminAuth) {
+      try {
+        const authData = JSON.parse(adminAuth);
+        setIsAdmin(authData.user === 'admin');
+      } catch (error) {
+        console.error('Error parsing admin auth:', error);
+        setIsAdmin(false);
       }
-    };
-    fetchUser();
+    }
+    setLoading(false);
   }, []);
 
-  if (!user) {
+  if (loading) {
     return (
       <AdaptiveLayout title="대시보드">
         <div className="text-center text-secondary py-20">
-          <p>대시보드에 접근하려면 로그인이 필요합니다.</p>
-          <Link href="/auth" className="btn-primary mt-4 inline-block">로그인</Link>
+          <p>로딩 중...</p>
+        </div>
+      </AdaptiveLayout>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <AdaptiveLayout title="대시보드">
+        <div className="text-center text-secondary py-20">
+          <p>대시보드에 접근하려면 관리자 로그인이 필요합니다.</p>
+          <Link href="/auth" className="btn-primary mt-4 inline-block">관리자 로그인</Link>
         </div>
       </AdaptiveLayout>
     );
@@ -56,14 +67,14 @@ export default function DashboardPage() {
       <div className="space-y-10">
         {/* 프로필 및 환영 메시지 */}
         <section className="card flex flex-col md:flex-row items-center gap-6">
-          <img 
-            src={profile?.image ? supabase.storage.from('profiles').getPublicUrl(profile.image).data.publicUrl : '/logo/sunjeong_link_logo.png'} 
-            alt="프로필" 
+          <img
+            src="/logo/sunjeong_link_logo.png"
+            alt="관리자"
             className="w-24 h-24 rounded-full border-4 border-border object-cover bg-background"
           />
           <div className="text-center md:text-left">
-            <h1 className="text-3xl font-bold">환영합니다, {profile?.name || user.email}님!</h1>
-            <p className="text-secondary mt-1">오늘도 멋진 캠페인을 만들어보세요.</p>
+            <h1 className="text-3xl font-bold">환영합니다, 관리자님!</h1>
+            <p className="text-secondary mt-1">오늘도 멋진 캠페인을 관리해보세요.</p>
           </div>
         </section>
 

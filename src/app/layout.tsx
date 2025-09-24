@@ -162,7 +162,44 @@ export default function RootLayout({
           <main className="flex-grow">
             {children}
           </main>
-          
+
+          {/* 푸터 */}
+          <footer className="bg-[#181b3a]/95 border-t border-[#2d2f5d]/50 mt-auto">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                {/* 회사 정보 */}
+                <div className="text-xs text-gray-400 leading-relaxed">
+                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
+                    <span className="font-semibold">상호: 주식회사 선정에이전시</span>
+                    <span>대표: 최성훈</span>
+                    <span>사업자등록번호: 170-88-03245</span>
+                  </div>
+                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 mt-1">
+                    <span>전화: 010-2803-5248</span>
+                    <span>주소: 서울특별시 성동구 성수일로8길 55 B동 706호</span>
+                  </div>
+                  <div className="mt-1">
+                    <span>광고관련: </span>
+                    <a href="mailto:borrow13@sunjeong.co.kr" className="text-blue-400 hover:text-blue-300 transition">
+                      borrow13@sunjeong.co.kr
+                    </a>
+                  </div>
+                </div>
+
+                {/* 로고 */}
+                <div className="flex items-center">
+                  <Image
+                    src="/logo/sunjeong_link_logo.png"
+                    alt="링커블 로고"
+                    width={120}
+                    height={40}
+                    className="h-8 w-auto object-contain opacity-70"
+                  />
+                </div>
+              </div>
+            </div>
+          </footer>
+
           {/* 모바일 하단 탭 네비게이션 */}
           <div className="block md:hidden">
             <MobileTabNavigation />
