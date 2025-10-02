@@ -8,8 +8,8 @@ export default function AuthButton() {
   const router = useRouter();
 
   useEffect(() => {
-    // localStorage에서 관리자 세션 확인
-    const adminAuth = localStorage.getItem('adminAuth');
+    // sessionStorage에서 관리자 세션 확인 (브라우저 종료시 자동 삭제)
+    const adminAuth = sessionStorage.getItem('adminAuth');
     if (adminAuth) {
       try {
         const authData = JSON.parse(adminAuth);
@@ -18,16 +18,20 @@ export default function AuthButton() {
         console.error('Error parsing admin auth:', error);
         setIsAdmin(false);
       }
+    } else {
+      setIsAdmin(false);
     }
   }, []);
 
   const handleLogout = () => {
     try {
+      // sessionStorage와 localStorage 모두 삭제
+      sessionStorage.removeItem('adminAuth');
       localStorage.removeItem('adminAuth');
       // 쿠키도 삭제
       document.cookie = 'adminAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       setIsAdmin(false);
-      router.push('/auth');
+      router.push('/');
       router.refresh();
     } catch (error) {
       console.error('Logout error:', error);

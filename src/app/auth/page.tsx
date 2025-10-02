@@ -41,6 +41,10 @@ const AuthPageContent = () => {
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // 리다이렉트 URL 가져오기
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const redirectUrl = searchParams?.get('redirect') || '/dashboard';
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -58,18 +62,18 @@ const AuthPageContent = () => {
       if (username === 'admin' && password === 'LinkAdmin2024!@#') {
         setMessage({ type: 'success', text: '관리자 로그인 성공! 대시보드로 이동합니다.' });
 
-        // localStorage와 쿠키에 관리자 세션 저장
+        // sessionStorage와 쿠키에 관리자 세션 저장 (브라우저 종료시 삭제)
         const authData = {
           user: 'admin',
           loginTime: new Date().toISOString()
         };
-        localStorage.setItem('adminAuth', JSON.stringify(authData));
+        sessionStorage.setItem('adminAuth', JSON.stringify(authData));
 
-        // 쿠키에도 저장 (미들웨어에서 사용)
-        document.cookie = `adminAuth=${JSON.stringify(authData)}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7일 유효
+        // 쿠키에도 저장 (미들웨어에서 사용) - 세션 쿠키로 설정 (브라우저 종료시 삭제)
+        document.cookie = `adminAuth=${encodeURIComponent(JSON.stringify(authData))}; path=/; SameSite=Lax`;
 
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push(redirectUrl);
           router.refresh();
         }, 1000);
       } else {
