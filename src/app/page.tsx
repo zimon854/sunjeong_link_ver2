@@ -543,6 +543,7 @@ export default function Home() {
               type="submit"
               className="w-full mt-2 py-3 rounded-full bg-blue-500 hover:bg-blue-600 font-semibold text-white text-sm md:text-lg flex items-center justify-center gap-2 transition transform hover:scale-105 active:scale-95"
               disabled={loading}
+              onClick={() => hapticFeedback('medium')}
             >
               {loading ? "등록 중..." : "제출하기"}
             </button>
@@ -550,45 +551,114 @@ export default function Home() {
         </form>
       </section>
 
-      {/* News */}
+      {/* Success Stories */}
       <section className="py-8 md:py-12 max-w-5xl mx-auto px-4 w-full">
-        <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center">News</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-          {/* 뉴스 카드 1 */}
-          <div className="bg-[#181830] rounded-2xl shadow-xl flex flex-col overflow-hidden hover:scale-105 transition">
-            <img src="/news/news1.png" alt="news1" className="w-full h-[100px] md:h-[180px] object-cover" />
-            <div className="flex-1 flex flex-col justify-between p-3 md:p-4">
-              <div className="mb-2 text-xs md:text-sm text-gray-100 font-semibold">선정에이전시, 설립 2년만에 특허-벤처-직무발명보상인증 &lsquo;트리플크라운&rsquo;</div>
-              <div className="text-xs text-gray-400 mb-4">&ldquo;K-브랜드 해외진출의 새로운 솔루션 제시&rdquo;</div>
-              <a href="https://m.news.nate.com/view/20250502n13007" className="text-xs text-blue-400 hover:underline mt-auto">자세히 보기 &rarr;</a>
+        <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center">성공 사례</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          <div className="bg-[#181830] rounded-2xl shadow-xl p-6 hover:scale-105 transition">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">K-뷰티 브랜드 A사</h3>
+                <p className="text-sm text-gray-400">동남아 진출 성공</p>
+              </div>
+            </div>
+            <p className="text-gray-300 text-sm mb-4">
+              링커블을 통해 태국 인플루언서 50명과 협업하여 3개월 만에 현지 매출 300% 증가
+            </p>
+            <div className="flex items-center text-xs text-blue-400">
+              <span className="font-semibold">매출 증가률: +300%</span>
+              <span className="ml-4">참여 인플루언서: 50명</span>
             </div>
           </div>
-          {/* 뉴스 카드 2 */}
-          <div className="bg-[#181830] rounded-2xl shadow-xl flex flex-col overflow-hidden hover:scale-105 transition">
-            <img src="/news/news2.png" alt="news2" className="w-full h-[100px] md:h-[180px] object-cover" />
-            <div className="flex-1 flex flex-col justify-between p-3 md:p-4">
-              <div className="mb-2 text-xs md:text-sm text-gray-100 font-semibold">선정에이전시, 기술경영 3관왕…특허·직무발명·벤처 인증 확보</div>
-              <div className="text-xs text-gray-400 mb-4">K-브랜드 해외 진출 결정적 전환점 마련</div>
-              <a href="https://www.kihoilbo.co.kr/news/articleView.html?idxno=1058413" className="text-xs text-blue-400 hover:underline mt-auto">자세히 보기 &rarr;</a>
+
+          <div className="bg-[#181830] rounded-2xl shadow-xl p-6 hover:scale-105 transition">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">패션 브랜드 B사</h3>
+                <p className="text-sm text-gray-400">인플루언서 마케팅 대성공</p>
+              </div>
+            </div>
+            <p className="text-gray-300 text-sm mb-4">
+              링커블 AI 매칭을 통해 브랜드에 최적화된 인플루언서 발굴, 월 평균 ROI 450% 달성
+            </p>
+            <div className="flex items-center text-xs text-green-400">
+              <span className="font-semibold">ROI: +450%</span>
+              <span className="ml-4">캠페인 성공률: 95%</span>
             </div>
           </div>
-          {/* 뉴스 카드 3 */}
-          <div className="bg-[#181830] rounded-2xl shadow-xl flex flex-col overflow-hidden hover:scale-105 transition">
-            <img src="/news/news3.png" alt="news3" className="w-full h-[100px] md:h-[180px] object-cover" />
-            <div className="flex-1 flex flex-col justify-between p-3 md:p-4">
-              <div className="mb-2 text-xs md:text-sm text-gray-100 font-semibold">선정 에이전시, 브랜드 매출 안정화 위한 마케팅 서비스 실시</div>
-              <div className="text-xs text-gray-400 mb-4">실시간 1위 달성, 글로벌 마케팅 혁신</div>
-              <a href="https://plus.hankyung.com/apps/newsinside.view?aid=2023111577555&category=&sns=y" className="text-xs text-blue-400 hover:underline mt-auto">자세히 보기 &rarr;</a>
+        </div>
+      </section>
+
+      {/* Platform Benefits */}
+      <section className="py-8 md:py-12 bg-[#181830]/50 w-full">
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center">링커블이 특별한 이유</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">AI 기반 매칭</h3>
+              <p className="text-gray-300 text-sm">브랜드와 인플루언서의 완벽한 매칭을 위한 AI 알고리즘</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">글로벌 네트워크</h3>
+              <p className="text-gray-300 text-sm">동남아시아 140만+ 검증된 인플루언서 네트워크</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">실시간 분석</h3>
+              <p className="text-gray-300 text-sm">캠페인 성과를 실시간으로 모니터링하고 최적화</p>
             </div>
           </div>
-          {/* 뉴스 카드 4 */}
-          <div className="bg-[#181830] rounded-2xl shadow-xl flex flex-col overflow-hidden hover:scale-105 transition">
-            <img src="/news/news4.png" alt="news4" className="w-full h-[100px] md:h-[180px] object-cover" />
-            <div className="flex-1 flex flex-col justify-between p-3 md:p-4">
-              <div className="mb-2 text-xs md:text-sm text-gray-100 font-semibold">가히로 뜬 코리아테크 </div>
-              <div className="text-xs text-gray-400 mb-4">왜 뷰티 플랫폼 &lsquo;와이레스&rsquo; 만들었나</div>
-              <a href="https://zdnet.co.kr/view/?no=20250107151911" className="text-xs text-blue-400 hover:underline mt-auto">자세히 보기 &rarr;</a>
-            </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-12 md:py-16 bg-gradient-to-r from-blue-600 to-purple-600 w-full">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-2xl md:text-4xl font-bold mb-4 text-white">
+            지금 시작하세요!
+          </h2>
+          <p className="text-lg md:text-xl text-blue-100 mb-8">
+            링커블과 함께 글로벌 마케팅의 새로운 차원을 경험해보세요
+          </p>
+          <div className="flex flex-col md:flex-row gap-4 justify-center">
+            <a
+              href="/campaigns/new"
+              className="px-8 py-4 bg-white text-blue-600 rounded-full font-bold text-lg hover:bg-gray-100 transition transform hover:scale-105"
+            >
+              캠페인 시작하기
+            </a>
+            <a
+              href="/influencers"
+              className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold text-lg hover:bg-white hover:text-blue-600 transition transform hover:scale-105"
+            >
+              인플루언서 둘러보기
+            </a>
           </div>
         </div>
       </section>

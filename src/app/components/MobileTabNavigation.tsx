@@ -87,12 +87,13 @@ export default function MobileTabNavigation() {
             </svg>
             <span className="text-xs font-medium">대시보드</span>
           </Link>
-          <div className={itemClasses.replace('hover:text-blue-300 active:text-blue-400', '').replace('material-ripple', '')}>
+          <Link href="/contact" className={itemClasses}>
             <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
             </svg>
-            <span className="text-xs font-medium">...</span>
-          </div>
+            <span className="text-xs font-medium">연락처</span>
+          </Link>
         </div>
       </div>
     );
@@ -133,21 +134,13 @@ export default function MobileTabNavigation() {
           </svg>
           <span className="text-xs font-medium">대시보드</span>
         </Link>
-        {isLoggedIn ? (
-          <Link href="/profile" className={itemClasses}>
-            <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs font-medium">프로필</span>
-          </Link>
-        ) : (
-          <Link href="/auth" className={itemClasses}>
-            <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs font-medium">로그인</span>
-          </Link>
-        )}
+        <Link href="/contact" className={itemClasses}>
+          <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          </svg>
+          <span className="text-xs font-medium">연락처</span>
+        </Link>
       </div>
     </div>
   );

@@ -153,6 +153,7 @@ export default function RootLayout({
                 <NavMenu href="/chat" label="실시간 채팅" desc="브랜드-인플루언서 실시간 소통" />
                 <NavMenu href="/profile" label="내 프로필 관리" desc="이름, 역할, 소개, 프로필 이미지 관리" />
                 <NavMenu href="/dashboard" label="내 대시보드" desc="내 서비스 현황 한눈에 보기" />
+                <NavMenu href="/contact" label="연락처" desc="고객지원 및 사업 문의" />
                 <AuthButton />
               </div>
             </div>
@@ -183,6 +184,17 @@ export default function RootLayout({
                     <a href="mailto:borrow13@sunjeong.co.kr" className="text-blue-400 hover:text-blue-300 transition">
                       borrow13@sunjeong.co.kr
                     </a>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-4">
+                    <Link href="/privacy" className="text-blue-400 hover:text-blue-300 transition text-xs">
+                      개인정보처리방침
+                    </Link>
+                    <Link href="/terms" className="text-blue-400 hover:text-blue-300 transition text-xs">
+                      이용약관
+                    </Link>
+                    <Link href="/contact" className="text-blue-400 hover:text-blue-300 transition text-xs">
+                      연락처
+                    </Link>
                   </div>
                 </div>
 

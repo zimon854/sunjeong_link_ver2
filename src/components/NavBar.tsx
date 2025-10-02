@@ -20,6 +20,7 @@ export default function NavBar() {
     { href: '/dashboard', label: '대시보드' },
     { href: '/profile', label: '내 프로필' },
     { href: '/chat', label: '채팅' },
+    { href: '/contact', label: '연락처' },
   ];
 
   return (
