@@ -51,4 +51,16 @@ const nextConfig = {
   }
 }
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+if (supabaseUrl) {
+  try {
+    const { hostname } = new URL(supabaseUrl)
+    if (!nextConfig.images.domains.includes(hostname)) {
+      nextConfig.images.domains.push(hostname)
+    }
+  } catch (error) {
+    console.warn('Invalid NEXT_PUBLIC_SUPABASE_URL, skipping image domain config:', error)
+  }
+}
+
 module.exports = withPWA(nextConfig)

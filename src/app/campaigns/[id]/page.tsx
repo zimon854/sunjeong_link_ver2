@@ -1,10 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createOptionalClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { Database } from '@/lib/database.types';
+import { findCampaignDetail, type SampleCampaignDetail } from '@/data/sampleCampaigns';
 
 type Campaign = Database['public']['Tables']['campaigns']['Row'];
 type Influencer = Database['public']['Tables']['influencers']['Row'];
@@ -18,6 +20,12 @@ interface CampaignWithParticipants extends Campaign {
   reviews_data: CampaignReview[];
 }
 
+type CampaignDetail = CampaignWithParticipants | SampleCampaignDetail;
+
+const hasSupabaseConfig = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
 const dummyKPI = {
   views: 1200,
   clicks: 340,
@@ -26,12 +34,26 @@ const dummyKPI = {
   roi: 3.2,
 };
 
+function resolveCampaignImageSrc(image: string | null | undefined, usingSampleData: boolean) {
+  if (!image) return '/campaign_sample/sample1.jpeg';
+  if (image.startsWith('http')) return image;
+  if (image.startsWith('/')) return image;
+  if (usingSampleData) return image;
+  if (hasSupabaseConfig && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const sanitized = image.replace(/^\/+/g, '');
+    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${sanitized}`;
+  }
+  return image;
+}
+
 export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = createClient();
   const [id, setId] = useState<string | null>(null);
-  const [campaign, setCampaign] = useState<CampaignWithParticipants | null>(null);
+  const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [usingSampleData, setUsingSampleData] = useState(false);
+
+  const supabase = useMemo(() => createOptionalClient(), []);
 
   useEffect(() => {
     const getParams = async () => {
@@ -43,81 +65,102 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
   useEffect(() => {
     if (!id) return;
-    
-    const fetchCampaignData = async () => {
-      // Fetch campaign with participants and reviews
-      const { data: campaignData, error: campaignError } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('id', Number(id))
-        .single();
 
-      if (campaignError || !campaignData) {
-        setLoading(false);
+    let isMounted = true;
+  let channel: ReturnType<SupabaseClient['channel']> | null = null;
+
+    const numericId = Number(id);
+    if (Number.isNaN(numericId)) {
+      setLoading(false);
+      setCampaign(null);
+      return;
+    }
+
+    const sampleFallback = () => {
+      const sample = findCampaignDetail(numericId);
+      if (sample) {
+        setCampaign(sample);
+        setUsingSampleData(true);
+      } else {
+        setCampaign(null);
+      }
+      setLoading(false);
+    };
+
+    const fetchCampaignData = async ({ skipSubscription } = { skipSubscription: false }) => {
+      if (!supabase || !hasSupabaseConfig) {
+        sampleFallback();
         return;
       }
 
-      // Fetch participants with influencer data
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('campaign_participants')
-        .select(`
-          *,
-          influencer:influencers(*)
-        `)
-        .eq('campaign_id', Number(id));
+      try {
+        const { data: campaignData, error: campaignError } = await supabase
+          .from('campaigns')
+          .select('*')
+          .eq('id', numericId)
+          .single();
 
-      // Fetch reviews
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('campaign_reviews')
-        .select('*')
-        .eq('campaign_id', Number(id));
+        if (campaignError || !campaignData) {
+          sampleFallback();
+          return;
+        }
 
-      if (!participantsError && !reviewsError) {
+        const { data: participantsData, error: participantsError } = await supabase
+          .from('campaign_participants')
+          .select(`
+            *,
+            influencer:influencers(*)
+          `)
+          .eq('campaign_id', numericId);
+
+        const { data: reviewsData, error: reviewsError } = await supabase
+          .from('campaign_reviews')
+          .select('*')
+          .eq('campaign_id', numericId);
+
+        if (participantsError || reviewsError) {
+          sampleFallback();
+          return;
+        }
+
+        if (!isMounted) return;
+
         setCampaign({
           ...campaignData,
           participants_data: participantsData || [],
           reviews_data: reviewsData || []
         });
+        setUsingSampleData(false);
+        setLoading(false);
+
+        if (!skipSubscription && !channel) {
+          channel = supabase
+            .channel(`campaign-${numericId}`)
+            .on(
+              'postgres_changes',
+              { event: '*', schema: 'public', table: 'campaign_participants', filter: `campaign_id=eq.${numericId}` },
+              () => fetchCampaignData({ skipSubscription: true })
+            )
+            .on(
+              'postgres_changes',
+              { event: '*', schema: 'public', table: 'campaign_reviews', filter: `campaign_id=eq.${numericId}` },
+              () => fetchCampaignData({ skipSubscription: true })
+            )
+            .subscribe();
+        }
+      } catch (error) {
+        console.error('캠페인 정보를 불러오는 중 오류:', error);
+        sampleFallback();
       }
-      
-      setLoading(false);
     };
 
     fetchCampaignData();
 
-    // Set up real-time subscription for campaign updates
-    const channel = supabase
-      .channel(`campaign-${id}`)
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'campaign_participants',
-          filter: `campaign_id=eq.${id}`
-        },
-        () => {
-          // Refetch data when participants change
-          fetchCampaignData();
-        }
-      )
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'campaign_reviews',
-          filter: `campaign_id=eq.${id}`
-        },
-        () => {
-          // Refetch data when reviews change
-          fetchCampaignData();
-        }
-      )
-      .subscribe();
-
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      if (channel && supabase) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [id, supabase]);
 
@@ -149,7 +192,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
         {campaign.image && (
           <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl border border-blue-500/20">
             <Image
-              src={campaign.image.startsWith('http') ? campaign.image : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${campaign.image}`}
+              src={resolveCampaignImageSrc(campaign.image, usingSampleData)}
               alt={campaign.title}
               width={800}
               height={400}
@@ -180,6 +223,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
               <a href={campaign.shopify_url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Shopify 스토어</a>
             )}
           </div>
+          {usingSampleData && (
+            <p className="mt-4 text-xs text-blue-300/70">
+              * 샘플 데이터 기반 화면입니다. 실제 캠페인 연결을 위해서는 관리자 콘솔에서 캠페인을 생성하세요.
+            </p>
+          )}
         </div>
 
         {/* 탭 메뉴 */}
@@ -364,10 +412,17 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
           )}
         </div>
 
-        <div className="mt-10 text-center">
-          <Link href={`/campaigns/${id}/upload`} className="w-full max-w-md inline-block px-6 py-4 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 text-lg">
-            콘텐츠 업로드 / 참여하기
-          </Link>
+        <div className="mt-10 text-center space-y-3">
+          <button
+            type="button"
+            className="w-full max-w-md inline-block px-6 py-4 bg-gray-600/80 text-white font-semibold rounded-xl text-lg cursor-not-allowed"
+            disabled
+          >
+            콘텐츠 업로드 / 참여하기 (일시 중지)
+          </button>
+          <p className="text-sm text-blue-200/70">
+            현재 캠페인 콘텐츠 업로드 및 참여 기능은 준비 중입니다. 관리자에게 문의해 주세요.
+          </p>
         </div>
       </div>
     </AdaptiveLayout>

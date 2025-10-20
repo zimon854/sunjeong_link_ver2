@@ -12,7 +12,7 @@
   "scope": "/",
   "lang": "ko",
   "dir": "ltr",
-  "categories": ["business", "social", "lifestyle", "shopping", "productivity"],
+  "categories": ["business", "news", "social", "lifestyle", "shopping", "productivity"],
   "prefer_related_applications": false,
   "edge_side_panel": {
     "preferred_width": 400

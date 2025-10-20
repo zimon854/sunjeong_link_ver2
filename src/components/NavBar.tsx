@@ -17,6 +17,7 @@ export default function NavBar() {
   const menus = [
     { href: '/campaigns', label: '캠페인' },
     { href: '/influencers', label: '인플루언서' },
+    { href: '/news', label: '뉴스룸' },
     { href: '/dashboard', label: '대시보드' },
     { href: '/profile', label: '내 프로필' },
     { href: '/chat', label: '채팅' },

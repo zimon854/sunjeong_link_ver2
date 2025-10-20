@@ -1,93 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { campaignCards, type CampaignCard } from '@/data/sampleCampaigns';
 
-interface Campaign {
-  id: number;
-  title: string;
-  brand: string;
-  image: string;
-  price: number;
-  discount: number;
-  description: string;
-  rating: number;
-  reviewCount: number;
-  participants: number;
-  liked: boolean;
-  status: string;
-  category: string;
-  mine?: boolean;
-}
-
-const initialCampaigns: Campaign[] = [
-  {
-    id: 1,
-    title: "비건 뷰티 마스크팩 공동구매",
-    brand: "그린코스",
-    image: "/campaign_sample/sample1.jpeg",
-    price: 34000,
-    discount: 11,
-    description: "맑고 뽀얀 피부를 위해, 짜서쓰는 백담고",
-    rating: 3.8,
-    reviewCount: 7,
-    participants: 57,
-    liked: true,
-    status: "진행중",
-    category: "뷰티",
-    mine: true,
-  },
-  {
-    id: 2,
-    title: "가방에서 립스틱 찾지 마세요!",
-    brand: "yyeon",
-    image: "/campaign_sample/sample2.jpeg",
-    price: 135000,
-    discount: 34,
-    description: "더 이상 가방에서 립스틱 찾지 마세요. [가방+파우치]",
-    rating: 4.5,
-    reviewCount: 3,
-    participants: 34,
-    liked: false,
-    status: "진행중",
-    category: "패션",
-    mine: false,
-  },
-  {
-    id: 3,
-    title: "피부 노화의 원인, 줄어드는 EGF는 이렇게 채우는 것입니다.",
-    brand: "스킨케어",
-    image: "/campaign_sample/sample3.jpeg",
-    price: 48900,
-    discount: 25,
-    description: "[크림]피부 노화의 원인, 줄어드는 'EGF'는 이렇게 채우는 것입니다.",
-    rating: 4.7,
-    reviewCount: 19,
-    participants: 21,
-    liked: false,
-    status: "종료",
-    category: "뷰티",
-    mine: false,
-  },
-  {
-    id: 4,
-    title: "노벨상 받은 바로 그 EGF, 메디비티 노벨상 앰플",
-    brand: "다이애저스메디(주)",
-    image: "/campaign_sample/sample4.jpeg",
-    price: 49000,
-    discount: 0,
-    description: "[앰플] 노벨상 받은 바로 그 EGF, 메디비티 노벨상 앰플",
-    rating: 4.6,
-    reviewCount: 21,
-    participants: 42,
-    liked: true,
-    status: "진행중",
-    category: "뷰티",
-    mine: false,
-  },
-];
-
-const categories = ["전체", "뷰티", "라이프", "푸드", "패션"];
 const sortOptions = [
   { value: "recommend", label: "추천순" },
   { value: "latest", label: "최신순" },
@@ -95,9 +11,15 @@ const sortOptions = [
 ];
 
 export default function CampaignListPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const [campaigns, setCampaigns] = useState<CampaignCard[]>(() => campaignCards.map(card => ({ ...card })));
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [sort, setSort] = useState("recommend");
+
+  const availableCategories = useMemo(() => {
+    const base = new Set<string>(["전체"]);
+    campaignCards.forEach(card => base.add(card.category));
+    return Array.from(base);
+  }, []);
 
   const handleLike = (id: number) => {
     setCampaigns(prev => prev.map(c => c.id === id ? { ...c, liked: !c.liked } : c));
@@ -124,7 +46,7 @@ export default function CampaignListPage() {
 
         <div className="bg-[#181830]/80 backdrop-blur-md rounded-2xl p-6 mb-10 shadow-2xl border border-blue-500/20 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-wrap gap-3 items-center">
-            {categories.map(cat => (
+            {availableCategories.map(cat => (
               <button
                 key={cat}
                 className={`px-5 py-2 rounded-full font-bold border-2 transition-all duration-200 text-sm ${selectedCategory === cat ? 'bg-blue-500 text-white border-blue-500 scale-105 shadow-lg' : 'bg-transparent text-blue-200 border-blue-700 hover:bg-blue-800/60 hover:border-blue-600'}`}

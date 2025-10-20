@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+const ALLOWED_USERS = new Set(['admin', 'playreview']);
+const ALLOWED_ROLES = new Set(['admin', 'reviewer']);
+
 export async function middleware(request: NextRequest) {
   // 보호된 경로 목록
   const protectedPaths = ['/dashboard', '/campaigns', '/influencers', '/chat', '/profile']
@@ -27,7 +30,12 @@ export async function middleware(request: NextRequest) {
       // URL 디코딩 후 JSON 파싱
       const decodedAuth = decodeURIComponent(adminAuth)
       const authData = JSON.parse(decodedAuth)
-      if (authData.user !== 'admin') {
+
+      const hasAllowedUser = ALLOWED_USERS.has(authData.user)
+      const role = typeof authData.role === 'string' ? authData.role : null
+      const hasAllowedRole = role ? ALLOWED_ROLES.has(role) : authData.user === 'admin'
+
+      if (!hasAllowedUser || !hasAllowedRole) {
         // 잘못된 인증 정보인 경우 auth 페이지로 리다이렉트
         const url = request.nextUrl.clone()
         url.pathname = '/auth'

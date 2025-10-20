@@ -4,15 +4,20 @@ import Link from 'next/link';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { FiBell, FiMessageSquare, FiPlusCircle, FiList, FiUser, FiBarChart2 } from 'react-icons/fi';
 
+type DashboardCampaign = { id: number; title: string; status: string };
+
 // Mock 데이터 (실제로는 API 호출로 대체)
-const dummyData = {
+const dummyData: {
+  myCampaigns: DashboardCampaign[];
+  joinedCampaigns: DashboardCampaign[];
+  notifications: { id: number; text: string; date: string }[];
+  messages: { id: number; from: string; text: string; date: string }[];
+} = {
   myCampaigns: [
     { id: 1, title: "비건 뷰티 마스크팩", status: "진행중" },
     { id: 2, title: "프리미엄 헤어오일", status: "종료" },
   ],
-  joinedCampaigns: [
-    { id: 3, title: "친환경 주방세제 런칭", status: "진행중" },
-  ],
+  joinedCampaigns: [],
   notifications: [
     { id: 1, text: "캠페인 '비건 뷰티 마스크팩'이 승인되었습니다.", date: "2024-06-01" },
     { id: 2, text: "새로운 메시지가 도착했습니다.", date: "2024-06-02" },
@@ -25,20 +30,50 @@ const dummyData = {
 export default function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [role, setRole] = useState<'admin' | 'reviewer' | null>(null);
 
   useEffect(() => {
     // localStorage에서 관리자 세션 확인
-    const adminAuth = localStorage.getItem('adminAuth');
-    if (adminAuth) {
-      try {
-        const authData = JSON.parse(adminAuth);
-        setIsAdmin(authData.user === 'admin');
-      } catch (error) {
-        console.error('Error parsing admin auth:', error);
+    const syncAdminAuthState = () => {
+      const sessionValue = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('adminAuth') : null;
+      const localValue = typeof localStorage !== 'undefined' ? localStorage.getItem('adminAuth') : null;
+      const adminAuth = sessionValue ?? localValue;
+
+      if (adminAuth) {
+        try {
+          const authData = JSON.parse(adminAuth);
+          const parsedRole = typeof authData.role === 'string' ? authData.role : null;
+          if (parsedRole && ['admin', 'reviewer'].includes(parsedRole)) {
+            setIsAdmin(true);
+            setRole(parsedRole as 'admin' | 'reviewer');
+          } else if (authData.user === 'admin') {
+            setIsAdmin(true);
+            setRole('admin');
+          } else {
+            setIsAdmin(false);
+            setRole(null);
+          }
+        } catch (error) {
+          console.error('Error parsing admin auth:', error);
+          setIsAdmin(false);
+          setRole(null);
+        }
+      } else {
         setIsAdmin(false);
+        setRole(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'adminAuth') {
+        syncAdminAuthState();
+      }
+    };
+
+    syncAdminAuthState();
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   if (loading) {
@@ -55,12 +90,14 @@ export default function DashboardPage() {
     return (
       <AdaptiveLayout title="대시보드">
         <div className="text-center text-secondary py-20">
-          <p>대시보드에 접근하려면 관리자 로그인이 필요합니다.</p>
+          <p>대시보드에 접근하려면 관리자 또는 검수 계정 로그인이 필요합니다.</p>
           <Link href="/auth" className="btn-primary mt-4 inline-block">관리자 로그인</Link>
         </div>
       </AdaptiveLayout>
     );
   }
+
+  const greetingLabel = role === 'reviewer' ? '검수 계정' : '관리자';
 
   return (
     <AdaptiveLayout title="대시보드">
@@ -73,8 +110,13 @@ export default function DashboardPage() {
             className="w-24 h-24 rounded-full border-4 border-border object-cover bg-background"
           />
           <div className="text-center md:text-left">
-            <h1 className="text-3xl font-bold">환영합니다, 관리자님!</h1>
+            <h1 className="text-3xl font-bold">환영합니다, {greetingLabel}님!</h1>
             <p className="text-secondary mt-1">오늘도 멋진 캠페인을 관리해보세요.</p>
+            {role === 'reviewer' && (
+              <p className="mt-2 text-xs text-secondary/80">
+                검수 전용 계정은 샘플 데이터로 앱 기능을 체험할 수 있습니다.
+              </p>
+            )}
           </div>
         </section>
 
@@ -92,7 +134,9 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-bold mb-4">참여한 캠페인</h2>
               <div className="card space-y-4">
                 {dummyData.joinedCampaigns.map(c => <CampaignItem key={c.id} {...c} />)}
-                {dummyData.joinedCampaigns.length === 0 && <p className="text-secondary text-center py-4">참여한 캠페인이 없습니다.</p>}
+                {dummyData.joinedCampaigns.length === 0 && (
+                  <p className="text-secondary text-center py-4">참여한 캠페인 정보는 현재 제공되지 않습니다.</p>
+                )}
               </div>
             </section>
           </div>

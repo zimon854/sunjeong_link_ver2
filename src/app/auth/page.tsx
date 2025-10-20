@@ -3,6 +3,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiLogIn } from 'react-icons/fi';
 
+const CREDENTIALS = {
+  admin: { password: 'LinkAdmin2024!@#', role: 'admin' as const, label: '관리자 계정' },
+  playreview: { password: 'LinkReview2024!@#', role: 'reviewer' as const, label: 'Play Console 검수 계정' },
+} as const;
+
+type CredentialKey = keyof typeof CREDENTIALS;
+
 // InputField 컴포넌트를 AuthPage 밖으로 분리
 const InputField = ({ type, placeholder, value, onChange }: { type: string, placeholder: string, value: string, onChange: (val: string) => void }) => (
   <input
@@ -58,27 +65,37 @@ const AuthPageContent = () => {
     setMessage(null);
 
     try {
-      // 하드코딩된 admin 계정 검증
-      if (username === 'admin' && password === 'LinkAdmin2024!@#') {
-        setMessage({ type: 'success', text: '관리자 로그인 성공! 대시보드로 이동합니다.' });
+      const matchedCredential = CREDENTIALS[username as CredentialKey];
 
-        // sessionStorage와 쿠키에 관리자 세션 저장 (브라우저 종료시 삭제)
-        const authData = {
-          user: 'admin',
-          loginTime: new Date().toISOString()
-        };
-        sessionStorage.setItem('adminAuth', JSON.stringify(authData));
-
-        // 쿠키에도 저장 (미들웨어에서 사용) - 세션 쿠키로 설정 (브라우저 종료시 삭제)
-        document.cookie = `adminAuth=${encodeURIComponent(JSON.stringify(authData))}; path=/; SameSite=Lax`;
-
-        setTimeout(() => {
-          router.push(redirectUrl);
-          router.refresh();
-        }, 1000);
-      } else {
+      if (!matchedCredential || matchedCredential.password !== password) {
         setMessage({ type: 'error', text: '관리자 ID 또는 비밀번호가 올바르지 않습니다.' });
+        return;
       }
+
+      const successLabel = matchedCredential.label;
+      setMessage({ type: 'success', text: `${successLabel}으로 로그인했습니다. 대시보드로 이동합니다.` });
+
+      const authData = {
+        user: username,
+        role: matchedCredential.role,
+        loginTime: new Date().toISOString()
+      };
+      sessionStorage.setItem('adminAuth', JSON.stringify(authData));
+      try {
+        localStorage.setItem('adminAuth', JSON.stringify(authData));
+      } catch (storageError) {
+        console.warn('Unable to persist admin session to localStorage:', storageError);
+      }
+
+      document.cookie = `adminAuth=${encodeURIComponent(JSON.stringify(authData))}; path=/; SameSite=Lax`;
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('adminAuth:changed'));
+      }
+
+      setTimeout(() => {
+        router.push(redirectUrl);
+        router.refresh();
+      }, 1000);
     } catch (error) {
       console.error('Unexpected login error:', error);
       setMessage({ type: 'error', text: '예상치 못한 오류가 발생했습니다. 다시 시도해주세요.' });
@@ -112,12 +129,20 @@ const AuthPageContent = () => {
             loading={loading}
           />
 
+          <div className="mt-8 space-y-2 text-center text-sm text-secondary">
+            <p className="font-semibold text-primary">관리자/검수 계정 안내</p>
+            <div className="rounded-lg border border-border bg-black/30 px-4 py-3 text-white">
+              <p className="font-mono">ID : playreview</p>
+              <p className="font-mono">PW : {CREDENTIALS.playreview.password}</p>
+            </div>
+            <p className="text-xs text-secondary/80">Play Console 검수 전용 계정으로 앱 기능만 확인 가능합니다.</p>
+          </div>
+
           {message && (
             <div className={`mt-6 p-3 rounded-lg text-center text-sm ${message.type === 'success' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
               {message.text}
             </div>
           )}
-
         </div>
       </div>
     </div>

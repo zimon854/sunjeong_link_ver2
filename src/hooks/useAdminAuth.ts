@@ -7,10 +7,17 @@ export function useAdminAuth() {
   useEffect(() => {
     const checkAdminAuth = () => {
       try {
-        const adminAuth = localStorage.getItem('adminAuth');
+        const rawSession = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('adminAuth') : null;
+        const rawLocal = typeof localStorage !== 'undefined' ? localStorage.getItem('adminAuth') : null;
+        const adminAuth = rawSession ?? rawLocal;
         if (adminAuth) {
           const authData = JSON.parse(adminAuth);
-          setIsAdmin(authData.user === 'admin');
+          const role = typeof authData.role === 'string' ? authData.role : null;
+          if (role && ['admin', 'reviewer'].includes(role)) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(authData.user === 'admin');
+          }
         } else {
           setIsAdmin(false);
         }
@@ -23,6 +30,15 @@ export function useAdminAuth() {
     };
 
     checkAdminAuth();
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'adminAuth') {
+        checkAdminAuth();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   return { isAdmin, loading };

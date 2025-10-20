@@ -81,6 +81,13 @@ export default function MobileTabNavigation() {
             </svg>
             <span className="text-xs font-medium">채팅</span>
           </Link>
+          <Link href="/news" className={itemClasses}>
+            <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M4 3a2 2 0 00-2 2v10a1 1 0 001 1h12a3 3 0 003-3V7a1 1 0 00-1-1h-2V5a2 2 0 00-2-2H4z" />
+              <path d="M6 7h4a1 1 0 010 2H6a1 1 0 110-2zm0 4h6a1 1 0 010 2H6a1 1 0 010-2z" />
+            </svg>
+            <span className="text-xs font-medium">뉴스룸</span>
+          </Link>
           <Link href="/dashboard" className={itemClasses}>
             <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
               <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
@@ -127,6 +134,13 @@ export default function MobileTabNavigation() {
             <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
           </svg>
           <span className="text-xs font-medium">채팅</span>
+        </Link>
+        <Link href="/news" className={itemClasses}>
+          <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M4 3a2 2 0 00-2 2v10a1 1 0 001 1h12a3 3 0 003-3V7a1 1 0 00-1-1h-2V5a2 2 0 00-2-2H4z" />
+            <path d="M6 7h4a1 1 0 010 2H6a1 1 0 110-2zm0 4h6a1 1 0 010 2H6a1 1 0 010-2z" />
+          </svg>
+          <span className="text-xs font-medium">뉴스룸</span>
         </Link>
         <Link href="/dashboard" className={itemClasses}>
           <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
