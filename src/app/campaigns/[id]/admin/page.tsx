@@ -54,7 +54,7 @@ function persistDemoUploads(campaignId: number, items: Content[]) {
   }
 }
 
-export default function AdminPage({ params }: { params: { id?: string } }) {
+export default function AdminPage({ params }: { params: { id: string } }) {
   const campaignId = params?.id;
   const numericCampaignId = useMemo(() => {
     if (!campaignId) return null;
