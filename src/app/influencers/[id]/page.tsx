@@ -4,10 +4,36 @@ import { createClient } from '@/lib/supabase/server';
 import { Database } from '@/lib/database.types';
 
 type Influencer = Database['public']['Tables']['influencers']['Row'];
+type InfluencerPageProps = {
+  params?: Promise<{ id?: string | string[] }>;
+};
 
-export default async function InfluencerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function InfluencerDetailPage({ params }: InfluencerPageProps) {
   const supabase = await createClient();
-  const { id } = await params;
+  const resolvedParams = params ? await params : undefined;
+  const rawId = resolvedParams?.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  if (!id) {
+    const fallbackInfluencer: Influencer = {
+      id: 'unknown',
+      name: 'Unknown Influencer',
+      avatar: '/campaign_sample/sample1.jpeg',
+      country: 'Unknown',
+      country_code: 'us',
+      follower_count: 0,
+      categories: [],
+      campaigns_count: 0,
+      rating: 0,
+      bio: '요청한 인플루언서를 찾을 수 없습니다.',
+      is_online: false,
+      social_handles: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    return <InfluencerDetailClient influencer={fallbackInfluencer} />;
+  }
   
   const { data: influencer, error } = await supabase
     .from('influencers')

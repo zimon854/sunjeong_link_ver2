@@ -46,8 +46,18 @@ function resolveCampaignImageSrc(image: string | null | undefined, usingSampleDa
   return image;
 }
 
-export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const [id, setId] = useState<string | null>(null);
+type CampaignPageParams = {
+  params?: { id?: string | string[] };
+};
+
+export default function CampaignDetailPage({ params }: CampaignPageParams) {
+  const resolvedId = useMemo(() => {
+    const rawId = params?.id;
+    if (Array.isArray(rawId)) return rawId[0] ?? null;
+    return rawId ?? null;
+  }, [params]);
+
+  const [id, setId] = useState<string | null>(resolvedId);
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -56,18 +66,14 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const supabase = useMemo(() => createOptionalClient(), []);
 
   useEffect(() => {
-    const getParams = async () => {
-      const resolvedParams = await params;
-      setId(resolvedParams.id);
-    };
-    getParams();
-  }, [params]);
+    setId(resolvedId);
+  }, [resolvedId]);
 
   useEffect(() => {
     if (!id) return;
 
     let isMounted = true;
-  let channel: ReturnType<SupabaseClient['channel']> | null = null;
+    let channel: ReturnType<SupabaseClient['channel']> | null = null;
 
     const numericId = Number(id);
     if (Number.isNaN(numericId)) {

@@ -4,11 +4,19 @@ import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { getNewsPostById } from '@/data/newsPosts';
 
 interface NewsDetailPageProps {
-  params: { id: string };
+  params?: Promise<{ id?: string | string[] }>;
 }
 
-export default function NewsDetailPage({ params }: NewsDetailPageProps) {
-  const post = getNewsPostById(params.id);
+export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
+  const resolvedParams = params ? await params : undefined;
+  const rawId = resolvedParams?.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  if (!id) {
+    notFound();
+  }
+
+  const post = getNewsPostById(id);
 
   if (!post) {
     notFound();

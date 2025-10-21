@@ -17,113 +17,114 @@ export function useNativeToast() {
       position = 'top'
     } = options
 
-    // PWA에서만 네이티브 토스트 사용
-    if (!isPWA()) {
-      // 웹에서는 기본 alert 또는 다른 토스트 라이브러리 사용
-      alert(message)
-      return
-    }
-
     // 토스트 컨테이너 찾기 또는 생성
     let container = document.getElementById('native-toast-container')
     if (!container) {
       container = document.createElement('div')
       container.id = 'native-toast-container'
-      container.className = 'fixed inset-0 pointer-events-none z-50'
+      container.className = 'fixed inset-0 pointer-events-none z-[10000]'
       document.body.appendChild(container)
     }
 
-    // 토스트 엘리먼트 생성
-    const toast = document.createElement('div')
-    const toastId = `toast-${Date.now()}`
-    toast.id = toastId
-    
-    // 타입별 스타일 설정
-    const typeStyles = {
-      success: 'border-green-400/30 bg-green-500/10 text-green-200',
-      error: 'border-red-400/30 bg-red-500/10 text-red-200',
-      warning: 'border-yellow-400/30 bg-yellow-500/10 text-yellow-200',
-      info: 'border-blue-400/30 bg-blue-500/10 text-blue-200'
-    }
+    const typeConfigs = {
+      success: { icon: '✓', label: '완료' },
+      error: { icon: '✕', label: '오류' },
+      warning: { icon: '⚠', label: '주의' },
+      info: { icon: 'ℹ', label: '안내' }
+    } as const
 
-    // 아이콘 설정
-    const typeIcons = {
-      success: '✓',
-      error: '✕',
-      warning: '⚠',
-      info: 'ℹ'
-    }
-
-    // 포지션별 클래스 설정
     const positionClasses = {
-      top: 'top-16',
-      center: 'top-1/2 -translate-y-1/2',
-      bottom: 'bottom-16'
-    }
+      top: '',
+      center: 'native-toast--center',
+      bottom: 'native-toast--bottom'
+    } as const
 
-    toast.className = `native-toast pointer-events-auto ${typeStyles[type]} ${positionClasses[position]}`
-    
+    const toast = document.createElement('div')
+    toast.setAttribute('role', 'status')
+    toast.setAttribute('aria-live', 'polite')
+
+    const typeClass = `native-toast--${type}`
+    const positionClass = positionClasses[position]
+    toast.className = ['native-toast', typeClass, positionClass].filter(Boolean).join(' ')
+
     toast.innerHTML = `
-      <div class="flex items-center gap-3">
-        <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-white/10 rounded-full">
-          <span class="text-sm">${typeIcons[type]}</span>
+      <div class="native-toast__content">
+        <div class="native-toast__icon">${typeConfigs[type].icon}</div>
+        <div class="native-toast__text">
+          <span class="native-toast__title">${typeConfigs[type].label}</span>
+          <p class="native-toast__message">${message}</p>
         </div>
-        <div class="flex-1">
-          <p class="text-sm font-medium">${message}</p>
-        </div>
-        <button class="flex-shrink-0 p-1 hover:bg-white/10 rounded transition-colors" onclick="document.getElementById('${toastId}').remove()">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        <button type="button" class="native-toast__close" aria-label="알림 닫기">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
+      <div class="native-toast__progress">
+        <div class="native-toast__progress-bar"></div>
+      </div>
     `
 
-    // 컨테이너에 추가
     container.appendChild(toast)
 
-    // 애니메이션 시작
-    setTimeout(() => {
-      toast.classList.add('show')
-    }, 10)
+    const closeButton = toast.querySelector<HTMLButtonElement>('.native-toast__close')
+    const progressBar = toast.querySelector<HTMLDivElement>('.native-toast__progress-bar')
 
-    // 자동 제거
-    setTimeout(() => {
+    if (!closeButton || !progressBar) {
+      return
+    }
+
+    // 애니메이션 시작
+    requestAnimationFrame(() => {
+      toast.classList.add('show')
+      progressBar.style.transitionDuration = `${duration}ms`
+      progressBar.style.transform = 'scaleX(0)'
+    })
+
+    const removeToast = () => {
       toast.classList.remove('show')
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (toast.parentNode) {
           toast.parentNode.removeChild(toast)
         }
-      }, 300)
-    }, duration)
+      }, 400)
+    }
 
-    // 진동 피드백 (타입에 따라)
-    if ('vibrate' in navigator) {
+    const hideTimer = window.setTimeout(removeToast, duration)
+
+    closeButton.addEventListener('click', () => {
+      window.clearTimeout(hideTimer)
+      removeToast()
+    })
+
+    // 진동 피드백 (PWA 환경에서만 동작)
+    if (isPWA() && 'vibrate' in navigator) {
       const vibrationPatterns = {
         success: [50],
         error: [100, 50, 100],
         warning: [50, 50, 50],
         info: [30]
-      }
+      } as const
       navigator.vibrate(vibrationPatterns[type])
     }
 
   }, [])
 
-  const showSuccess = useCallback((message: string, duration?: number) => {
-    showToast(message, { type: 'success', duration })
+  const showSuccess = useCallback((message: string, options: Omit<ToastOptions, 'type'> = {}) => {
+    showToast(message, { ...options, type: 'success' })
   }, [showToast])
 
-  const showError = useCallback((message: string, duration?: number) => {
-    showToast(message, { type: 'error', duration })
+  const showError = useCallback((message: string, options: Omit<ToastOptions, 'type'> = {}) => {
+    showToast(message, { ...options, type: 'error' })
   }, [showToast])
 
-  const showWarning = useCallback((message: string, duration?: number) => {
-    showToast(message, { type: 'warning', duration })
+  const showWarning = useCallback((message: string, options: Omit<ToastOptions, 'type'> = {}) => {
+    showToast(message, { ...options, type: 'warning' })
   }, [showToast])
 
-  const showInfo = useCallback((message: string, duration?: number) => {
-    showToast(message, { type: 'info', duration })
+  const showInfo = useCallback((message: string, options: Omit<ToastOptions, 'type'> = {}) => {
+    showToast(message, { ...options, type: 'info' })
   }, [showToast])
 
   return {

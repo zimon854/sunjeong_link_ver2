@@ -1,10 +1,11 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { createClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/database.types';
+import { useNativeToast } from '@/hooks/useNativeToast';
 
 type Influencer = Database['public']['Tables']['influencers']['Row'];
 type Campaign = Database['public']['Tables']['campaigns']['Row'];
@@ -25,6 +26,11 @@ export default function InfluencerDetailClient({ influencer }: InfluencerDetailC
   const [activeTab, setActiveTab] = useState('bio');
   const [campaignData, setCampaignData] = useState<InfluencerWithCampaigns | null>(null);
   const [loading, setLoading] = useState(true);
+  const { showInfo } = useNativeToast();
+
+  const handleMessageClick = useCallback(() => {
+    showInfo('지금 메시지 기능은 준비중입니다.', { position: 'center' });
+  }, [showInfo]);
 
   const tabs = [
     { id: 'bio', label: '소개' },
@@ -124,7 +130,13 @@ export default function InfluencerDetailClient({ influencer }: InfluencerDetailC
             </div>
           </div>
           <div className="w-full md:w-auto flex flex-col gap-3 mt-6 md:mt-0 md:ml-auto">
-            <button className="w-full text-center bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg">메시지 보내기</button>
+            <button
+              type="button"
+              onClick={handleMessageClick}
+              className="w-full text-center bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg"
+            >
+              메시지 보내기
+            </button>
             <button className="w-full text-center bg-transparent border-2 border-blue-500 text-blue-300 font-bold py-3 px-6 rounded-lg hover:bg-blue-500/20 transition-all duration-200">협업 제안하기</button>
           </div>
         </div>

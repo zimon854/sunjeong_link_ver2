@@ -1,9 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/database.types';
+import { useNativeToast } from '@/hooks/useNativeToast';
 
 type Influencer = Database['public']['Tables']['influencers']['Row'];
 
@@ -78,6 +79,11 @@ export default function InfluencersPage() {
   const supabase = createClient();
   const [influencers, setInfluencers] = useState<Influencer[]>(mockInfluencers);
   const [searchTerm, setSearchTerm] = useState('');
+  const { showInfo } = useNativeToast();
+
+  const handleMessageClick = useCallback(() => {
+    showInfo('지금 메시지 기능은 준비중입니다.', { position: 'center' });
+  }, [showInfo]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -194,7 +200,11 @@ export default function InfluencersPage() {
                 <Link href={`/influencers/${inf.id}`} className="flex-1 text-center bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-blue-500/40 transform hover:scale-105 active:scale-100">
                   프로필 보기
                 </Link>
-                <button className="flex-1 text-center bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-green-500/40 transform hover:scale-105 active:scale-100">
+                <button
+                  type="button"
+                  onClick={handleMessageClick}
+                  className="flex-1 text-center bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-green-500/40 transform hover:scale-105 active:scale-100"
+                >
                   메시지 보내기
                 </button>
               </div>
