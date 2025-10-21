@@ -46,18 +46,12 @@ function resolveCampaignImageSrc(image: string | null | undefined, usingSampleDa
   return image;
 }
 
-type CampaignPageParams = {
-  params?: { id?: string | string[] };
+type CampaignPageProps = {
+  params?: Promise<{ id?: string | string[] }>;
 };
 
-export default function CampaignDetailPage({ params }: CampaignPageParams) {
-  const resolvedId = useMemo(() => {
-    const rawId = params?.id;
-    if (Array.isArray(rawId)) return rawId[0] ?? null;
-    return rawId ?? null;
-  }, [params]);
-
-  const [id, setId] = useState<string | null>(resolvedId);
+export default function CampaignDetailPage({ params }: CampaignPageProps) {
+  const [id, setId] = useState<string | null>(null);
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -66,8 +60,39 @@ export default function CampaignDetailPage({ params }: CampaignPageParams) {
   const supabase = useMemo(() => createOptionalClient(), []);
 
   useEffect(() => {
-    setId(resolvedId);
-  }, [resolvedId]);
+    let isMounted = true;
+
+    const resolveParams = async () => {
+      if (!params) {
+        if (isMounted) setId(null);
+        return;
+      }
+
+      try {
+        const resolved =
+          typeof (params as unknown as { then?: unknown })?.then === 'function'
+            ? await params
+            : (params as unknown as { id?: string | string[] });
+
+        if (!isMounted) return;
+
+        const rawId = resolved?.id;
+        const normalizedId = Array.isArray(rawId) ? rawId[0] ?? null : rawId ?? null;
+        setId(normalizedId);
+      } catch (error) {
+        if (isMounted) {
+          console.warn('캠페인 경로 파라미터를 해석할 수 없습니다:', error);
+          setId(null);
+        }
+      }
+    };
+
+    resolveParams();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [params]);
 
   useEffect(() => {
     if (!id) return;
