@@ -24,7 +24,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['localhost', 'sunjeong-link-ver2.vercel.app', 'flagcdn.com'],
+    domains: ['localhost', 'sunjeong-link-ver2.vercel.app', 'flagcdn.com', 'images.unsplash.com'],
   },
   // PWA에서 파일 캐싱 최적화
   async headers() {

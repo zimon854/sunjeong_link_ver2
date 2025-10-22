@@ -93,6 +93,73 @@ export type Database = {
           updated_at?: string;
         };
       };
+      vietnam_influencers: {
+        Row: {
+          id: string;
+          name: string;
+          city: string | null;
+          niches: string[] | null;
+          languages: string[] | null;
+          avatar_url: string | null;
+          bio: string | null;
+          platforms:
+            | {
+                platform: string;
+                handle: string;
+                followers: number;
+                url: string;
+              }[]
+            | null;
+          highlight_video_url: string | null;
+          highlight_video_thumbnail: string | null;
+          display_order: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          city?: string | null;
+          niches?: string[] | null;
+          languages?: string[] | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          platforms?:
+            | {
+                platform: string;
+                handle: string;
+                followers: number;
+                url: string;
+              }[]
+            | null;
+          highlight_video_url?: string | null;
+          highlight_video_thumbnail?: string | null;
+          display_order?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          city?: string | null;
+          niches?: string[] | null;
+          languages?: string[] | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          platforms?:
+            | {
+                platform: string;
+                handle: string;
+                followers: number;
+                url: string;
+              }[]
+            | null;
+          highlight_video_url?: string | null;
+          highlight_video_thumbnail?: string | null;
+          display_order?: number | null;
+          updated_at?: string;
+        };
+      };
       campaign_participants: {
         Row: {
           id: number;
