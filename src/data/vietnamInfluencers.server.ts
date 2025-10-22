@@ -68,7 +68,7 @@ async function fetchFromSupabase(): Promise<MappedInfluencer[]> {
     const { data, error } = await supabase
       .from('vietnam_influencers')
       .select(
-        'id, name, city, niches, languages, avatar_url, bio, platforms, highlight_video_url, highlight_video_thumbnail',
+        'id, name, city, niches, languages, avatar_url, bio, platforms, highlight_video_url, highlight_video_thumbnail, display_order',
       );
 
     if (error) {
