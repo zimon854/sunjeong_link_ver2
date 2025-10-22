@@ -148,7 +148,7 @@ export default function InfluencerShowcase({ influencers }: InfluencerShowcasePr
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
                 <div className="relative flex flex-col gap-4 p-6">
-                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4">
                   <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-gray-200">
                     <Image src={influencer.avatar} alt={influencer.name} fill sizes="64px" className="object-cover" />
                   </div>
@@ -231,6 +231,7 @@ export default function InfluencerShowcase({ influencers }: InfluencerShowcasePr
                     <p className="text-xs text-gray-400">대표 영상 정보가 준비 중입니다.</p>
                   )}
                 </div>
+              </div>
               </article>
             );
           })}
