@@ -70,7 +70,7 @@ export default function InfluencerShowcase({ influencers }: InfluencerShowcasePr
     <div className="space-y-10 pb-16">
       <section className="rounded-3xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-8 py-12 text-white shadow-xl">
         <div className="max-w-3xl space-y-4">
-          <p className="text-sm uppercase tracking-widest text-white/70">Market Spotlight</p>
+          <p className="text-sm font-semibold text-white/80">Market Spotlight</p>
           <h1 className="text-3xl font-semibold sm:text-4xl">베트남 인플루언서 풀</h1>
           <p className="text-lg text-white/80">
             틱톡을 중심으로 빠르게 성장 중인 베트남 크리에이터 6명을 선별했습니다. 모바일 숏폼 트렌드에 최적화된 파트너십을 고민 중이라면 이 리스트로 시작해보세요.
@@ -168,7 +168,7 @@ export default function InfluencerShowcase({ influencers }: InfluencerShowcasePr
                 <p className="text-sm text-gray-700">{influencer.bio}</p>
 
                 <div className="rounded-2xl bg-gray-50 p-4">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Followers</p>
+                  <p className="mb-2 text-xs font-semibold text-gray-500">Followers</p>
                   <div className="flex flex-wrap gap-3 text-xs">
                     {influencer.platforms.map((platform) => {
                       const hasExternalLink = platform.url && platform.url !== '#';
@@ -261,7 +261,7 @@ export default function InfluencerShowcase({ influencers }: InfluencerShowcasePr
                   <Image src={activeInfluencer.avatar} alt={activeInfluencer.name} fill sizes="56px" className="object-cover" />
                 </div>
                 <div>
-                  <p className="text-sm uppercase tracking-wide text-emerald-500">TikTok Highlight</p>
+                  <p className="text-sm font-semibold text-emerald-500">TikTok Highlight</p>
                   <h3 className="text-xl font-semibold text-gray-900">{activeInfluencer.name}</h3>
                   <p className="text-sm text-gray-500">{activeInfluencer.city} · {activeInfluencer.niches.join(', ')}</p>
                 </div>

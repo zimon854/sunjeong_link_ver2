@@ -38,11 +38,11 @@ const contactInfo = [
 export default function EditorialPolicyPage() {
   return (
     <AdaptiveLayout title="뉴스룸 편집 기준" showBackButton>
-      <div className="mx-auto w-full max-w-3xl py-12 text-white space-y-10">
+      <div className="mx-auto w-full max-w-4xl py-12 text-slate-800 space-y-10">
         <header className="space-y-3 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-blue-300/80">Editorial Guidelines</p>
-          <h1 className="text-4xl font-extrabold">링커블 뉴스룸 편집 기준</h1>
-          <p className="text-secondary text-sm md:text-base">
+          <p className="text-sm font-semibold text-blue-600/80">Editorial Guidelines</p>
+          <h1 className="text-4xl font-extrabold text-slate-900">링커블 뉴스룸 편집 기준</h1>
+          <p className="text-sm md:text-base text-slate-600">
             링커블 뉴스룸은 신뢰할 수 있는 커머스 정보를 제공하기 위해 아래 원칙을 따릅니다. 모든 기사는
             내부 편집위원회의 검토를 거치며, 제보·정정 요청을 투명하게 처리합니다.
           </p>
@@ -50,9 +50,9 @@ export default function EditorialPolicyPage() {
 
         <section className="space-y-6">
           {editorialPrinciples.map((section) => (
-            <div key={section.title} className="rounded-2xl border border-blue-500/20 bg-blue-900/20 p-6">
-              <h2 className="text-xl font-bold text-white mb-4">{section.title}</h2>
-              <ul className="space-y-3 text-sm text-blue-100/90 list-disc pl-5">
+            <div key={section.title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-900 mb-4">{section.title}</h2>
+              <ul className="space-y-3 text-sm text-slate-600 list-disc pl-5">
                 {section.bullets.map((bullet) => (
                   <li key={bullet}>{bullet}</li>
                 ))}
@@ -61,21 +61,21 @@ export default function EditorialPolicyPage() {
           ))}
         </section>
 
-        <section className="rounded-2xl border border-blue-500/20 bg-black/30 p-6 text-sm text-blue-100/90 space-y-3">
-          <h2 className="text-lg font-semibold text-white">문의 및 제보 채널</h2>
+        <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6 text-sm text-slate-700 space-y-3">
+          <h2 className="text-lg font-semibold text-slate-900">문의 및 제보 채널</h2>
           <p>뉴스룸 관련 문의는 아래 경로로 접수해주세요. 모든 메일에는 24시간 내 1차 회신을 드립니다.</p>
           <ul className="space-y-2">
             {contactInfo.map((item) => (
-              <li key={item.label} className="flex justify-between border-b border-blue-900/40 pb-2 text-sm">
-                <span className="text-blue-300/70">{item.label}</span>
-                <span>{item.value}</span>
+              <li key={item.label} className="flex justify-between border-b border-slate-300 pb-2 text-sm">
+                <span className="text-slate-500">{item.label}</span>
+                <span className="text-slate-700">{item.value}</span>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-blue-500/10 bg-blue-950/20 p-6 text-xs text-blue-200 space-y-2">
-          <h2 className="text-sm font-semibold text-white">업데이트 이력</h2>
+        <section className="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-xs text-blue-700 space-y-2">
+          <h2 className="text-sm font-semibold text-blue-900">업데이트 이력</h2>
           <p>본 편집 기준은 2025년 9월 30일에 제정되었으며, 2025년 10월 1일 최신 개정이 적용되었습니다.</p>
           <p>추가 개정이 발생하면 뉴스룸 및 Google Play 콘솔에 동일하게 공지합니다.</p>
         </section>

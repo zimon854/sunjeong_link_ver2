@@ -81,12 +81,12 @@ export default function AuthButton() {
 
   return isAdmin ? (
     <div className="flex items-center gap-4 flex-nowrap">
-      <span className="text-sm text-secondary whitespace-nowrap">
+      <span className="text-sm text-slate-600 whitespace-nowrap">
         안녕하세요, {greetingLabel}님!
       </span>
       <button
         onClick={handleLogout}
-        className="px-4 py-2 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-sm font-semibold transition duration-200 transform hover:scale-105 active:scale-100 whitespace-nowrap"
+        className="px-4 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold transition duration-200 shadow-sm whitespace-nowrap"
       >
         로그아웃
       </button>

@@ -3,6 +3,17 @@
 import { useState, useEffect } from 'react'
 import { isPWA, isAndroid, getNetworkStatus } from '@/lib/device'
 
+type BatteryManagerLike = {
+  level: number
+  charging: boolean
+  addEventListener: (type: 'levelchange' | 'chargingchange', listener: () => void) => void
+  removeEventListener: (type: 'levelchange' | 'chargingchange', listener: () => void) => void
+}
+
+type NavigatorWithBattery = Navigator & {
+  getBattery?: () => Promise<BatteryManagerLike>
+}
+
 interface PWAStatusBarProps {
   backgroundColor?: string
   textColor?: string
@@ -46,23 +57,35 @@ export default function PWAStatusBar({
 
   useEffect(() => {
     // 배터리 정보 (지원되는 브라우저에서만)
-    if (showBattery && 'getBattery' in navigator) {
-      (navigator as any).getBattery().then((battery: any) => {
+    if (!showBattery) {
+      return
+    }
+
+    const nav = navigator as NavigatorWithBattery
+    const getBattery = nav.getBattery
+    let cleanup: (() => void) | undefined
+
+    if (typeof getBattery === 'function') {
+      getBattery.call(nav).then((battery) => {
         const updateBatteryInfo = () => {
           setBatteryLevel(Math.round(battery.level * 100))
           setIsCharging(battery.charging)
         }
-        
+
         updateBatteryInfo()
-        
+
         battery.addEventListener('levelchange', updateBatteryInfo)
         battery.addEventListener('chargingchange', updateBatteryInfo)
-        
-        return () => {
+
+        cleanup = () => {
           battery.removeEventListener('levelchange', updateBatteryInfo)
           battery.removeEventListener('chargingchange', updateBatteryInfo)
         }
       })
+    }
+
+    return () => {
+      cleanup?.()
     }
   }, [showBattery])
 

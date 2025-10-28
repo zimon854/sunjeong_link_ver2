@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 
 import { createClient } from '../../../../lib/supabaseClient';
-import { findCampaignDetail } from '@/data/sampleCampaigns';
 
 type ApprovalStatus = 'pending' | 'approved' | 'rejected';
 type ContentSource = 'supabase' | 'sample' | 'demoUpload';
@@ -70,55 +70,34 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
   const [contents, setContents] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedbacks, setFeedbacks] = useState<Record<number, string>>({});
-  const [usingSampleData, setUsingSampleData] = useState(false);
+  const [dataSource, setDataSource] = useState<'supabase' | 'demo'>('supabase');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!numericCampaignId) {
       setError('유효한 캠페인 ID가 아닙니다.');
+      setContents([]);
       setLoading(false);
       return;
     }
 
     let isMounted = true;
 
-    const loadSampleData = () => {
-      const sample = findCampaignDetail(numericCampaignId);
+    const loadDemoData = () => {
       const demoUploads = readDemoUploads(numericCampaignId);
-
-      const sampleContents: Content[] = sample
-        ? sample.participants_data.map((participant) => ({
-            id: participant.id,
-            media_url: participant.content_url ?? '',
-            caption: participant.content_caption ?? '',
-            approval_status: (participant.approval_status as ApprovalStatus) ?? 'pending',
-            feedback: '',
-            source: 'sample',
-            created_at: participant.created_at ?? undefined,
-          }))
-        : [];
-
-      if (isMounted) {
-        setContents([...demoUploads, ...sampleContents]);
-        setUsingSampleData(true);
-        setLoading(false);
-        if (!sample && demoUploads.length === 0) {
-          setError('샘플 캠페인 데이터를 찾을 수 없습니다.');
-        }
-      }
+      if (!isMounted) return;
+      setContents(demoUploads);
+      setDataSource('demo');
+      setError(demoUploads.length === 0 ? '콘텐츠 데이터가 아직 등록되지 않았습니다.' : null);
+      setLoading(false);
     };
 
-    if (!hasSupabaseConfig) {
-      loadSampleData();
+    if (!hasSupabaseConfig || !supabase) {
+      loadDemoData();
       return;
     }
 
     const fetchContents = async () => {
-      if (!supabase) {
-        loadSampleData();
-        return;
-      }
-
       const { data, error: fetchError } = await supabase
         .from('content')
         .select('*')
@@ -127,8 +106,8 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
       if (!isMounted) return;
 
       if (fetchError) {
-        console.warn('콘텐츠 조회 실패, 샘플 데이터로 대체합니다:', fetchError);
-        loadSampleData();
+        console.warn('콘텐츠 조회 실패, 로컬 데모 데이터를 사용합니다:', fetchError);
+        loadDemoData();
         return;
       }
 
@@ -143,8 +122,8 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
       }));
 
       setContents(normalized);
-      setUsingSampleData(false);
-      setError(null);
+      setDataSource('supabase');
+      setError(normalized.length === 0 ? '등록된 콘텐츠가 없습니다.' : null);
       setLoading(false);
     };
 
@@ -156,7 +135,7 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
   }, [numericCampaignId, supabase]);
 
   const persistIfDemo = (nextContents: Content[]) => {
-    if (!usingSampleData || numericCampaignId === null) return;
+    if (dataSource !== 'demo' || numericCampaignId === null) return;
     const demoItems = nextContents.filter((item) => item.source === 'demoUpload');
     persistDemoUploads(numericCampaignId, demoItems);
   };
@@ -181,7 +160,7 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
   };
 
   const handleApprove = async (id: number) => {
-    if (!supabase || usingSampleData) {
+    if (!supabase || dataSource !== 'supabase') {
       patchStatus(id, 'approved');
       return;
     }
@@ -191,7 +170,7 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
   };
 
   const handleReject = async (id: number) => {
-    if (!supabase || usingSampleData) {
+    if (!supabase || dataSource !== 'supabase') {
       patchStatus(id, 'rejected');
       return;
     }
@@ -203,7 +182,7 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
   const handleFeedback = async (id: number) => {
     const feedback = feedbacks[id] || '';
 
-    if (!supabase || usingSampleData) {
+    if (!supabase || dataSource !== 'supabase') {
       setContents((prev) => {
         const next = prev.map((item) => (item.id === id ? { ...item, feedback } : item));
         persistIfDemo(next);
@@ -227,9 +206,9 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
   return (
     <div className="max-w-2xl mx-auto mt-10">
       <h2 className="text-2xl font-bold mb-4">콘텐츠 승인/피드백</h2>
-      {usingSampleData && (
+      {dataSource === 'demo' && (
         <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-          Supabase 환경 변수 없이 동작 중입니다. 업로드한 샘플 콘텐츠는 이 브라우저에만 저장됩니다.
+          Supabase 환경이 설정되지 않아 로컬 데모 데이터로 동작 중입니다. 업로드한 샘플 콘텐츠는 이 브라우저에만 저장됩니다.
         </div>
       )}
       {error && !contents.length && (
@@ -251,11 +230,16 @@ export default function AdminPageClient({ campaignId }: AdminPageClientProps) {
               isVideo ? (
                 <video src={mediaUrl} controls className="w-full max-h-60 mb-2" />
               ) : (
-                <img
-                  src={mediaUrl}
-                  alt={content.file_name ? `업로드된 파일 ${content.file_name}` : '업로드된 콘텐츠'}
-                  className="w-full max-h-60 mb-2 object-contain"
-                />
+                <div className="relative mb-2 h-60 w-full">
+                  <Image
+                    src={mediaUrl}
+                    alt={content.file_name ? `업로드된 파일 ${content.file_name}` : '업로드된 콘텐츠'}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 640px"
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
               )
             ) : (
               <div className="mb-2 rounded bg-gray-100 p-4 text-center text-sm text-gray-500">

@@ -93,6 +93,41 @@ export type Database = {
           updated_at?: string;
         };
       };
+      koc_tiktok_influencers: {
+        Row: {
+          id: string;
+          stt: number;
+          name: string;
+          tiktok_profile_url: string;
+          followers: number;
+          best_video_url: string | null;
+          profile_image_url: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          stt: number;
+          name: string;
+          tiktok_profile_url: string;
+          followers: number;
+          best_video_url?: string | null;
+          profile_image_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          stt?: number;
+          name?: string;
+          tiktok_profile_url?: string;
+          followers?: number;
+          best_video_url?: string | null;
+          profile_image_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       vietnam_influencers: {
         Row: {
           id: string;

@@ -35,7 +35,7 @@ export default function PWAAppBar({
     <>
       {/* PWA 상태바 */}
       <div 
-        className="pwa-status-bar bg-[#0f172a] w-full"
+        className="pwa-status-bar bg-blue-600 w-full"
         style={{ 
           height: 'env(safe-area-inset-top)',
           minHeight: '24px'
@@ -43,13 +43,13 @@ export default function PWAAppBar({
       />
       
       {/* 앱바 */}
-      <div className={`pwa-app-bar bg-[#181b3a]/95 backdrop-blur-xl border-b border-[#2d2f5d]/60 shadow-lg ${className}`}>
+      <div className={`pwa-app-bar bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow ${className}`}>
         <div className="flex items-center justify-between px-4 py-3 min-h-[56px]">
           {/* 왼쪽 - 뒤로가기 버튼 */}
           {showBackButton ? (
             <button
               onClick={handleBack}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all duration-200 active:scale-95"
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-200 active:scale-95"
               aria-label="뒤로가기"
             >
               <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@ export default function PWAAppBar({
           )}
           
           {/* 가운데 - 제목 */}
-          <h1 className="text-white font-semibold text-lg text-center flex-1 px-4 truncate">
+          <h1 className="text-slate-900 font-semibold text-lg text-center flex-1 px-4 truncate">
             {title}
           </h1>
           

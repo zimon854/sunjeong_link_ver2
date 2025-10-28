@@ -78,9 +78,12 @@ export const viewport = {
 
 function NavMenu({ href, label, desc }: { href: string; label: string; desc: string }) {
   return (
-    <Link href={href} className="group flex flex-col items-center justify-center min-w-[90px] px-3 py-1 rounded-xl hover:bg-blue-800/70 transition text-white font-semibold relative">
+    <Link
+      href={href}
+      className="group flex flex-col items-center justify-center min-w-[90px] px-3 py-1 rounded-xl transition text-slate-700 font-semibold relative hover:bg-slate-100"
+    >
       <span className="text-base whitespace-nowrap">{label}</span>
-      <span className="absolute left-1/2 -bottom-2 translate-x-[-50%] translate-y-full opacity-0 group-hover:opacity-100 bg-[#181830] text-blue-200 text-xs rounded px-2 py-1 shadow-lg pointer-events-none transition z-20 whitespace-nowrap">
+      <span className="absolute left-1/2 -bottom-2 translate-x-[-50%] translate-y-full opacity-0 group-hover:opacity-100 bg-white text-slate-600 text-xs rounded px-2 py-1 shadow-lg pointer-events-none transition z-20 whitespace-nowrap border border-slate-200">
         {desc}
       </span>
     </Link>
@@ -131,7 +134,7 @@ export default function RootLayout({
           <div className="pwa-status-bar"></div>
           
           {/* 네비게이션바 */}
-          <nav className="sticky top-0 z-50 w-full bg-[#181b3a]/95 backdrop-blur-xl border-b border-[#2d2f5d]/50 shadow-lg pwa-safe-top">
+          <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-sm pwa-safe-top">
             <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 py-3 md:py-4">
               {/* 왼쪽: 링커블 로고 */}
               <Link href="/" className="flex items-center">
@@ -146,11 +149,9 @@ export default function RootLayout({
               </Link>
               
               {/* 데스크톱 메뉴 (모바일에서는 완전히 숨김) */}
-              <div className="hidden lg:flex items-center gap-6 text-[15px] font-medium text-white">
+              <div className="hidden lg:flex items-center gap-6 text-[15px] font-medium text-slate-700">
                 <NavMenu href="/campaigns" label="캠페인 리스트" desc="진행 중인 모든 캠페인 한눈에 보기" />
-                <NavMenu href="/campaigns/new" label="캠페인 생성" desc="브랜드/셀러용 신규 캠페인 등록" />
                 <NavMenu href="/influencers" label="인플루언서 리스트" desc="인플루언서 한눈에 보기" />
-                <NavMenu href="/chat" label="실시간 채팅" desc="브랜드-인플루언서 실시간 소통" />
                 <NavMenu href="/profile" label="내 프로필 관리" desc="이름, 역할, 소개, 프로필 이미지 관리" />
                 <NavMenu href="/dashboard" label="내 대시보드" desc="내 서비스 현황 한눈에 보기" />
                 <NavMenu href="/contact" label="연락처" desc="고객지원 및 사업 문의" />
@@ -165,13 +166,13 @@ export default function RootLayout({
           </main>
 
           {/* 푸터 */}
-          <footer className="bg-[#181b3a]/95 border-t border-[#2d2f5d]/50 mt-auto">
+          <footer className="bg-white border-t border-slate-200 mt-auto">
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 {/* 회사 정보 */}
-                <div className="text-xs text-gray-400 leading-relaxed">
+                <div className="text-xs text-slate-600 leading-relaxed">
                   <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
-                    <span className="font-semibold">상호: 주식회사 선정에이전시</span>
+                    <span className="font-semibold text-slate-700">상호: 주식회사 선정에이전시</span>
                     <span>대표: 최성훈</span>
                     <span>사업자등록번호: 170-88-03245</span>
                   </div>
@@ -181,18 +182,18 @@ export default function RootLayout({
                   </div>
                   <div className="mt-1">
                     <span>광고관련: </span>
-                    <a href="mailto:borrow13@sunjeong.co.kr" className="text-blue-400 hover:text-blue-300 transition">
+                    <a href="mailto:borrow13@sunjeong.co.kr" className="text-blue-600 hover:text-blue-700 transition">
                       borrow13@sunjeong.co.kr
                     </a>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-4">
-                    <Link href="/privacy" className="text-blue-400 hover:text-blue-300 transition text-xs">
+                    <Link href="/privacy" className="text-blue-600 hover:text-blue-700 transition text-xs">
                       개인정보처리방침
                     </Link>
-                    <Link href="/terms" className="text-blue-400 hover:text-blue-300 transition text-xs">
+                    <Link href="/terms" className="text-blue-600 hover:text-blue-700 transition text-xs">
                       이용약관
                     </Link>
-                    <Link href="/contact" className="text-blue-400 hover:text-blue-300 transition text-xs">
+                    <Link href="/contact" className="text-blue-600 hover:text-blue-700 transition text-xs">
                       연락처
                     </Link>
                   </div>

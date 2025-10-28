@@ -36,6 +36,14 @@ export default function MatchPageClient({ campaignId }: MatchPageClientProps) {
     setLoading(false);
   }, [campaignId, supabase]);
 
+  const fetchProfile = useCallback(
+    async (userId: string) => {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      if (!error && data) setProfile(data);
+    },
+    [supabase]
+  );
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -43,17 +51,12 @@ export default function MatchPageClient({ campaignId }: MatchPageClientProps) {
         fetchProfile(data.user.id);
       }
     });
-  }, [supabase]);
+  }, [fetchProfile, supabase]);
 
   useEffect(() => {
     if (!campaignId) return;
     fetchMatches();
   }, [campaignId, fetchMatches]);
-
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (!error && data) setProfile(data);
-  };
 
   const handleApply = async () => {
     setMessage('');

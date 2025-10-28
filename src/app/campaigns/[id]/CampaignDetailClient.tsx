@@ -6,7 +6,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { Database } from '@/lib/database.types';
-import { findCampaignDetail, type SampleCampaignDetail } from '@/data/sampleCampaigns';
 
 type Campaign = Database['public']['Tables']['campaigns']['Row'];
 type Influencer = Database['public']['Tables']['influencers']['Row'];
@@ -20,30 +19,24 @@ interface CampaignWithParticipants extends Campaign {
   reviews_data: CampaignReview[];
 }
 
-type CampaignDetail = CampaignWithParticipants | SampleCampaignDetail;
-
 const hasSupabaseConfig = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const dummyKPI = {
-  views: 1200,
-  clicks: 340,
-  conversions: 28,
-  sales: 420000,
-  roi: 3.2,
-};
-
-function resolveCampaignImageSrc(image: string | null | undefined, usingSampleData: boolean) {
-  if (!image) return '/campaign_sample/sample1.jpeg';
+function resolveCampaignImageSrc(image: string | null | undefined) {
+  if (!image) return '/logo/sunjeong_link_logo.png';
   if (image.startsWith('http')) return image;
   if (image.startsWith('/')) return image;
-  if (usingSampleData) return image;
   if (hasSupabaseConfig && process.env.NEXT_PUBLIC_SUPABASE_URL) {
     const sanitized = image.replace(/^\/+/g, '');
     return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${sanitized}`;
   }
   return image;
+}
+
+function formatMetricValue(value: unknown): string {
+  const num = Number(value);
+  return Number.isFinite(num) ? num.toLocaleString() : '0';
 }
 
 interface CampaignDetailClientProps {
@@ -52,12 +45,53 @@ interface CampaignDetailClientProps {
 
 export default function CampaignDetailClient({ campaignId }: CampaignDetailClientProps) {
   const [id, setId] = useState<string | null>(campaignId);
-  const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
+  const [campaign, setCampaign] = useState<CampaignWithParticipants | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
-  const [usingSampleData, setUsingSampleData] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const supabase = useMemo(() => createOptionalClient(), []);
+
+  const aggregatedKPI = useMemo(() => {
+    if (!campaign || !Array.isArray(campaign.participants_data)) {
+      return null;
+    }
+
+    let views = 0;
+    let clicks = 0;
+    let conversions = 0;
+    let sales = 0;
+    let roiSum = 0;
+    let roiCount = 0;
+
+    campaign.participants_data.forEach((participant) => {
+      const metrics = participant.performance_metrics as Record<string, unknown> | null | undefined;
+      if (!metrics) return;
+
+      views += Number(metrics.views) || 0;
+      clicks += Number(metrics.clicks) || 0;
+      conversions += Number(metrics.conversions) || 0;
+      sales += Number(metrics.sales) || 0;
+
+      const roiValue = Number(metrics.roi);
+      if (!Number.isNaN(roiValue) && metrics.roi !== undefined && metrics.roi !== null) {
+        roiSum += roiValue;
+        roiCount += 1;
+      }
+    });
+
+    if (views === 0 && clicks === 0 && conversions === 0 && sales === 0 && roiCount === 0) {
+      return null;
+    }
+
+    return {
+      views,
+      clicks,
+      conversions,
+      sales,
+      roi: roiCount ? parseFloat((roiSum / roiCount).toFixed(2)) : null,
+    };
+  }, [campaign]);
 
   useEffect(() => {
     setId(campaignId);
@@ -66,6 +100,7 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
   useEffect(() => {
     if (!id) {
       setCampaign(null);
+      setErrorMessage('유효한 캠페인 ID를 찾을 수 없습니다.');
       setLoading(false);
       return;
     }
@@ -75,25 +110,17 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
 
     const numericId = Number(id);
     if (Number.isNaN(numericId)) {
-      setLoading(false);
       setCampaign(null);
+      setErrorMessage('유효한 캠페인 ID를 찾을 수 없습니다.');
+      setLoading(false);
       return;
     }
 
-    const sampleFallback = () => {
-      const sample = findCampaignDetail(numericId);
-      if (sample) {
-        setCampaign(sample);
-        setUsingSampleData(true);
-      } else {
-        setCampaign(null);
-      }
-      setLoading(false);
-    };
-
     const fetchCampaignData = async ({ skipSubscription } = { skipSubscription: false }) => {
       if (!supabase || !hasSupabaseConfig) {
-        sampleFallback();
+        setErrorMessage('캠페인 데이터를 불러오려면 데이터베이스 구성이 필요합니다.');
+        setCampaign(null);
+        setLoading(false);
         return;
       }
 
@@ -105,7 +132,9 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
           .single();
 
         if (campaignError || !campaignData) {
-          sampleFallback();
+          setErrorMessage('캠페인 정보를 찾을 수 없습니다.');
+          setCampaign(null);
+          setLoading(false);
           return;
         }
 
@@ -123,7 +152,15 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
           .eq('campaign_id', numericId);
 
         if (participantsError || reviewsError) {
-          sampleFallback();
+          setErrorMessage('참여자 또는 리뷰 데이터를 불러오지 못했습니다.');
+          if (isMounted) {
+            setCampaign({
+              ...campaignData,
+              participants_data: participantsData || [],
+              reviews_data: reviewsData || [],
+            });
+            setLoading(false);
+          }
           return;
         }
 
@@ -134,7 +171,7 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
           participants_data: participantsData || [],
           reviews_data: reviewsData || []
         });
-        setUsingSampleData(false);
+        setErrorMessage(null);
         setLoading(false);
 
         if (!skipSubscription && !channel) {
@@ -154,7 +191,9 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
         }
       } catch (error) {
         console.error('캠페인 정보를 불러오는 중 오류:', error);
-        sampleFallback();
+        setErrorMessage('캠페인 정보를 불러오는 중 오류가 발생했습니다.');
+        setCampaign(null);
+        setLoading(false);
       }
     };
 
@@ -177,13 +216,12 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
       </AdaptiveLayout>
     );
   }
-
   if (!campaign) {
     return (
       <AdaptiveLayout title="오류">
         <div className="text-center text-blue-300/70 py-20">
           <p className="text-2xl mb-2">🚫</p>
-          <p>캠페인을 찾을 수 없습니다.</p>
+          <p>{errorMessage ?? '캠페인을 찾을 수 없습니다.'}</p>
           <Link href="/campaigns" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg">캠페인 목록으로</Link>
         </div>
       </AdaptiveLayout>
@@ -196,7 +234,7 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
         {campaign.image && (
           <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl border border-blue-500/20">
             <Image
-              src={resolveCampaignImageSrc(campaign.image, usingSampleData)}
+              src={resolveCampaignImageSrc(campaign.image)}
               alt={campaign.title}
               width={800}
               height={400}
@@ -208,12 +246,12 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
 
         <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-lg border border-blue-500/20">
           <div className="flex flex-wrap gap-3 mb-4">
-            <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.brand}</span>
-            <span className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.category}</span>
-            <span className={`px-3 py-1 rounded-full text-sm font-bold ${campaign.status === '진행중' ? 'bg-green-500/30 text-green-300' : 'bg-gray-500/30 text-gray-300'}`}>{campaign.status}</span>
+            <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.brand ?? '브랜드 미정'}</span>
+            <span className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.category ?? '카테고리 미정'}</span>
+            <span className={`px-3 py-1 rounded-full text-sm font-bold ${campaign.status === '진행중' ? 'bg-green-500/30 text-green-300' : 'bg-gray-500/30 text-gray-300'}`}>{campaign.status ?? '상태 미정'}</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">{campaign.title}</h1>
-          <p className="text-blue-200/80 mb-6">{campaign.description}</p>
+          <p className="text-blue-200/80 mb-6">{campaign.description ?? '캠페인 설명이 아직 등록되지 않았습니다.'}</p>
           <div className="flex items-center justify-between bg-blue-950/30 p-4 rounded-xl">
             <div>
               <p className="text-sm text-blue-300/70">제품 가격</p>
@@ -227,11 +265,6 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
               <a href={campaign.shopify_url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Shopify 스토어</a>
             )}
           </div>
-          {usingSampleData && (
-            <p className="mt-4 text-xs text-blue-300/70">
-              * 샘플 데이터 기반 화면입니다. 실제 캠페인 연결을 위해서는 관리자 콘솔에서 캠페인을 생성하세요.
-            </p>
-          )}
         </div>
 
         {/* 탭 메뉴 */}
@@ -257,15 +290,15 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
             <div>
               <h3 className="text-2xl font-bold mb-6">캠페인 개요</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-                <KPI_Card label="조회수" value={dummyKPI.views.toLocaleString()} />
-                <KPI_Card label="클릭수" value={dummyKPI.clicks.toLocaleString()} />
-                <KPI_Card label="전환수" value={dummyKPI.conversions.toLocaleString()} />
-                <KPI_Card label="매출" value={`${dummyKPI.sales.toLocaleString()}원`} />
-                <KPI_Card label="ROI" value={`${dummyKPI.roi}배`} />
+                <KPI_Card label="조회수" value={aggregatedKPI ? aggregatedKPI.views.toLocaleString() : '데이터 없음'} />
+                <KPI_Card label="클릭수" value={aggregatedKPI ? aggregatedKPI.clicks.toLocaleString() : '데이터 없음'} />
+                <KPI_Card label="전환수" value={aggregatedKPI ? aggregatedKPI.conversions.toLocaleString() : '데이터 없음'} />
+                <KPI_Card label="매출" value={aggregatedKPI ? `${aggregatedKPI.sales.toLocaleString()}원` : '데이터 없음'} />
+                <KPI_Card label="ROI" value={aggregatedKPI && aggregatedKPI.roi !== null ? `${aggregatedKPI.roi}배` : '데이터 없음'} />
               </div>
               <div className="bg-blue-950/30 rounded-xl p-6">
                 <h4 className="text-lg font-semibold mb-3">상세 설명</h4>
-                <p className="text-blue-200/90 leading-relaxed">{campaign.description}</p>
+                <p className="text-blue-200/90 leading-relaxed">{campaign.description ?? '캠페인 설명이 아직 등록되지 않았습니다.'}</p>
               </div>
             </div>
           )}
@@ -280,7 +313,7 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
                       <div className="flex items-center gap-4 mb-4">
                         <Link href={`/influencers/${participant.influencer.id}`}>
                           <Image
-                            src={participant.influencer.avatar || '/campaign_sample/sample1.jpeg'}
+                            src={participant.influencer.avatar || '/logo/sunjeong_link_logo.png'}
                             alt={participant.influencer.name}
                             width={60}
                             height={60}
@@ -323,9 +356,9 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
                             <p className="text-blue-200/90 text-sm">{participant.content_caption}</p>
                             {participant.performance_metrics && (
                               <div className="flex gap-4 mt-2 text-xs text-blue-300/70">
-                                <span>조회: {participant.performance_metrics.views || 0}</span>
-                                <span>좋아요: {participant.performance_metrics.likes || 0}</span>
-                                <span>댓글: {participant.performance_metrics.comments || 0}</span>
+                                <span>조회: {formatMetricValue(participant.performance_metrics.views)}</span>
+                                <span>좋아요: {formatMetricValue(participant.performance_metrics.likes)}</span>
+                                <span>댓글: {formatMetricValue(participant.performance_metrics.comments)}</span>
                               </div>
                             )}
                           </div>
@@ -376,11 +409,11 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
             <div>
               <h3 className="text-2xl font-bold mb-6">성과 분석</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-                <KPI_Card label="조회수" value={dummyKPI.views.toLocaleString()} />
-                <KPI_Card label="클릭수" value={dummyKPI.clicks.toLocaleString()} />
-                <KPI_Card label="전환수" value={dummyKPI.conversions.toLocaleString()} />
-                <KPI_Card label="매출" value={`${dummyKPI.sales.toLocaleString()}원`} />
-                <KPI_Card label="ROI" value={`${dummyKPI.roi}배`} />
+                <KPI_Card label="조회수" value={aggregatedKPI ? aggregatedKPI.views.toLocaleString() : '데이터 없음'} />
+                <KPI_Card label="클릭수" value={aggregatedKPI ? aggregatedKPI.clicks.toLocaleString() : '데이터 없음'} />
+                <KPI_Card label="전환수" value={aggregatedKPI ? aggregatedKPI.conversions.toLocaleString() : '데이터 없음'} />
+                <KPI_Card label="매출" value={aggregatedKPI ? `${aggregatedKPI.sales.toLocaleString()}원` : '데이터 없음'} />
+                <KPI_Card label="ROI" value={aggregatedKPI && aggregatedKPI.roi !== null ? `${aggregatedKPI.roi}배` : '데이터 없음'} />
               </div>
               
               {/* 인플루언서별 성과 */}
@@ -392,7 +425,7 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
                       <div key={participant.id} className="flex items-center justify-between bg-blue-950/50 rounded-lg p-4">
                         <div className="flex items-center gap-3">
                           <Image
-                            src={participant.influencer.avatar || '/campaign_sample/sample1.jpeg'}
+                            src={participant.influencer.avatar || '/logo/sunjeong_link_logo.png'}
                             alt={participant.influencer.name}
                             width={40}
                             height={40}
@@ -401,9 +434,9 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
                           <span className="font-medium">{participant.influencer.name}</span>
                         </div>
                         <div className="flex gap-4 text-sm text-blue-300/70">
-                          <span>조회: {participant.performance_metrics?.views || 0}</span>
-                          <span>좋아요: {participant.performance_metrics?.likes || 0}</span>
-                          <span>댓글: {participant.performance_metrics?.comments || 0}</span>
+                          <span>조회: {Number(participant.performance_metrics?.views ?? 0).toLocaleString()}</span>
+                          <span>좋아요: {Number(participant.performance_metrics?.likes ?? 0).toLocaleString()}</span>
+                          <span>댓글: {Number(participant.performance_metrics?.comments ?? 0).toLocaleString()}</span>
                         </div>
                       </div>
                     ))}

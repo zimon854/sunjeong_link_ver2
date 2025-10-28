@@ -14,7 +14,7 @@ export function useNativeToast() {
     const {
       type = 'info',
       duration = 3000,
-      position = 'top'
+      position = 'center'
     } = options
 
     // 토스트 컨테이너 찾기 또는 생성

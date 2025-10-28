@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+type ExtendedNavigator = Navigator & { standalone?: boolean };
+
 export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -14,8 +16,9 @@ export default function PWAInstallPrompt() {
     setIsIOS(iOS);
 
     // Check if already installed as PWA
-    const standalone = (window.navigator as any).standalone || 
-      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    const nav = window.navigator as ExtendedNavigator;
+    const standalone = Boolean(nav.standalone) ||
+      (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches);
     setIsStandalone(standalone);
 
     // Show prompt if iOS and not standalone

@@ -7,47 +7,47 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#0b0c24] py-8">
+    <div className="min-h-screen bg-slate-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#181b3a]/95 backdrop-blur-xl rounded-lg shadow-2xl border border-[#2d2f5d]/60 p-8">
-          <h1 className="text-3xl font-bold text-white mb-8 text-center">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-8 text-center">
             이용약관
           </h1>
 
-          <div className="prose max-w-none text-gray-300">
-            <div className="mb-8 p-4 bg-blue-800/30 backdrop-blur-sm rounded-lg border border-blue-600/30">
-              <p className="text-sm text-blue-300">
+          <div className="space-y-10 text-slate-700 text-base leading-relaxed">
+            <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-600">
                 <strong>시행일자:</strong> 2024년 1월 1일<br />
                 <strong>최종 개정일:</strong> 2024년 10월 2일
               </p>
             </div>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제1조 (목적)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제1조 (목적)</h2>
               <p className="mb-4">
-                이 약관은 주식회사 선정에이전시(이하 "회사")가 제공하는 링커블(Lynkable) 서비스(이하 "서비스")의
+                이 약관은 주식회사 선정에이전시(이하 &ldquo;회사&rdquo;)가 제공하는 링커블(Lynkable) 서비스(이하 &ldquo;서비스&rdquo;)의
                 이용과 관련하여 회사와 이용자와의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제2조 (정의)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제2조 (정의)</h2>
               <p className="mb-4">이 약관에서 사용하는 용어의 정의는 다음과 같습니다:</p>
 
-              <div className="bg-[#2d2f5d]/30 backdrop-blur-sm p-4 rounded-lg border border-[#2d2f5d]/60">
+              <div className="bg-slate-100 p-4 rounded-lg border border-slate-200">
                 <ul className="list-disc pl-6 space-y-2">
-                  <li><strong className="text-gray-200">"서비스"</strong>란 회사가 제공하는 인플루언서 마케팅 플랫폼을 의미합니다.</li>
-                  <li><strong className="text-gray-200">"이용자"</strong>란 이 약관에 따라 회사가 제공하는 서비스를 받는 회원 및 비회원을 말합니다.</li>
-                  <li><strong className="text-gray-200">"회원"</strong>이란 회사와 서비스 이용계약을 체결하고 이용자 아이디(ID)를 부여받은 자를 의미합니다.</li>
-                  <li><strong className="text-gray-200">"브랜드"</strong>란 마케팅 캠페인을 의뢰하는 기업 또는 개인을 의미합니다.</li>
-                  <li><strong className="text-gray-200">"인플루언서"</strong>란 소셜미디어를 통해 마케팅 활동을 수행하는 개인을 의미합니다.</li>
-                  <li><strong className="text-gray-200">"캠페인"</strong>이란 브랜드와 인플루언서 간의 마케팅 프로젝트를 의미합니다.</li>
+                  <li><strong className="text-slate-700">&ldquo;서비스&rdquo;</strong>란 회사가 제공하는 인플루언서 마케팅 플랫폼을 의미합니다.</li>
+                  <li><strong className="text-slate-700">&ldquo;이용자&rdquo;</strong>란 이 약관에 따라 회사가 제공하는 서비스를 받는 회원 및 비회원을 말합니다.</li>
+                  <li><strong className="text-slate-700">&ldquo;회원&rdquo;</strong>이란 회사와 서비스 이용계약을 체결하고 이용자 아이디(ID)를 부여받은 자를 의미합니다.</li>
+                  <li><strong className="text-slate-700">&ldquo;브랜드&rdquo;</strong>란 마케팅 캠페인을 의뢰하는 기업 또는 개인을 의미합니다.</li>
+                  <li><strong className="text-slate-700">&ldquo;인플루언서&rdquo;</strong>란 소셜미디어를 통해 마케팅 활동을 수행하는 개인을 의미합니다.</li>
+                  <li><strong className="text-slate-700">&ldquo;캠페인&rdquo;</strong>이란 브랜드와 인플루언서 간의 마케팅 프로젝트를 의미합니다.</li>
                 </ul>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제3조 (약관의 효력 및 변경)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제3조 (약관의 효력 및 변경)</h2>
               <p className="mb-4">
                 ① 이 약관은 서비스 화면에 게시하거나 기타의 방법으로 이용자에게 공지함으로써 효력을 발생합니다.
               </p>
@@ -59,7 +59,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제4조 (서비스의 제공)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제4조 (서비스의 제공)</h2>
               <p className="mb-4">회사가 제공하는 서비스는 다음과 같습니다:</p>
 
               <ul className="list-disc pl-6 space-y-2 mb-4">
@@ -71,8 +71,8 @@ export default function TermsPage() {
                 <li>기타 회사가 정하는 서비스</li>
               </ul>
 
-              <div className="bg-yellow-800/20 border-l-4 border-yellow-500 p-4 rounded-r-lg">
-                <p className="text-sm text-yellow-300">
+              <div className="bg-amber-50 border-l-4 border-amber-200 p-4 rounded-r-lg">
+                <p className="text-sm text-amber-800">
                   <strong>서비스 제공 시간:</strong> 연중무휴 24시간 제공을 원칙으로 하나,
                   시스템 점검 등 운영상 필요한 경우 서비스를 일시 중단할 수 있습니다.
                 </p>
@@ -80,7 +80,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제5조 (회원가입)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제5조 (회원가입)</h2>
               <p className="mb-4">
                 ① 이용자는 회사가 정한 가입 양식에 따라 회원정보를 기입한 후 이 약관에 동의한다는 의사표시를 함으로써
                 회원가입을 신청합니다.
@@ -99,7 +99,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제6조 (회원 정보의 변경)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제6조 (회원 정보의 변경)</h2>
               <p className="mb-4">
                 ① 회원은 개인정보관리화면을 통하여 언제든지 본인의 개인정보를 열람하고 수정할 수 있습니다.
               </p>
@@ -110,7 +110,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제7조 (개인정보보호)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제7조 (개인정보보호)</h2>
               <p className="mb-4">
                 ① 회사는 이용자의 개인정보를 보호하기 위해 개인정보보호법 등 관련 법령에 따라 별도의
                 개인정보처리방침을 정하여 준수합니다.
@@ -121,7 +121,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제8조 (이용자의 의무)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제8조 (이용자의 의무)</h2>
               <p className="mb-4">이용자는 다음 행위를 하여서는 안 됩니다:</p>
 
               <ul className="list-disc pl-6 space-y-2 mb-4">
@@ -137,24 +137,24 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제9조 (서비스 이용료)</h2>
-              <div className="bg-green-800/30 backdrop-blur-sm p-4 rounded-lg border border-green-600/30">
-                <p className="mb-4 text-green-300">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제9조 (서비스 이용료)</h2>
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <p className="mb-4 text-green-800">
                   ① 회사의 서비스는 기본적으로 무료로 제공됩니다. 단, 유료 서비스의 경우 해당 서비스의
                   이용료를 지불하여야 서비스를 이용할 수 있습니다.
                 </p>
-                <p className="mb-4 text-green-300">
+                <p className="mb-4 text-green-800">
                   ② 유료 서비스의 요금, 결제방법, 결제일 등은 각 서비스별로 안내되며, 회원은 이에 동의한 후
                   유료 서비스를 이용할 수 있습니다.
                 </p>
-                <p className="text-green-300">
+                <p className="text-green-800">
                   ③ 캠페인 성사시 회사는 거래 금액의 일정 비율을 수수료로 부과할 수 있습니다.
                 </p>
               </div>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제10조 (저작권의 귀속 및 이용제한)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제10조 (저작권의 귀속 및 이용제한)</h2>
               <p className="mb-4">
                 ① 회사가 작성한 저작물에 대한 저작권 기타 지적재산권은 회사에 귀속합니다.
               </p>
@@ -166,7 +166,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제11조 (계약해지 및 이용제한)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제11조 (계약해지 및 이용제한)</h2>
               <p className="mb-4">
                 ① 회원이 이용계약을 해지하고자 하는 때에는 회원 본인이 온라인을 통하여
                 회사에 해지신청을 하여야 합니다.
@@ -185,7 +185,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제12조 (손해배상)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제12조 (손해배상)</h2>
               <p className="mb-4">
                 ① 회사는 무료로 제공되는 서비스와 관련하여 회원에게 어떠한 손해가 발생하더라도
                 동 손해가 회사의 고의 또는 중대한 과실에 기인한 경우를 제외하고는 이에 대하여 책임을 부담하지 아니합니다.
@@ -197,7 +197,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제13조 (면책조항)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제13조 (면책조항)</h2>
               <p className="mb-4">
                 ① 회사는 천재지변 또는 이에 준하는 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는
                 서비스 제공에 관한 책임이 면제됩니다.
@@ -212,7 +212,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제14조 (분쟁해결)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제14조 (분쟁해결)</h2>
               <p className="mb-4">
                 ① 회사는 이용자로부터 제출되는 불만사항 및 의견은 우선적으로 그 사항을 처리합니다.
                 다만, 신속한 처리가 곤란한 경우에는 이용자에게 그 사유와 처리일정을 통보해 드립니다.
@@ -223,7 +223,7 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">제15조 (재판권 및 준거법)</h2>
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">제15조 (재판권 및 준거법)</h2>
               <p className="mb-4">
                 ① 회사와 이용자 간에 발생한 분쟁에 관한 소송은 대한민국 법을 준거법으로 하며,
                 회사의 본사 소재지를 관할하는 법원에 제기합니다.
@@ -234,22 +234,22 @@ export default function TermsPage() {
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">부칙</h2>
-              <div className="bg-blue-800/30 backdrop-blur-sm p-4 rounded-lg border border-blue-600/30">
-                <p className="mb-2 text-blue-300">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">부칙</h2>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <p className="mb-2 text-blue-800">
                   <strong>제1조 (시행일)</strong><br />
                   이 약관은 2024년 1월 1일부터 적용됩니다.
                 </p>
-                <p className="text-blue-300">
+                <p className="text-blue-800">
                   <strong>제2조 (경과조치)</strong><br />
                   이 약관 시행 이전에 가입한 회원에 대해서는 개정된 약관을 적용합니다.
                 </p>
               </div>
             </section>
 
-            <div className="mt-12 pt-8 border-t border-[#2d2f5d]/60 text-center">
-              <p className="text-gray-400">
-                <strong className="text-white">주식회사 선정에이전시</strong><br />
+            <div className="mt-12 pt-8 border-t border-slate-200 text-center text-slate-600">
+              <p>
+                <strong className="text-slate-900">주식회사 선정에이전시</strong><br />
                 서울특별시 성동구 성수일로8길 55 B동 706호<br />
                 사업자등록번호: 170-88-03245<br />
                 대표: 최성훈<br />

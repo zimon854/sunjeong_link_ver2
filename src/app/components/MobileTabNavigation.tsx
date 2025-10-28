@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceInfo } from "@/lib/device";
 
 // 모바일 하단 탭 네비게이션 컴포넌트 - PWA 최적화
 export default function MobileTabNavigation() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deviceInfo, setDeviceInfo] = useState<ReturnType<typeof getDeviceInfo> | null>(null);
@@ -40,22 +40,26 @@ export default function MobileTabNavigation() {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   // PWA 스타일 적용
   const containerClasses = deviceInfo?.isPWA 
-    ? "fixed bottom-0 left-0 right-0 bg-[#181b3a]/95 backdrop-blur-xl border-t border-[#2d2f5d]/60 md:hidden z-50 shadow-2xl pwa-safe-bottom"
-    : "fixed bottom-0 left-0 right-0 bg-[#181b3a] border-t border-[#2d2f5d] md:hidden z-50";
+    ? "fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 md:hidden z-50 shadow-lg pwa-safe-bottom"
+    : "fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 md:hidden z-50 shadow";
     
   const itemClasses = deviceInfo?.isTouchDevice
-    ? "flex flex-col items-center p-2 text-white hover:text-blue-300 active:text-blue-400 transition-all duration-200 min-h-[48px] active:scale-95 material-ripple touch-optimized"
-    : "flex flex-col items-center p-1 text-white hover:text-blue-300 transition-colors duration-200";
+    ? "flex flex-col items-center p-2 text-slate-600 hover:text-blue-600 active:text-blue-700 transition-all duration-200 min-h-[48px] active:scale-95 material-ripple touch-optimized"
+    : "flex flex-col items-center p-1 text-slate-600 hover:text-blue-600 transition-colors duration-200";
 
   if (loading) {
     return (
-      <div className={containerClasses} style={{
-        paddingBottom: deviceInfo?.isPWA ? 'env(safe-area-inset-bottom)' : undefined
-      }}>
+      <div
+        className={containerClasses}
+        style={{
+          paddingBottom: deviceInfo?.isPWA ? 'env(safe-area-inset-bottom)' : undefined
+        }}
+        data-authenticated={isLoggedIn ? 'true' : 'false'}
+      >
         <div className="flex items-center justify-around py-1">
           <Link href="/" className={itemClasses}>
             <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
@@ -74,12 +78,6 @@ export default function MobileTabNavigation() {
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
             </svg>
             <span className="text-xs font-medium">인플루언서</span>
-          </Link>
-          <Link href="/chat" className={itemClasses}>
-            <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs font-medium">채팅</span>
           </Link>
           <Link href="/news" className={itemClasses}>
             <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
@@ -101,15 +99,26 @@ export default function MobileTabNavigation() {
             </svg>
             <span className="text-xs font-medium">연락처</span>
           </Link>
+          <Link href={isLoggedIn ? "/profile" : "/auth"} className={itemClasses}>
+            <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 2a4 4 0 014 4v1a4 4 0 11-8 0V6a4 4 0 014-4z" />
+              <path d="M4 14a4 4 0 014-4h4a4 4 0 014 4v2H4v-2z" />
+            </svg>
+            <span className="text-xs font-medium">{isLoggedIn ? '내 계정' : '로그인'}</span>
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={containerClasses} style={{
-      paddingBottom: deviceInfo?.isPWA ? 'env(safe-area-inset-bottom)' : undefined
-    }}>
+    <div
+      className={containerClasses}
+      style={{
+        paddingBottom: deviceInfo?.isPWA ? 'env(safe-area-inset-bottom)' : undefined
+      }}
+      data-authenticated={isLoggedIn ? 'true' : 'false'}
+    >
       <div className="flex items-center justify-around py-1">
         <Link href="/" className={itemClasses}>
           <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
@@ -128,12 +137,6 @@ export default function MobileTabNavigation() {
             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
           </svg>
           <span className="text-xs font-medium">인플루언서</span>
-        </Link>
-        <Link href="/chat" className={itemClasses}>
-          <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-          </svg>
-          <span className="text-xs font-medium">채팅</span>
         </Link>
         <Link href="/news" className={itemClasses}>
           <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
@@ -154,6 +157,13 @@ export default function MobileTabNavigation() {
             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
           </svg>
           <span className="text-xs font-medium">연락처</span>
+        </Link>
+        <Link href={isLoggedIn ? "/profile" : "/auth"} className={itemClasses}>
+          <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a4 4 0 014 4v1a4 4 0 11-8 0V6a4 4 0 014-4z" />
+            <path d="M4 14a4 4 0 014-4h4a4 4 0 014 4v2H4v-2z" />
+          </svg>
+          <span className="text-xs font-medium">{isLoggedIn ? '내 계정' : '로그인'}</span>
         </Link>
       </div>
     </div>
