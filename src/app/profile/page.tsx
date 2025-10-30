@@ -147,7 +147,8 @@ export default function ProfilePage() {
 
   return (
     <AdaptiveLayout title="내 프로필">
-      <div className="w-full max-w-3xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 py-8">
+        <div className="w-full max-w-3xl mx-auto px-4">
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 space-y-8">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
@@ -361,6 +362,7 @@ export default function ProfilePage() {
           </div>
           {message && <p className="text-center mt-2 text-emerald-600">{message}</p>}
         </form>
+        </div>
       </div>
     </AdaptiveLayout>
   );

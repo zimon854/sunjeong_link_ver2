@@ -203,21 +203,22 @@ export default function DashboardPage() {
 
   return (
     <AdaptiveLayout title="대시보드">
-      <div className="space-y-10">
-        <DashboardHero greetingLabel={greetingLabel} role={role} highlights={heroHighlights} />
-        <DashboardSummary stats={stats} />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        <div className="space-y-10 px-4 py-6">
+          <DashboardHero greetingLabel={greetingLabel} role={role} highlights={heroHighlights} />
+          <DashboardSummary stats={stats} />
 
-        <div className="grid gap-8 xl:grid-cols-[1.75fr,1fr]">
-          <div className="space-y-8">
-            <CampaignSection
-              title="내 캠페인"
-              description="Lynkable에 등록된 캠페인을 한눈에 확인하세요."
-              campaigns={myCampaigns}
-              emptyLabel="생성한 캠페인이 아직 없습니다."
-              emptyAction={{ label: '첫 캠페인 만들기', href: '/campaigns/new', icon: <FiPlusCircle /> }}
-              viewHref="/campaigns"
-            />
-            <CampaignSection
+          <div className="grid gap-8 xl:grid-cols-[1.75fr,1fr]">
+            <div className="space-y-8">
+              <CampaignSection
+                title="내 캠페인"
+                description="Lynkable에 등록된 캠페인을 한눈에 확인하세요."
+                campaigns={myCampaigns}
+                emptyLabel="생성한 캠페인이 아직 없습니다."
+                emptyAction={{ label: '첫 캠페인 만들기', href: '/campaigns/new', icon: <FiPlusCircle /> }}
+                viewHref="/campaigns"
+              />
+              <CampaignSection
               title="참여한 캠페인"
               description="파트너와 함께 진행 중인 외부 캠페인의 현황입니다."
               campaigns={joinedCampaigns}
@@ -233,6 +234,7 @@ export default function DashboardPage() {
             <NotificationPanel notifications={notifications} />
             <MessagePanel messages={messages} />
           </div>
+        </div>
         </div>
       </div>
     </AdaptiveLayout>
@@ -286,26 +288,26 @@ function DashboardHero({ greetingLabel, role, highlights }: { greetingLabel: str
     <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
       <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-semibold text-blue-600">
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-display font-semibold text-blue-600 tracking-wider">
             <FiZap className="h-4 w-4" />
             Lynkable Dashboard
           </span>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900">환영합니다, {greetingLabel}님</h1>
-          <p className="mt-2 text-base text-slate-600">캠페인 파이프라인을 한 곳에서 관리하고 실시간 피드백을 확인하세요.</p>
+          <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-slate-900">환영합니다, {greetingLabel}님</h1>
+          <p className="mt-2 font-body text-base text-slate-600 leading-relaxed">캠페인 파이프라인을 한 곳에서 관리하고 실시간 피드백을 확인하세요.</p>
           {role === 'reviewer' && (
-            <p className="mt-2 text-xs text-slate-500">보조 관리자 계정은 샘플 데이터로 앱 기능을 체험할 수 있습니다.</p>
+            <p className="mt-2 font-body text-xs text-slate-500">보조 관리자 계정은 샘플 데이터로 앱 기능을 체험할 수 있습니다.</p>
           )}
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href={role === 'reviewer' ? '/campaigns' : '/campaigns/new'}
-              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2 font-display text-sm font-semibold text-white shadow hover:bg-blue-700 tracking-wide"
             >
               <FiPlusCircle className="h-4 w-4" />
               새 캠페인 만들기
             </Link>
             <Link
               href="/dashboard/performance"
-              className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-5 py-2 text-sm font-semibold text-blue-700 hover:border-blue-300"
+              className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-5 py-2 font-display text-sm font-semibold text-blue-700 hover:border-blue-300 tracking-wide"
             >
               <FiBarChart2 className="h-4 w-4" />
               성과 리포트 보기

@@ -340,7 +340,7 @@ export default function InfluencersPage() {
   }, [sortedInfluencers]);
 
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">TikTok KOC 인플루언서</h1>

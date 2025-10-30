@@ -6,19 +6,19 @@
 @tailwind utilities;
 
 :root {
-  /* 색상 팔레트 */
-  --background-rgb: 245, 247, 252; /* 밝은 블루 그레이 */
+  /* 색상 팔레트 - 밝은 테마 */
+  --background-rgb: 255, 255, 255; /* 흰색 배경 */
   --surface-rgb: 255, 255, 255; /* 카드 기본 */
-  --surface-muted-rgb: 236, 240, 248; /* 연한 강조 배경 */
+  --surface-muted-rgb: 248, 250, 252; /* 연한 배경 */
   --primary-rgb: 37, 99, 235; /* blue-600 */
   --primary-hover-rgb: 29, 78, 216; /* blue-700 */
   --secondary-rgb: 100, 116, 139; /* slate-500 */
 
-  --text-primary-rgb: 30, 41, 59; /* slate-800 */
-  --text-secondary-rgb: 71, 85, 105; /* slate-500 */
+  --text-primary-rgb: 15, 23, 42; /* slate-900 */
+  --text-secondary-rgb: 71, 85, 105; /* slate-600 */
   --text-link-rgb: 37, 99, 235; /* blue-600 */
 
-  --border-rgb: 209, 213, 219; /* slate-200 */
+  --border-rgb: 226, 232, 240; /* slate-200 */
 
   /* 폰트 */
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
@@ -29,45 +29,176 @@
 }
 
 @layer base {
+  * {
+    border-color: rgb(var(--border-rgb));
+  }
+
   body {
     color: rgb(var(--text-primary-rgb));
     background-color: rgb(var(--background-rgb));
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight;
+    color: rgb(var(--text-primary-rgb));
   }
 
-  h1 { @apply text-4xl; }
-  h2 { @apply text-3xl; }
-  h3 { @apply text-2xl; }
-  h4 { @apply text-xl; }
+  h1 { 
+    @apply text-3xl md:text-5xl leading-tight; 
+  }
+  h2 { 
+    @apply text-2xl md:text-4xl leading-tight; 
+  }
+  h3 { 
+    @apply text-xl md:text-2xl leading-tight; 
+  }
+  h4 { 
+    @apply text-lg md:text-xl leading-tight; 
+  }
 
   p {
-    @apply text-base leading-relaxed;
+    @apply font-body text-base leading-relaxed;
     color: rgb(var(--text-secondary-rgb));
   }
 
   a {
     color: rgb(var(--text-link-rgb));
-    @apply hover:underline;
+    @apply font-body hover:underline transition-colors duration-200;
+  }
+
+  button {
+    @apply font-display transition-all duration-200;
+  }
+
+  input, textarea, select {
+    @apply font-body transition-colors duration-200;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 shadow-sm;
+    @apply px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
     background-color: rgb(var(--primary-rgb));
   }
   .btn-primary:hover {
     background-color: rgb(var(--primary-hover-rgb));
-    @apply shadow-md -translate-y-0.5;
+    @apply -translate-y-0.5;
+  }
+  .btn-primary:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-lg font-semibold border-2 transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+    border-color: rgb(var(--border-rgb));
+    color: rgb(var(--text-primary-rgb));
+    background-color: rgb(var(--background-rgb));
+  }
+  .btn-secondary:hover {
+    @apply -translate-y-0.5 border-slate-300;
   }
 
   .card {
     background-color: rgb(var(--surface-rgb));
-    @apply rounded-2xl shadow-sm border border-slate-200 p-6;
+    @apply rounded-2xl shadow-sm border p-6 transition-shadow duration-200 hover:shadow-md;
+    border-color: rgb(var(--border-rgb));
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none;
+    border-color: rgb(var(--border-rgb));
+    background-color: rgb(var(--surface-rgb));
+    color: rgb(var(--text-primary-rgb));
+  }
+  .input-field::placeholder {
+    color: rgb(var(--text-secondary-rgb));
+  }
+
+  .loading-spinner {
+    @apply inline-block w-8 h-8 border-4 border-current border-t-transparent rounded-full animate-spin;
+  }
+  
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-12 px-6 text-center;
+  }
+  
+  .empty-state-icon {
+    @apply w-16 h-16 text-slate-300 mb-4;
+  }
+  
+  .empty-state-title {
+    @apply text-lg font-semibold text-slate-900 mb-2;
+  }
+  
+  .empty-state-description {
+    @apply text-sm text-slate-500 max-w-sm;
+  }
+
+  .loading-card {
+    @apply animate-pulse bg-slate-200 rounded-2xl;
+  }
+
+  .section-padding {
+    @apply py-16 px-4;
+  }
+
+  .container-width {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+}
+
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--surface-muted-rgb));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-rgb));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--text-secondary-rgb));
+}
+
+/* 포커스 스타일 개선 */
+.focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* 프린트 스타일 */
+@media print {
+  .no-print {
+    display: none !important;
   }
 }

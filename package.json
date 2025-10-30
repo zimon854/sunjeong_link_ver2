@@ -13,7 +13,11 @@
     "analyze": "ANALYZE=true npm run build",
     "pwa:check": "node scripts/check-pwa.js",
     "dev:clean": "rm -rf .next && npm run dev",
-    "postbuild": "echo 'Build completed successfully!'"
+    "postbuild": "echo 'Build completed successfully!'",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
@@ -30,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.56.1",
     "@types/next-pwa": "^5.6.9",
     "@types/node": "^20",
     "@types/react": "^19",
