@@ -1,76 +1,63 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { getDeviceInfo } from '@/lib/device'
+import type { ReactNode } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FiArrowLeft } from "react-icons/fi";
 
 interface PWAAppBarProps {
-  title: string
-  showBackButton?: boolean
-  rightAction?: React.ReactNode
-  className?: string
+  title: string;
+  showBackButton?: boolean;
+  rightAction?: ReactNode;
+  backHref?: string;
 }
 
-export default function PWAAppBar({ 
-  title, 
-  showBackButton = false, 
+export default function PWAAppBar({
+  title,
+  showBackButton = false,
   rightAction,
-  className = '' 
+  backHref,
 }: PWAAppBarProps) {
-  const router = useRouter()
-  const [deviceInfo, setDeviceInfo] = useState<ReturnType<typeof getDeviceInfo> | null>(null)
-
-  useEffect(() => {
-    setDeviceInfo(getDeviceInfo())
-  }, [])
+  const router = useRouter();
 
   const handleBack = () => {
-    router.back()
-  }
-
-  // PWA에서만 표시
-  if (!deviceInfo?.isPWA) return null
+    if (backHref) {
+      router.push(backHref);
+      return;
+    }
+    router.back();
+  };
 
   return (
-    <>
-      {/* PWA 상태바 */}
-      <div 
-        className="pwa-status-bar bg-blue-600 w-full"
-        style={{ 
-          height: 'env(safe-area-inset-top)',
-          minHeight: '24px'
-        }}
-      />
-      
-      {/* 앱바 */}
-      <div className={`pwa-app-bar bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow ${className}`}>
-        <div className="flex items-center justify-between px-4 py-3 min-h-[56px]">
-          {/* 왼쪽 - 뒤로가기 버튼 */}
-          {showBackButton ? (
-            <button
-              onClick={handleBack}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-200 active:scale-95"
-              aria-label="뒤로가기"
-            >
-              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.42-1.41L7.83 13H20v-2z"/>
-              </svg>
-            </button>
-          ) : (
-            <div className="w-10" /> // 공간 확보
-          )}
-          
-          {/* 가운데 - 제목 */}
-          <h1 className="text-slate-900 font-semibold text-lg text-center flex-1 px-4 truncate">
-            {title}
-          </h1>
-          
-          {/* 오른쪽 - 추가 액션 */}
-          <div className="w-10 flex justify-end">
-            {rightAction}
-          </div>
+    <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between bg-white/80 px-4 py-3 text-slate-900 shadow-sm backdrop-blur">
+      <div className="flex items-center gap-3">
+        {showBackButton ? (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm"
+            aria-label="뒤로가기"
+          >
+            <FiArrowLeft className="h-5 w-5" />
+          </button>
+        ) : (
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500">LY</span>
+        )}
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-semibold leading-tight truncate">{title}</span>
+          <span className="text-[11px] text-slate-400">링커블 PWA</span>
         </div>
       </div>
-    </>
-  )
+      <div className="flex items-center gap-2">
+        {rightAction ?? (
+          <Link
+            href="/campaigns"
+            className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600"
+          >
+            캠페인
+          </Link>
+        )}
+      </div>
+    </header>
+  );
 }

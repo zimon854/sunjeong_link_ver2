@@ -1,14 +1,38 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FiLogIn } from 'react-icons/fi';
+import { FiActivity, FiBarChart2, FiLogIn, FiShield } from 'react-icons/fi';
 
 const CREDENTIALS = {
-  admin: { password: 'LinkAdmin2024!@#', role: 'admin' as const, label: '관리자 계정' },
-  playreview: { password: 'LinkReview2024!@#', role: 'reviewer' as const, label: 'Play Console 관리자 계정' },
+  borrow13: { password: 'Tjswjd5248!', role: 'admin' as const, label: '관리자 계정' },
 } as const;
 
 type CredentialKey = keyof typeof CREDENTIALS;
+
+const SECURITY_FEATURES = [
+  {
+    title: '다중 승인 절차',
+    description: '주요 설정 변경은 2인 승인 후 적용됩니다.',
+    icon: FiShield,
+  },
+  {
+    title: '실시간 감사 로그',
+    description: '로그인과 데이터 접근 히스토리를 상시 추적합니다.',
+    icon: FiActivity,
+  },
+  {
+    title: '성과 대시보드',
+    description: '캠페인 KPI와 운영 지표를 한눈에 확인할 수 있습니다.',
+    icon: FiBarChart2,
+  },
+] as const;
+
+const OPERATIONS_METRICS = [
+  { label: '평균 응답', value: '4시간 이내' },
+  { label: '진행 중 캠페인', value: '27개' },
+  { label: 'Creator Network', value: '1,000+ 명' },
+  { label: '지원 채널', value: 'Email · Phone' },
+] as const;
 
 // InputField 컴포넌트를 AuthPage 밖으로 분리
 const InputField = ({ type, placeholder, value, onChange }: { type: string, placeholder: string, value: string, onChange: (val: string) => void }) => (
@@ -47,7 +71,6 @@ const AuthPageContent = () => {
   const router = useRouter();
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showReviewHelp, setShowReviewHelp] = useState(false);
 
   // 리다이렉트 URL 가져오기
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -108,61 +131,99 @@ const AuthPageContent = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8 space-y-3">
-          <span className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-sm font-semibold text-blue-700">
-            링커블 운영 전용 채널
-          </span>
-          <h1 className="text-4xl font-extrabold text-slate-900">관리자 로그인</h1>
-          <p className="text-slate-500">안전한 운영을 위해 관리자 전용 계정으로 접속해주세요.</p>
-        </div>
-        <div className="card">
-          <div className="flex justify-center mb-6">
-            <div className="w-full rounded-2xl bg-blue-500/10 px-4 py-3 text-blue-700 font-semibold flex items-center justify-center gap-2">
-              <FiLogIn className="text-blue-600" />
-              관리자 로그인
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 py-16 px-4 sm:px-6 lg:px-10">
+      <div className="mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-xl md:flex-row">
+        <section className="flex flex-1 items-center justify-center bg-white px-6 py-12 sm:px-10 lg:px-12">
+          <div className="w-full max-w-sm space-y-8">
+            <div className="space-y-4">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold tracking-[0.3em] text-blue-700">
+                ADMIN ACCESS
+              </span>
+              <h1 className="text-3xl font-bold text-slate-900 sm:text-[34px]">Lynkable 관리자 로그인</h1>
+              <p className="text-sm leading-relaxed text-slate-500">
+                승인된 운영 계정으로 접속해 대시보드, 캠페인, 인플루언서 데이터를 안전하게 확인하세요.
+              </p>
             </div>
-          </div>
 
-          <AdminLoginForm
-            username={username}
-            setUsername={setUsername}
-            password={password}
-            setPassword={setPassword}
-            handleLogin={handleLogin}
-            loading={loading}
-          />
-
-          <div className="mt-8 space-y-3 text-center text-sm text-slate-500">
-            <button
-              type="button"
-              onClick={() => setShowReviewHelp((prev) => !prev)}
-              className="w-full rounded-xl border border-blue-100 bg-blue-50 px-4 py-2 font-semibold text-blue-700 hover:bg-blue-100 transition"
-            >
-              {showReviewHelp ? '관리자 계정 안내 닫기' : '관리자 전용 계정 안내 보기'}
-            </button>
-            {showReviewHelp && (
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-4 text-left space-y-2">
-                <p className="text-sm font-semibold text-blue-800">Play Console 관리자 계정</p>
-                <div className="rounded-xl bg-white px-3 py-2 text-sm text-slate-700">
-                  <p className="font-mono">ID : playreview</p>
-                  <p className="font-mono">PW : {CREDENTIALS.playreview.password}</p>
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4 text-sm text-blue-800">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                  <FiLogIn className="h-5 w-5" />
+                </span>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-500">Secure Sign-In</p>
+                  <p className="font-semibold">세션은 24시간 후 자동으로 만료됩니다.</p>
+                  <p className="text-xs text-blue-600/80">출근 시 1일 1회 로그인을 권장합니다.</p>
                 </div>
-                <p className="text-xs text-slate-500">
-                  관리자 운영 목적의 계정이며 일반 사용자에게 공유되지 않습니다. <br />
-                  로그인 후 대시보드, 인플루언서 리스트 등 주요 화면만 확인 가능합니다.
-                </p>
+              </div>
+            </div>
+
+            <AdminLoginForm
+              username={username}
+              setUsername={setUsername}
+              password={password}
+              setPassword={setPassword}
+              handleLogin={handleLogin}
+              loading={loading}
+            />
+
+            {message && (
+              <div
+                className={`rounded-xl px-4 py-3 text-center text-sm font-medium ${
+                  message.type === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                }`}
+              >
+                <span className="whitespace-nowrap">{message.text}</span>
               </div>
             )}
+
+            <p className="text-center text-xs text-slate-400">
+              계정이 필요하면 보안 담당자에게 발급을 요청하세요.
+            </p>
+          </div>
+        </section>
+
+        <aside className="flex flex-1 flex-col justify-between border-t border-slate-200 bg-slate-50 px-6 py-12 text-slate-700 sm:px-10 lg:px-12 md:border-l md:border-t-0">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-blue-600">
+                운영 브리프
+              </span>
+              <h2 className="text-2xl font-semibold text-slate-900 sm:text-[28px]">
+                운영팀이 즉시 확인해야 할
+                <br /> 핵심 지표 요약판
+              </h2>
+              <p className="text-sm leading-relaxed text-slate-500">
+                핵심 캠페인 진행률, 계약 단계, 고객 문의 로그를 한 화면에서 정리해 신속한 의사결정을 돕습니다.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {SECURITY_FEATURES.map(({ title, description, icon: Icon }) => (
+                <div key={title} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <Icon className="h-[18px] w-[18px]" />
+                  </span>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+                    <p className="text-xs leading-relaxed text-slate-500">{description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {message && (
-            <div className={`mt-6 rounded-xl px-4 py-3 text-center text-sm font-medium ${message.type === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-              {message.text}
+          <dl className="mt-10 grid grid-cols-1 gap-3 text-xs text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">운영 공지</dt>
+              <dd className="mt-2 text-sm font-semibold text-slate-900">계정 발급 및 접근 권한 변경은 보안팀을 통해 요청해 주세요</dd>
             </div>
-          )}
-        </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">지원 채널</dt>
+              <dd className="mt-2 text-sm font-semibold text-slate-900">press@lynkable.co / 010-2803-5248</dd>
+            </div>
+          </dl>
+        </aside>
       </div>
     </div>
   );

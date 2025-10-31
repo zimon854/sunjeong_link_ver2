@@ -1,194 +1,26 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { isPWA, isAndroid, getNetworkStatus } from '@/lib/device'
+import { useMemo } from "react";
 
-type BatteryManagerLike = {
-  level: number
-  charging: boolean
-  addEventListener: (type: 'levelchange' | 'chargingchange', listener: () => void) => void
-  removeEventListener: (type: 'levelchange' | 'chargingchange', listener: () => void) => void
-}
-
-type NavigatorWithBattery = Navigator & {
-  getBattery?: () => Promise<BatteryManagerLike>
-}
-
-interface PWAStatusBarProps {
-  backgroundColor?: string
-  textColor?: string
-  showTime?: boolean
-  showBattery?: boolean
-  showNetwork?: boolean
-}
-
-export default function PWAStatusBar({ 
-  backgroundColor = '#0f172a',
-  textColor = '#ffffff',
-  showTime = true,
-  showBattery = true,
-  showNetwork = true
-}: PWAStatusBarProps) {
-  const [currentTime, setCurrentTime] = useState<string>('')
-  const [batteryLevel, setBatteryLevel] = useState<number | null>(null)
-  const [isCharging, setIsCharging] = useState<boolean>(false)
-  const [networkInfo, setNetworkInfo] = useState<{ online: boolean; effectiveType?: string }>({ online: true })
-
-  useEffect(() => {
-    // PWA 환경이 아니면 렌더링하지 않음
-    if (!isPWA() || !isAndroid()) return
-
-    // 시간 업데이트
-    if (showTime) {
-      const updateTime = () => {
-        const now = new Date()
-        setCurrentTime(now.toLocaleTimeString('ko-KR', { 
-          hour: '2-digit', 
-          minute: '2-digit',
-          hour12: false 
-        }))
-      }
-      updateTime()
-      const timeInterval = setInterval(updateTime, 1000)
-      
-      return () => clearInterval(timeInterval)
-    }
-  }, [showTime])
-
-  useEffect(() => {
-    // 배터리 정보 (지원되는 브라우저에서만)
-    if (!showBattery) {
-      return
-    }
-
-    const nav = navigator as NavigatorWithBattery
-    const getBattery = nav.getBattery
-    let cleanup: (() => void) | undefined
-
-    if (typeof getBattery === 'function') {
-      getBattery.call(nav).then((battery) => {
-        const updateBatteryInfo = () => {
-          setBatteryLevel(Math.round(battery.level * 100))
-          setIsCharging(battery.charging)
-        }
-
-        updateBatteryInfo()
-
-        battery.addEventListener('levelchange', updateBatteryInfo)
-        battery.addEventListener('chargingchange', updateBatteryInfo)
-
-        cleanup = () => {
-          battery.removeEventListener('levelchange', updateBatteryInfo)
-          battery.removeEventListener('chargingchange', updateBatteryInfo)
-        }
-      })
-    }
-
-    return () => {
-      cleanup?.()
-    }
-  }, [showBattery])
-
-  useEffect(() => {
-    // 네트워크 정보
-    if (showNetwork) {
-      const updateNetworkInfo = () => {
-        const info = getNetworkStatus()
-        setNetworkInfo(info)
-      }
-      
-      updateNetworkInfo()
-      
-      window.addEventListener('online', updateNetworkInfo)
-      window.addEventListener('offline', updateNetworkInfo)
-      
-      return () => {
-        window.removeEventListener('online', updateNetworkInfo)
-        window.removeEventListener('offline', updateNetworkInfo)
-      }
-    }
-  }, [showNetwork])
-
-  // PWA가 아니거나 안드로이드가 아니면 렌더링하지 않음
-  if (!isPWA() || !isAndroid()) return null
+export default function PWAStatusBar() {
+  const statusText = useMemo(() => {
+    const now = new Date();
+    return now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+  }, []);
 
   return (
-    <div 
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 text-sm font-medium pwa-status-bar"
-      style={{ 
-        backgroundColor,
-        color: textColor,
-        height: 'env(safe-area-inset-top, 24px)',
-        minHeight: '24px',
-        paddingTop: '4px',
-        paddingBottom: '4px'
-      }}
+    <div
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-1 text-xs font-semibold text-slate-100"
+      aria-hidden="true"
     >
-      {/* 왼쪽: 시간 */}
+      <span>{statusText}</span>
       <div className="flex items-center gap-2">
-        {showTime && currentTime && (
-          <span className="font-mono text-xs">
-            {currentTime}
-          </span>
-        )}
-        
-        {showNetwork && (
-          <div className="flex items-center gap-1">
-            {networkInfo.online ? (
-              <div className="flex gap-1">
-                {/* 신호 강도 표시 (가상) */}
-                <div className="flex items-end gap-0.5">
-                  <div className="w-1 h-2 bg-current opacity-100 rounded-sm"></div>
-                  <div className="w-1 h-3 bg-current opacity-80 rounded-sm"></div>
-                  <div className="w-1 h-4 bg-current opacity-60 rounded-sm"></div>
-                  <div className="w-1 h-5 bg-current opacity-40 rounded-sm"></div>
-                </div>
-                {networkInfo.effectiveType && (
-                  <span className="text-xs opacity-80">
-                    {networkInfo.effectiveType.toUpperCase()}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <span className="text-xs opacity-60">오프라인</span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* 가운데: 앱 제목 또는 빈 공간 */}
-      <div className="flex-1 text-center">
-        <span className="text-xs opacity-80">링커블</span>
-      </div>
-
-      {/* 오른쪽: 배터리, 기타 상태 */}
-      <div className="flex items-center gap-2">
-        {showBattery && batteryLevel !== null && (
-          <div className="flex items-center gap-1">
-            {isCharging && (
-              <div className="text-xs">⚡</div>
-            )}
-            <div className="relative">
-              <div className="w-6 h-3 border border-current rounded-sm opacity-60">
-                <div 
-                  className="h-full bg-current rounded-sm transition-all duration-300"
-                  style={{ 
-                    width: `${batteryLevel}%`,
-                    backgroundColor: batteryLevel > 20 ? 'currentColor' : '#ef4444'
-                  }}
-                />
-              </div>
-              <div className="w-1 h-1 bg-current rounded-r-sm absolute -right-0.5 top-1 opacity-60"></div>
-            </div>
-            <span className="text-xs font-mono">
-              {batteryLevel}%
-            </span>
-          </div>
-        )}
-        
-        {/* PWA 표시 */}
-        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="PWA 모드"></div>
+        <span className="inline-flex h-2 w-2 items-center justify-center rounded-full bg-emerald-400" />
+        <span>5G</span>
+        <span className="inline-flex h-2 w-6 items-center justify-center rounded bg-slate-200/60">
+          <span className="h-1.5 w-4 rounded bg-slate-100" />
+        </span>
       </div>
     </div>
-  )
+  );
 }

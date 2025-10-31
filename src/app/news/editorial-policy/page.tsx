@@ -43,8 +43,8 @@ export default function EditorialPolicyPage() {
           <p className="text-sm font-semibold text-blue-600/80">Editorial Guidelines</p>
           <h1 className="text-4xl font-extrabold text-slate-900">링커블 뉴스룸 편집 기준</h1>
           <p className="text-sm md:text-base text-slate-600">
-            링커블 뉴스룸은 신뢰할 수 있는 커머스 정보를 제공하기 위해 아래 원칙을 따릅니다. 모든 기사는
-            내부 편집위원회의 검토를 거치며, 제보·정정 요청을 투명하게 처리합니다.
+            링커블 뉴스룸은 신뢰할 수 있는 커머스 정보를 제공하기 위해 아래 원칙을 따릅니다.
+            <span className="block">모든 기사는 내부 편집위원회의 검토를 거치며, 제보·정정 요청을 투명하게 처리합니다.</span>
           </p>
         </header>
 

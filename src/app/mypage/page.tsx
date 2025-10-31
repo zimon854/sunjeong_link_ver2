@@ -44,7 +44,7 @@ const profileStats = {
   avgRating: 4.8,
 };
 
-export default function ProfilePage() {
+export default function MyPage() {
   const { isAdmin, loading: authLoading } = useAdminAuth();
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -110,10 +110,10 @@ export default function ProfilePage() {
       localStorage.removeItem('adminProfile');
       setProfile(updatedProfile);
       setImagePreview(updatedProfile.image || defaultProfile.image);
-  setMessage('프로필이 성공적으로 저장되었습니다.');
+  setMessage('개인정보가 성공적으로 저장되었습니다.');
       setIsEditing(false);
     } catch (error) {
-      setMessage('프로필 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      setMessage('개인정보 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
 
     setLoading(false);
@@ -121,7 +121,7 @@ export default function ProfilePage() {
 
   if (authLoading) {
     return (
-      <AdaptiveLayout title="프로필">
+      <AdaptiveLayout title="마이페이지">
         <div className="text-center text-slate-500 py-20">
           <p>로딩 중...</p>
         </div>
@@ -133,7 +133,7 @@ export default function ProfilePage() {
     return (
       <AdaptiveLayout title="로그인 필요">
         <div className="text-center text-slate-600 py-20 space-y-4">
-          <p>내 프로필을 확인하려면 로그인이 필요합니다.</p>
+          <p>마이페이지는 로그인한 사용자만 이용할 수 있습니다.</p>
           <Link
             href="/auth"
             className="inline-flex items-center justify-center px-5 py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold shadow-sm transition"
@@ -146,7 +146,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <AdaptiveLayout title="내 프로필">
+    <AdaptiveLayout title="마이페이지">
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 py-8">
         <div className="w-full max-w-3xl mx-auto px-4">
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 space-y-8">
@@ -182,7 +182,7 @@ export default function ProfilePage() {
                 ) : (
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{profile.name}</h1>
                 )}
-                <p className="text-sm text-slate-500">내 프로필을 업데이트하고 협업 파트너와 공유할 정보를 관리하세요.</p>
+                <p className="text-sm text-slate-500">개인 정보를 업데이트하고 협업 파트너와 공유할 정보를 관리하세요.</p>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                   {isEditing ? (
                     <input

@@ -36,7 +36,7 @@ function MobileMenuButton({ isOpen, onClick }: { isOpen: boolean; onClick: () =>
       onClick={onClick}
       className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
       aria-expanded={isOpen}
-      aria-label={isOpen ? "메뉴 닫기" : "메뉴 열기"}
+      aria-label={isOpen ? '메뉴 닫기' : '메뉴 열기'}
     >
       <span 
         className={`block h-0.5 w-6 bg-slate-600 transition-all duration-300 ${
@@ -68,9 +68,8 @@ export default function NavBar() {
     { href: '/campaigns', label: '캠페인' },
     { href: '/influencers', label: '인플루언서' },
     { href: '/news', label: '뉴스룸' },
-    { href: '/dashboard', label: '대시보드' },
-    { href: '/profile', label: '내 프로필' },
     { href: '/contact', label: '연락처' },
+    { href: '/dashboard', label: '대시보드' },
   ];
 
   return (

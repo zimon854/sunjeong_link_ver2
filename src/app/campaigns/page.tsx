@@ -30,19 +30,21 @@ const hasSupabaseConfig = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+const CLOSED_STATUS = '마감';
+
 const dummyCampaigns: CampaignRow[] = [
   {
     id: 1,
-    title: '링커블 X 가희 촉촉보습 릴스 캠페인',
-    brand: '가희',
+    title: '링커블 X 가히 촉촉보습 릴스 캠페인',
+    brand: '가히',
     category: '뷰티',
     price: 250000,
-    image: '/campaign_sample/sample1.jpeg',
+    image: '/campaign_sample/kahi.png',
     shopify_url: 'https://lynkable.kr/campaigns/gahee-hydration',
-    status: '모집중',
+    status: CLOSED_STATUS,
     participants: 32,
     description:
-      '비건 성분을 강조한 가희 촉촉보습 앰플을 활용해 30초 내외의 릴스로 생기 가득한 피부 연출을 보여주세요.',
+      '비건 성분을 강조한 가히 촉촉보습 앰플을 활용해 30초 내외의 릴스로 생기 가득한 피부 연출을 보여주세요.',
     created_at: '2024-08-18T09:00:00Z',
     updated_at: '2024-09-02T11:30:00Z',
   },
@@ -52,9 +54,9 @@ const dummyCampaigns: CampaignRow[] = [
     brand: 'Dr.G',
     category: '뷰티',
     price: 180000,
-    image: '/campaign_sample/sample2.jpeg',
+    image: '/campaign_sample/DR.G.png',
     shopify_url: 'https://lynkable.kr/campaigns/drg-cica-routine',
-    status: '마감임박',
+    status: CLOSED_STATUS,
     participants: 54,
     description:
       '민감성 피부를 위한 진정 루틴을 루즈하지 않고 담백한 톤으로 표현해 주세요. 사용 전후 피부 변화를 함께 작성해 주시면 좋아요.',
@@ -67,9 +69,9 @@ const dummyCampaigns: CampaignRow[] = [
     brand: 'Dyson',
     category: '라이프스타일',
     price: 350000,
-    image: '/campaign_sample/sample3.jpeg',
+    image: '/campaign_sample/dyson.png',
     shopify_url: 'https://lynkable.kr/campaigns/dyson-airstrait',
-    status: '진행중',
+    status: CLOSED_STATUS,
     participants: 48,
     description:
       '프리미엄 스타일러를 활용한 숏폼 챌린지입니다. 아침 루틴과 출근 준비 상황에서 Airstrait가 어떻게 시간을 단축하는지 보여주세요.',
@@ -82,9 +84,9 @@ const dummyCampaigns: CampaignRow[] = [
     brand: 'Samsung',
     category: '테크',
     price: 210000,
-    image: '/campaign_sample/sample4.jpeg',
+    image: '/campaign_sample/galaxy_buds3.png',
     shopify_url: 'https://lynkable.kr/campaigns/galaxy-buds3pro',
-    status: '모집중',
+    status: CLOSED_STATUS,
     participants: 26,
     description:
       '서울 주요 핫플에서 Galaxy Buds3 Pro를 체험해 보고 생생한 사운드와 통화 품질을 인터뷰 형식으로 담아주세요.',
@@ -97,9 +99,9 @@ const dummyCampaigns: CampaignRow[] = [
     brand: '무신사',
     category: '패션',
     price: 200000,
-    image: '/campaign_sample/sample2.jpeg',
+    image: '/campaign_sample/Musinsa.png',
     shopify_url: 'https://lynkable.kr/campaigns/musinsa-fall-lookbook',
-    status: '진행중',
+    status: CLOSED_STATUS,
     participants: 41,
     description:
       '가을 무드의 도심 배경에서 3가지 스타일링을 15초 내외 숏폼으로 소개해 주세요. 착장 정보와 스타일 팁을 함께 안내하면 좋아요.',
@@ -112,9 +114,9 @@ const dummyCampaigns: CampaignRow[] = [
     brand: '뚜레쥬르',
     category: 'F&B',
     price: 150000,
-    image: '/campaign_sample/sample1.jpeg',
+    image: '/campaign_sample/Touslesjours.png',
     shopify_url: 'https://lynkable.kr/campaigns/tlj-shinemuscat-party',
-    status: '모집예정',
+    status: CLOSED_STATUS,
     participants: 18,
     description:
       '신선한 샤인머스캣 케이크와 함께하는 홈 파티 VLOG를 만들어 주세요. 가족 혹은 친구와 함께 나누는 밝은 분위기가 필요합니다.',
@@ -122,6 +124,12 @@ const dummyCampaigns: CampaignRow[] = [
     updated_at: '2024-09-07T08:45:00Z',
   },
 ];
+
+const normalizeClosedCampaigns = (items: CampaignRow[]): CampaignRow[] =>
+  items.map((campaign) => ({
+    ...campaign,
+    status: CLOSED_STATUS,
+  }));
 
 function resolveImageSrc(image: string | null | undefined) {
   if (!image) return '/logo/sunjeong_link_logo.png';
@@ -164,7 +172,7 @@ function CampaignCard({ campaign }: CampaignCardProps) {
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-400/50 hover:shadow-lg">
       <div className="relative h-56 overflow-hidden">
-        <Link href={`/campaigns/${campaign.id}`} className="block h-full">
+        <div className="block h-full">
           <Image
             src={resolveImageSrc(campaign.image)}
             alt={campaign.title}
@@ -172,9 +180,12 @@ function CampaignCard({ campaign }: CampaignCardProps) {
             height={360}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
-        </Link>
-        <div className="absolute left-4 top-4 rounded-full border border-blue-200 bg-white/90 px-3 py-1 text-xs font-semibold text-blue-600 shadow-sm">
-          {campaign.status || '상태 미정'}
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/45 text-sm font-semibold text-white backdrop-blur-[1px]">
+            마감된 캠페인
+          </div>
+        </div>
+        <div className="absolute left-4 top-4 rounded-full border border-slate-300 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm">
+          {campaign.status || CLOSED_STATUS}
         </div>
       </div>
       <div className="flex flex-1 flex-col space-y-4 p-6">
@@ -209,13 +220,13 @@ function CampaignCard({ campaign }: CampaignCardProps) {
             )}
           </div>
         </div>
-        <Link
-          href={`/campaigns/${campaign.id}`}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+        <span
+          className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-500"
+          aria-disabled="true"
         >
-          캠페인 살펴보기
-          <FiArrowUpRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
+          마감된 캠페인
+          <FiInfo className="h-4 w-4" aria-hidden="true" />
+        </span>
       </div>
     </div>
   );
@@ -251,7 +262,7 @@ export default function CampaignListPage() {
     const loadCampaigns = async () => {
       if (!supabase || !hasSupabaseConfig) {
         if (!isMounted) return;
-        setCampaigns(dummyCampaigns);
+        setCampaigns(normalizeClosedCampaigns(dummyCampaigns));
         setUsingFallbackData(true);
         setError(null);
         setLoading(false);
@@ -269,11 +280,11 @@ export default function CampaignListPage() {
         if (!isMounted) return;
 
         if (data && data.length > 0) {
-          setCampaigns(data);
+          setCampaigns(normalizeClosedCampaigns(data));
           setUsingFallbackData(false);
           setError(null);
         } else {
-          setCampaigns(dummyCampaigns);
+          setCampaigns(normalizeClosedCampaigns(dummyCampaigns));
           setUsingFallbackData(true);
           setError(null);
         }
@@ -281,7 +292,7 @@ export default function CampaignListPage() {
         console.error('캠페인 목록 조회 실패:', err);
         if (!isMounted) return;
 
-        setCampaigns(dummyCampaigns);
+        setCampaigns(normalizeClosedCampaigns(dummyCampaigns));
         setUsingFallbackData(true);
         setError('캠페인 목록을 불러오지 못했습니다. 더미 데이터를 표시합니다.');
       } finally {
@@ -330,8 +341,7 @@ export default function CampaignListPage() {
 
   const summary = useMemo(() => {
     const total = campaigns.length;
-    const activeStatuses = ['모집중', '진행중', '마감임박'];
-    const active = campaigns.filter((campaign) => activeStatuses.includes(campaign.status ?? '')).length;
+    const active = 0;
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const newThisMonth = campaigns.filter((campaign) => {
@@ -364,7 +374,7 @@ export default function CampaignListPage() {
       {
         label: '활성 캠페인',
         value: numberFormatter.format(summary.active),
-        helper: '모집·진행 중',
+        helper: '현재는 모두 마감',
         icon: <FiTrendingUp className="h-4 w-4" />,
       },
       {
@@ -421,15 +431,12 @@ export default function CampaignListPage() {
   if (!isAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="w-full max-w-md space-y-4 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-2xl font-bold text-slate-900">관리자 전용 페이지</h1>
-          <p className="text-sm leading-relaxed text-slate-600">
-            캠페인 목록은 관리자만 확인할 수 있습니다. 관리자 계정으로 로그인해 주세요.
+        <div className="py-16 text-center">
+          <h1 className="text-2xl font-bold text-slate-900">관리자 전용 페이지입니다.</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            캠페인 목록은 관리자 계정으로 로그인한 경우에만 확인할 수 있습니다.
           </p>
-          <Link
-            href="/auth"
-            className="inline-flex w-full items-center justify-center rounded-full bg-blue-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
-          >
+          <Link href="/auth" className="btn-primary mt-6 inline-flex items-center justify-center">
             관리자 로그인
           </Link>
         </div>

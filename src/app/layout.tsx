@@ -3,78 +3,14 @@ import "./globals.css";
 import Link from "next/link";
 import Image from "next/image";
 import MobileTabNavigation from "./components/MobileTabNavigation";
-import PWAInstallPrompt from "./components/PWAInstallPrompt";
-import NetworkStatus from "../components/NetworkStatus";
 import AuthButton from "../components/AuthButton";
 
 export const metadata: Metadata = {
   title: "Lynkable - 인플루언서 마케팅 플랫폼",
   description: "한국 브랜드와 동남아시아 인플루언서를 연결하는 글로벌 공동구매 플랫폼",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "링커블",
-    startupImage: [
-      {
-        url: "/logo/sunjeong_link_logo.png",
-        media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
-      },
-      {
-        url: "/logo/sunjeong_link_logo.png",
-        media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)",
-      },
-      {
-        url: "/logo/sunjeong_link_logo.png",
-        media: "(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)",
-      },
-      {
-        url: "/logo/sunjeong_link_logo.png",
-        media: "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)",
-      },
-      {
-        url: "/logo/sunjeong_link_logo.png",
-        media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)",
-      },
-      {
-        url: "/logo/sunjeong_link_logo.png",
-        media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)",
-      },
-    ],
-  },
-  formatDetection: {
-    telephone: false,
-    email: false,
-    address: false,
-  },
-  icons: {
-    icon: [
-      { url: "/logo/sunjeong_link_logo.png", sizes: "192x192", type: "image/png" },
-      { url: "/logo/sunjeong_link_logo.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [
-      { url: "/logo/sunjeong_link_logo.png", sizes: "180x180", type: "image/png" },
-    ],
-  },
-  other: {
-    "mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "링커블",
-    "application-name": "링커블",
-    "msapplication-TileColor": "#2563eb",
-    "msapplication-tap-highlight": "no",
-  },
 };
 
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: '#2563eb',
-  viewportFit: 'cover',
-};
+
 
 function NavMenu({ href, label, desc }: { href: string; label: string; desc: string }) {
   return (
@@ -98,43 +34,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#2563eb" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="링커블" />
-        <meta name="application-name" content="링커블" />
-        <meta name="msapplication-TileColor" content="#2563eb" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        
-        {/* iOS specific meta tags */}
-        <meta name="apple-touch-fullscreen" content="yes" />
-        <meta name="apple-mobile-web-app-orientations" content="portrait" />
-        
-        {/* Apple touch icons */}
-        <link rel="apple-touch-icon" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/logo/sunjeong_link_logo.png" />
-        
-        {/* Splash screens for iOS */}
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/logo/sunjeong_link_logo.png" />
-        <link rel="apple-touch-startup-image" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="/logo/sunjeong_link_logo.png" />
       </head>
       <body className="bg-background text-foreground min-h-screen">
         <div className="flex flex-col min-h-screen">
-          {/* PWA 전용 상태바 */}
-          <div className="pwa-status-bar"></div>
-          
           {/* 네비게이션바 */}
-          <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-sm pwa-safe-top">
+          <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-sm">
             <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 py-3 md:py-4">
               {/* 왼쪽: 링커블 로고 */}
               <Link href="/" className="flex items-center">
@@ -148,13 +52,13 @@ export default function RootLayout({
                 />
               </Link>
               
-              {/* 데스크톱 메뉴 (모바일에서는 완전히 숨김) */}
+              {/* Desktop navigation */}
               <div className="hidden lg:flex items-center gap-6 text-[15px] font-medium text-slate-700">
-                <NavMenu href="/campaigns" label="캠페인 리스트" desc="진행 중인 모든 캠페인 한눈에 보기" />
-                <NavMenu href="/influencers" label="인플루언서 리스트" desc="인플루언서 한눈에 보기" />
-                <NavMenu href="/profile" label="내 프로필 관리" desc="이름, 역할, 소개, 프로필 이미지 관리" />
-                <NavMenu href="/dashboard" label="내 대시보드" desc="내 서비스 현황 한눈에 보기" />
-                <NavMenu href="/contact" label="연락처" desc="고객지원 및 사업 문의" />
+                <NavMenu href="/campaigns" label="캠페인" desc="진행 중인 캠페인을 모두 확인" />
+                <NavMenu href="/influencers" label="인플루언서" desc="인플루언서를 한눈에 살펴보기" />
+                <NavMenu href="/news" label="뉴스룸" desc="최신 기사와 발표 확인" />
+                <NavMenu href="/contact" label="연락처" desc="파트너십 & 고객지원 연결" />
+                <NavMenu href="/dashboard" label="대시보드" desc="서비스 현황을 바로 확인" />
                 <AuthButton />
               </div>
             </div>
@@ -218,8 +122,6 @@ export default function RootLayout({
             <MobileTabNavigation />
           </div>
         </div>
-        <PWAInstallPrompt />
-        <NetworkStatus />
       </body>
     </html>
   );

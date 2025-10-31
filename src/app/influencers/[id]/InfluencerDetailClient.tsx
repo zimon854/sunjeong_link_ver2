@@ -216,7 +216,7 @@ export default function InfluencerDetailClient({ influencer }: InfluencerDetailC
                             src={participation.campaign.image ? 
                               (participation.campaign.image.startsWith('http') ? participation.campaign.image : 
                                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${participation.campaign.image}`) :
-                              '/campaign_sample/sample1.jpeg'
+                              '/campaign_sample/kahi.png'
                             }
                             alt={participation.campaign.title}
                             width={80}

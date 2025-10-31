@@ -1,42 +1,68 @@
 'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { createOptionalClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import Link from 'next/link';
+
 import AdaptiveLayout from '@/components/AdaptiveLayout';
+import { createOptionalClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/database.types';
+import {
+  FiExternalLink,
+  FiLink2,
+  FiMessageCircle,
+  FiPlayCircle,
+  FiShoppingBag,
+  FiStar,
+  FiTrendingUp,
+} from 'react-icons/fi';
 
 type Campaign = Database['public']['Tables']['campaigns']['Row'];
 type Influencer = Database['public']['Tables']['influencers']['Row'];
 type CampaignParticipant = Database['public']['Tables']['campaign_participants']['Row'];
 type CampaignReview = Database['public']['Tables']['campaign_reviews']['Row'];
 
-interface CampaignWithParticipants extends Campaign {
-  participants_data: (CampaignParticipant & {
-    influencer: Influencer;
-  })[];
+type ParticipantWithInfluencer = CampaignParticipant & { influencer: Influencer };
+
+interface CampaignWithRelations extends Campaign {
+  participants_data: ParticipantWithInfluencer[];
   reviews_data: CampaignReview[];
 }
 
 const hasSupabaseConfig = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 );
+
+const numberFormatter = new Intl.NumberFormat('ko-KR');
 
 function resolveCampaignImageSrc(image: string | null | undefined) {
   if (!image) return '/logo/sunjeong_link_logo.png';
   if (image.startsWith('http')) return image;
   if (image.startsWith('/')) return image;
   if (hasSupabaseConfig && process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    const sanitized = image.replace(/^\/+/g, '');
-    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/campaigns/${sanitized}`;
+    const sanitized = image.replace(/^\/+/, '');
+    return process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/campaigns/' + sanitized;
   }
   return image;
 }
 
 function formatMetricValue(value: unknown): string {
   const num = Number(value);
-  return Number.isFinite(num) ? num.toLocaleString() : '0';
+  return Number.isFinite(num) ? numberFormatter.format(num) : '0';
+}
+
+function getPrimarySocialLink(handles: Influencer['social_handles'] | null | undefined): string | null {
+  if (!handles) return null;
+  const record = handles as Record<string, string | undefined>;
+  const priorityOrder = ['tiktok', 'instagram', 'youtube', 'twitter', 'linkedin'];
+  for (const key of priorityOrder) {
+    const link = record[key];
+    if (typeof link === 'string' && link.trim().length > 0) {
+      return link;
+    }
+  }
+  return null;
 }
 
 interface CampaignDetailClientProps {
@@ -45,9 +71,9 @@ interface CampaignDetailClientProps {
 
 export default function CampaignDetailClient({ campaignId }: CampaignDetailClientProps) {
   const [id, setId] = useState<string | null>(campaignId);
-  const [campaign, setCampaign] = useState<CampaignWithParticipants | null>(null);
+  const [campaign, setCampaign] = useState<CampaignWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'reviews' | 'performance'>('overview');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const supabase = useMemo(() => createOptionalClient(), []);
@@ -92,7 +118,6 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
       roi: roiCount ? parseFloat((roiSum / roiCount).toFixed(2)) : null,
     };
   }, [campaign]);
-
   useEffect(() => {
     setId(campaignId);
   }, [campaignId]);
@@ -140,10 +165,9 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
 
         const { data: participantsData, error: participantsError } = await supabase
           .from('campaign_participants')
-          .select(`
-            *,
-            influencer:influencers(*)
-          `)
+          .select(
+            '*,\n            influencer:influencers(*)'
+          )
           .eq('campaign_id', numericId);
 
         const { data: reviewsData, error: reviewsError } = await supabase
@@ -156,7 +180,7 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
           if (isMounted) {
             setCampaign({
               ...campaignData,
-              participants_data: participantsData || [],
+              participants_data: (participantsData as ParticipantWithInfluencer[]) || [],
               reviews_data: reviewsData || [],
             });
             setLoading(false);
@@ -164,27 +188,29 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
           return;
         }
 
-        if (!isMounted) return;
+        if (!isMounted) {
+          return;
+        }
 
         setCampaign({
           ...campaignData,
-          participants_data: participantsData || [],
-          reviews_data: reviewsData || []
+          participants_data: (participantsData as ParticipantWithInfluencer[]) || [],
+          reviews_data: reviewsData || [],
         });
         setErrorMessage(null);
         setLoading(false);
 
         if (!skipSubscription && !channel) {
           channel = supabase
-            .channel(`campaign-${numericId}`)
+            .channel('campaign-' + numericId)
             .on(
               'postgres_changes',
-              { event: '*', schema: 'public', table: 'campaign_participants', filter: `campaign_id=eq.${numericId}` },
+              { event: '*', schema: 'public', table: 'campaign_participants', filter: 'campaign_id=eq.' + numericId },
               () => fetchCampaignData({ skipSubscription: true })
             )
             .on(
               'postgres_changes',
-              { event: '*', schema: 'public', table: 'campaign_reviews', filter: `campaign_id=eq.${numericId}` },
+              { event: '*', schema: 'public', table: 'campaign_reviews', filter: 'campaign_id=eq.' + numericId },
               () => fetchCampaignData({ skipSubscription: true })
             )
             .subscribe();
@@ -206,271 +232,549 @@ export default function CampaignDetailClient({ campaignId }: CampaignDetailClien
       }
     };
   }, [id, supabase]);
-
   if (loading) {
     return (
-      <AdaptiveLayout title="로딩 중...">
-        <div className="flex justify-center items-center h-screen">
-          <div className="w-12 h-12 border-4 border-blue-300/30 border-t-blue-400 rounded-full animate-spin"></div>
+      <AdaptiveLayout title="Campaign Spotlight">
+        <div className="flex min-h-[60vh] items-center justify-center bg-slate-50">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-500" />
         </div>
       </AdaptiveLayout>
     );
   }
+
   if (!campaign) {
     return (
-      <AdaptiveLayout title="오류">
-        <div className="text-center text-blue-300/70 py-20">
-          <p className="text-2xl mb-2">🚫</p>
-          <p>{errorMessage ?? '캠페인을 찾을 수 없습니다.'}</p>
-          <Link href="/campaigns" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg">캠페인 목록으로</Link>
+      <AdaptiveLayout title="Campaign Spotlight">
+        <div className="flex flex-col items-center gap-4 bg-slate-50 py-24 text-center text-slate-600">
+          <span className="text-3xl">🚫</span>
+          <p className="text-lg text-slate-500">{errorMessage ?? '캠페인을 찾을 수 없습니다.'}</p>
+          <Link
+            href="/campaigns"
+            className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-6 py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+          >
+            캠페인 목록으로 돌아가기
+          </Link>
         </div>
       </AdaptiveLayout>
     );
   }
 
-  return (
-    <AdaptiveLayout title={campaign.title} showBackButton={true}>
-      <div className="w-full max-w-4xl mx-auto text-white">
-        {campaign.image && (
-          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl border border-blue-500/20">
-            <Image
-              src={resolveCampaignImageSrc(campaign.image)}
-              alt={campaign.title}
-              width={800}
-              height={400}
-              className="w-full h-auto object-cover"
-              priority
-            />
-          </div>
-        )}
+  const participantsList = campaign.participants_data ?? [];
+  const tabConfig = [
+    { id: 'overview', label: '캠페인 브리프' },
+    { id: 'participants', label: '크리에이터' },
+    { id: 'reviews', label: '브랜드 피드백' },
+    { id: 'performance', label: '성과 요약' },
+  ] as const;
 
-        <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-lg border border-blue-500/20">
-          <div className="flex flex-wrap gap-3 mb-4">
-            <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.brand ?? '브랜드 미정'}</span>
-            <span className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm font-semibold">{campaign.category ?? '카테고리 미정'}</span>
-            <span className={`px-3 py-1 rounded-full text-sm font-bold ${campaign.status === '진행중' ? 'bg-green-500/30 text-green-300' : 'bg-gray-500/30 text-gray-300'}`}>{campaign.status ?? '상태 미정'}</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">{campaign.title}</h1>
-          <p className="text-blue-200/80 mb-6">{campaign.description ?? '캠페인 설명이 아직 등록되지 않았습니다.'}</p>
-          <div className="flex items-center justify-between bg-blue-950/30 p-4 rounded-xl">
-            <div>
-              <p className="text-sm text-blue-300/70">제품 가격</p>
-              <p className="text-2xl font-bold text-white">{campaign.price?.toLocaleString()}원</p>
+  const focusPoints = [
+    '틱톡 15~30초 숏폼 포맷으로 진행',
+    (campaign.brand || '브랜드') + '의 핵심 USP 강조',
+    '사용 장면과 전후 비교 중심의 UGC 무드',
+    '댓글 유도 CTA 혹은 링크 클릭 전환 목표 달성',
+  ];
+
+  const quickFacts = [
+    { label: '브랜드', value: campaign.brand ?? '미정', icon: <FiShoppingBag className="h-4 w-4" aria-hidden="true" /> },
+    { label: '카테고리', value: campaign.category ?? '미정', icon: <FiPlayCircle className="h-4 w-4" aria-hidden="true" /> },
+    { label: '캠페인 상태', value: campaign.status ?? '상태 미정', icon: <FiTrendingUp className="h-4 w-4" aria-hidden="true" /> },
+    {
+      label: '보상',
+      value: campaign.price ? numberFormatter.format(campaign.price) + '원' : '협의',
+      icon: <FiShoppingBag className="h-4 w-4" aria-hidden="true" />,
+    },
+    {
+      label: '참여 크리에이터',
+      value: numberFormatter.format(participantsList.length) + '명',
+      icon: <FiStar className="h-4 w-4" aria-hidden="true" />,
+    },
+    {
+      label: '캠페인 링크',
+      value: campaign.shopify_url ? '랜딩 페이지 연결됨' : '추가 예정',
+      icon: <FiLink2 className="h-4 w-4" aria-hidden="true" />,
+      href: campaign.shopify_url || undefined,
+    },
+  ];
+
+  const topByViews = participantsList.length
+    ? [...participantsList].sort(
+        (a, b) => (Number(b.performance_metrics?.views) || 0) - (Number(a.performance_metrics?.views) || 0)
+      )[0]
+    : null;
+
+  const topByConversions = participantsList.length
+    ? [...participantsList].sort(
+        (a, b) => (Number(b.performance_metrics?.conversions) || 0) - (Number(a.performance_metrics?.conversions) || 0)
+      )[0]
+    : null;
+
+  const overviewDescription = campaign.description
+    ? campaign.description.split(/\n+/).filter((paragraph) => paragraph.trim().length > 0)
+    : [];
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'participants': {
+        if (!participantsList.length) {
+          return (
+            <div className="py-16 text-center text-slate-400">
+              <p>아직 참여한 인플루언서가 없습니다.</p>
             </div>
-            <div>
-              <p className="text-sm text-blue-300/70">총 참여자</p>
-              <p className="text-2xl font-bold text-white">{campaign.participants_data?.length || 0}명</p>
-            </div>
-            {campaign.shopify_url && (
-              <a href={campaign.shopify_url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Shopify 스토어</a>
-            )}
-          </div>
-        </div>
+          );
+        }
 
-        {/* 탭 메뉴 */}
-        <div className="mb-8 bg-black/20 p-2 rounded-xl flex justify-center gap-2">
-          {[
-            { id: 'overview', label: '개요' },
-            { id: 'participants', label: '참여 인플루언서' },
-            { id: 'reviews', label: '리뷰' },
-            { id: 'performance', label: '성과' }
-          ].map(tab => (
-            <button 
-              key={tab.id} 
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-blue-300/70 hover:bg-white/10'}`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        return (
+          <div className="space-y-6">
+            {participantsList.map((participant) => {
+              const metrics = (participant.performance_metrics as Record<string, unknown>) ?? {};
+              const views = Number(metrics.views) || 0;
+              const likes = Number(metrics.likes) || 0;
+              const comments = Number(metrics.comments) || 0;
+              const conversions = Number(metrics.conversions) || 0;
+              const primaryProfileLink = getPrimarySocialLink(participant.influencer.social_handles);
+              const statusMeta = ((status: string) => {
+                if (status === 'approved') {
+                  return {
+                    label: '승인 완료',
+                    className:
+                      'inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600',
+                  };
+                }
+                if (status === 'pending') {
+                  return {
+                    label: '검토 중',
+                    className:
+                      'inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-600',
+                  };
+                }
+                if (status === 'rejected') {
+                  return {
+                    label: '반려',
+                    className:
+                      'inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600',
+                  };
+                }
+                return {
+                  label: '대기',
+                  className:
+                    'inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600',
+                };
+              })(participant.approval_status || 'pending');
 
-        {/* 탭 콘텐츠 */}
-        <div className="bg-[#181830]/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-blue-500/20 min-h-[400px]">
-          {activeTab === 'overview' && (
-            <div>
-              <h3 className="text-2xl font-bold mb-6">캠페인 개요</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-                <KPI_Card label="조회수" value={aggregatedKPI ? aggregatedKPI.views.toLocaleString() : '데이터 없음'} />
-                <KPI_Card label="클릭수" value={aggregatedKPI ? aggregatedKPI.clicks.toLocaleString() : '데이터 없음'} />
-                <KPI_Card label="전환수" value={aggregatedKPI ? aggregatedKPI.conversions.toLocaleString() : '데이터 없음'} />
-                <KPI_Card label="매출" value={aggregatedKPI ? `${aggregatedKPI.sales.toLocaleString()}원` : '데이터 없음'} />
-                <KPI_Card label="ROI" value={aggregatedKPI && aggregatedKPI.roi !== null ? `${aggregatedKPI.roi}배` : '데이터 없음'} />
-              </div>
-              <div className="bg-blue-950/30 rounded-xl p-6">
-                <h4 className="text-lg font-semibold mb-3">상세 설명</h4>
-                <p className="text-blue-200/90 leading-relaxed">{campaign.description ?? '캠페인 설명이 아직 등록되지 않았습니다.'}</p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'participants' && (
-            <div>
-              <h3 className="text-2xl font-bold mb-6">참여 인플루언서 ({campaign.participants_data?.length || 0}명)</h3>
-              {campaign.participants_data && campaign.participants_data.length > 0 ? (
-                <div className="grid gap-6">
-                  {campaign.participants_data.map((participant) => (
-                    <div key={participant.id} className="bg-blue-950/30 rounded-xl p-6 border border-blue-500/20">
-                      <div className="flex items-center gap-4 mb-4">
-                        <Link href={`/influencers/${participant.influencer.id}`}>
-                          <Image
-                            src={participant.influencer.avatar || '/logo/sunjeong_link_logo.png'}
-                            alt={participant.influencer.name}
-                            width={60}
-                            height={60}
-                            className="w-15 h-15 rounded-full object-cover border-2 border-blue-500/60 hover:scale-105 transition"
-                          />
+              return (
+                <article key={participant.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="flex items-start gap-4">
+                      <Link href={'/influencers/' + participant.influencer_id} className="shrink-0">
+                        <Image
+                          src={participant.influencer.avatar || '/logo/sunjeong_link_logo.png'}
+                          alt={participant.influencer.name}
+                          width={64}
+                          height={64}
+                          className="h-16 w-16 rounded-full border border-slate-200 object-cover"
+                        />
+                      </Link>
+                      <div className="space-y-1">
+                        <Link
+                          href={'/influencers/' + participant.influencer_id}
+                          className="text-lg font-semibold text-slate-900 hover:text-blue-600"
+                        >
+                          {participant.influencer.name}
                         </Link>
-                        <div className="flex-1">
-                          <Link href={`/influencers/${participant.influencer.id}`} className="text-lg font-semibold text-blue-200 hover:text-blue-100 transition">
-                            {participant.influencer.name}
-                          </Link>
-                          <div className="flex items-center gap-2 text-sm text-blue-300/70">
-                            <Image src={`https://flagcdn.com/w20/${participant.influencer.country_code}.png`} alt={participant.influencer.country} width={16} height={12} />
-                            <span>{participant.influencer.country}</span>
-                            <span>•</span>
-                            <span>{participant.influencer.follower_count.toLocaleString()} 팔로워</span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            participant.approval_status === 'approved' ? 'bg-green-500/30 text-green-300' :
-                            participant.approval_status === 'pending' ? 'bg-yellow-500/30 text-yellow-300' :
-                            'bg-gray-500/30 text-gray-300'
-                          }`}>
-                            {participant.approval_status === 'approved' ? '승인됨' : 
-                             participant.approval_status === 'pending' ? '검토중' : '대기'}
-                          </div>
+                        <p className="text-sm text-slate-500">
+                          {participant.influencer.country} · {numberFormatter.format(participant.influencer.follower_count)}명 팔로워
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          {(participant.influencer.categories || []).slice(0, 4).map((category) => (
+                            <span key={category} className="rounded-full bg-slate-100 px-2 py-1 font-medium">
+                              #{category}
+                            </span>
+                          ))}
                         </div>
                       </div>
-                      
-                      {participant.content_url && (
-                        <div className="flex items-center gap-4 bg-blue-950/40 rounded-lg p-4">
-                          <Image 
-                            src={participant.content_url} 
-                            alt="콘텐츠" 
-                            width={80} 
-                            height={80} 
-                            className="w-20 h-20 object-cover rounded-lg" 
-                          />
-                          <div className="flex-1">
-                            <p className="text-blue-200/90 text-sm">{participant.content_caption}</p>
-                            {participant.performance_metrics && (
-                              <div className="flex gap-4 mt-2 text-xs text-blue-300/70">
-                                <span>조회: {formatMetricValue(participant.performance_metrics.views)}</span>
-                                <span>좋아요: {formatMetricValue(participant.performance_metrics.likes)}</span>
-                                <span>댓글: {formatMetricValue(participant.performance_metrics.comments)}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-blue-300/50">
-                  <p className="text-xl mb-2">👥</p>
-                  <p>아직 참여한 인플루언서가 없습니다.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div>
-              <h3 className="text-2xl font-bold mb-6">브랜드 리뷰</h3>
-              {campaign.reviews_data && campaign.reviews_data.length > 0 ? (
-                <div className="space-y-4">
-                  {campaign.reviews_data.map((review) => (
-                    <div key={review.id} className="bg-blue-950/30 rounded-xl p-4 border-l-4 border-blue-500">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="font-semibold text-blue-200/90">{review.reviewer_name}</p>
-                        <div className="flex items-center gap-1 text-amber-400 text-sm font-bold">
-                          {'★'.repeat(Math.floor(review.rating))} {review.rating}
-                        </div>
-                      </div>
-                      <p className="text-blue-300/80 text-sm italic">&ldquo;{review.comment}&rdquo;</p>
-                      <p className="text-xs text-blue-300/50 mt-2">
-                        {new Date(review.created_at).toLocaleDateString('ko-KR')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-blue-300/50">
-                  <p className="text-xl mb-2">💬</p>
-                  <p>아직 작성된 리뷰가 없습니다.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'performance' && (
-            <div>
-              <h3 className="text-2xl font-bold mb-6">성과 분석</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-                <KPI_Card label="조회수" value={aggregatedKPI ? aggregatedKPI.views.toLocaleString() : '데이터 없음'} />
-                <KPI_Card label="클릭수" value={aggregatedKPI ? aggregatedKPI.clicks.toLocaleString() : '데이터 없음'} />
-                <KPI_Card label="전환수" value={aggregatedKPI ? aggregatedKPI.conversions.toLocaleString() : '데이터 없음'} />
-                <KPI_Card label="매출" value={aggregatedKPI ? `${aggregatedKPI.sales.toLocaleString()}원` : '데이터 없음'} />
-                <KPI_Card label="ROI" value={aggregatedKPI && aggregatedKPI.roi !== null ? `${aggregatedKPI.roi}배` : '데이터 없음'} />
-              </div>
-              
-              {/* 인플루언서별 성과 */}
-              <div className="bg-blue-950/30 rounded-xl p-6">
-                <h4 className="text-lg font-semibold mb-4">인플루언서별 성과</h4>
-                {campaign.participants_data && campaign.participants_data.length > 0 ? (
-                  <div className="space-y-3">
-                    {campaign.participants_data.map((participant) => (
-                      <div key={participant.id} className="flex items-center justify-between bg-blue-950/50 rounded-lg p-4">
-                        <div className="flex items-center gap-3">
-                          <Image
-                            src={participant.influencer.avatar || '/logo/sunjeong_link_logo.png'}
-                            alt={participant.influencer.name}
-                            width={40}
-                            height={40}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                          <span className="font-medium">{participant.influencer.name}</span>
-                        </div>
-                        <div className="flex gap-4 text-sm text-blue-300/70">
-                          <span>조회: {Number(participant.performance_metrics?.views ?? 0).toLocaleString()}</span>
-                          <span>좋아요: {Number(participant.performance_metrics?.likes ?? 0).toLocaleString()}</span>
-                          <span>댓글: {Number(participant.performance_metrics?.comments ?? 0).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    ))}
+                    <span className={statusMeta.className}>{statusMeta.label}</span>
                   </div>
-                ) : (
-                  <p className="text-blue-300/50 text-center py-4">성과 데이터가 없습니다.</p>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <MetricChip label="조회수" value={formatMetricValue(views)} helper="누적" />
+                    <MetricChip label="좋아요" value={formatMetricValue(likes)} helper="누적" />
+                    <MetricChip label="댓글" value={formatMetricValue(comments)} helper="누적" />
+                    <MetricChip label="전환" value={formatMetricValue(conversions)} helper="누적" />
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {primaryProfileLink && (
+                      <a
+                        href={primaryProfileLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <FiExternalLink className="h-4 w-4" aria-hidden="true" /> 프로필 방문
+                      </a>
+                    )}
+                    {participant.content_url && (
+                      <a
+                        href={participant.content_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full border border-blue-200 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+                      >
+                        <FiPlayCircle className="h-4 w-4" aria-hidden="true" /> 콘텐츠 보기
+                      </a>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        );
+      }
+      case 'reviews': {
+        if (!campaign.reviews_data?.length) {
+          return (
+            <div className="py-16 text-center text-slate-400">
+              <p>아직 작성된 리뷰가 없습니다.</p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-4">
+            {campaign.reviews_data.map((review) => (
+              <article key={review.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-base font-semibold text-slate-900">{review.reviewer_name}</p>
+                    <time className="text-xs text-slate-400" dateTime={review.created_at}>
+                      {new Date(review.created_at).toLocaleDateString('ko-KR')}
+                    </time>
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-600">
+                    <FiStar className="h-4 w-4" aria-hidden="true" />
+                    {review.rating.toFixed(1)} / 5.0
+                  </div>
+                </div>
+                <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600">{review.comment}</p>
+              </article>
+            ))}
+          </div>
+        );
+      }
+      case 'performance': {
+        return (
+          <div className="space-y-8">
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <PerformanceCard label="누적 조회수" value={aggregatedKPI?.views ?? 0} helper="전 참여자" />
+              <PerformanceCard label="누적 클릭" value={aggregatedKPI?.clicks ?? 0} helper="전 참여자" />
+              <PerformanceCard label="총 전환" value={aggregatedKPI?.conversions ?? 0} helper="전 참여자" />
+              <PerformanceCard label="캠페인 매출" value={aggregatedKPI?.sales ?? 0} helper="원" isCurrency />
+            </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-900">인사이트</h3>
+              {aggregatedKPI ? (
+                <div className="mt-4 space-y-4">
+                  <p className="text-sm text-slate-600">
+                    총 <strong className="font-semibold text-slate-900">{numberFormatter.format(aggregatedKPI.views)}회</strong>의 조회수와 {' '}
+                    <strong className="font-semibold text-slate-900">{numberFormatter.format(aggregatedKPI.clicks)}회</strong>의 클릭이 발생했습니다. 평균 ROI는 {' '}
+                    <strong className="font-semibold text-slate-900">{aggregatedKPI.roi !== null ? aggregatedKPI.roi + '배' : '집계중'}</strong> 입니다.
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <HighlightCard title="조회수 리더" participant={topByViews} metricKey="views" helper="가장 높은 조회수를 기록" />
+                    <HighlightCard title="전환 리더" participant={topByConversions} metricKey="conversions" helper="가장 많은 전환을 기록" />
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-slate-500">성과 데이터가 집계되면 요약이 표시됩니다.</p>
+              )}
+            </section>
+          </div>
+        );
+      }
+      case 'overview':
+      default: {
+        return (
+          <div className="space-y-8">
+            <section className="grid gap-6 lg:grid-cols-[1.6fr,1fr]">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-slate-900">캠페인 소개</h3>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-slate-600">
+                  {overviewDescription.length ? (
+                    overviewDescription.map((paragraph, index) => <p key={index}>{paragraph}</p>)
+                  ) : (
+                    <p>캠페인 설명이 곧 업데이트될 예정입니다. 관리자에게 문의해 주세요.</p>
+                  )}
+                </div>
+                <div className="mt-6 space-y-3">
+                  <h4 className="text-sm font-semibold text-slate-900">콘텐츠 가이드</h4>
+                  <ul className="space-y-2">
+                    {focusPoints.map((point) => (
+                      <li key={point} className="flex items-start gap-3 text-sm text-slate-600">
+                        <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                          <FiPlayCircle className="h-4 w-4" aria-hidden="true" />
+                        </span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-slate-900">퀵 팩트</h3>
+                <div className="space-y-3 text-sm">
+                  {quickFacts.map(({ label, value, icon, href }) => (
+                    <QuickFactItem key={label} label={label} value={value} icon={icon} href={href} />
+                  ))}
+                </div>
+                {campaign.shopify_url && (
+                  <Link
+                    href={campaign.shopify_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                  >
+                    <FiExternalLink className="h-4 w-4" aria-hidden="true" /> 랜딩 페이지 열기
+                  </Link>
                 )}
               </div>
-            </div>
-          )}
-        </div>
+            </section>
 
-        <div className="mt-10 text-center space-y-3">
-          <button
-            type="button"
-            className="w-full max-w-md inline-block px-6 py-4 bg-gray-600/80 text-white font-semibold rounded-xl text-lg cursor-not-allowed"
-            disabled
-          >
-            콘텐츠 업로드 / 참여하기 (일시 중지)
-          </button>
-          <p className="text-sm text-blue-200/70">
-            현재 캠페인 콘텐츠 업로드 및 참여 기능은 준비 중입니다. 관리자에게 문의해 주세요.
-          </p>
-        </div>
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-900">최근 하이라이트</h3>
+              {participantsList.length ? (
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <HighlightCard title="조회수 리더" participant={topByViews} metricKey="views" helper="가장 많은 조회수를 기록" />
+                  <HighlightCard title="전환 리더" participant={topByConversions} metricKey="conversions" helper="가장 많은 전환을 기록" />
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-slate-500">참여 인플루언서가 등록되면 요약이 표시됩니다.</p>
+              )}
+            </section>
+
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricChip label="참여 신청" value={numberFormatter.format(campaign.participants ?? 0) + '명'} helper="현재 모집 현황" />
+              <MetricChip label="누적 리뷰" value={numberFormatter.format(campaign.reviews_data?.length ?? 0) + '건'} helper="브랜드 피드백" />
+              <MetricChip
+                label="평균 ROI"
+                value={aggregatedKPI && aggregatedKPI.roi !== null ? aggregatedKPI.roi + '배' : '집계중'}
+                helper="성과 요약"
+              />
+              <MetricChip
+                label="누적 조회수"
+                value={aggregatedKPI ? numberFormatter.format(aggregatedKPI.views) : '집계중'}
+                helper="전 참여자 기준"
+              />
+            </section>
+          </div>
+        );
+      }
+    }
+  };
+  return (
+    <AdaptiveLayout title={campaign.title ?? 'Campaign Spotlight'} showBackButton>
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 py-8">
+        <header className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="grid gap-6 lg:grid-cols-[2fr,3fr]">
+            <div className="relative h-64 overflow-hidden bg-slate-100 lg:h-full">
+              <Image
+                src={resolveCampaignImageSrc(campaign.image)}
+                alt={campaign.title}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                priority
+              />
+              {campaign.status && (
+                <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1 text-xs font-semibold text-blue-600 shadow-sm">
+                  <FiTrendingUp className="h-4 w-4" aria-hidden="true" />
+                  {campaign.status}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-6 p-6 lg:p-8">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-500">Campaign Spotlight</p>
+                <h1 className="text-3xl font-bold leading-tight text-slate-900 lg:text-4xl">{campaign.title}</h1>
+                <p className="text-sm text-slate-500">
+                  등록일 {campaign.created_at ? new Date(campaign.created_at).toLocaleDateString('ko-KR') : '미정'} · 업데이트 {campaign.updated_at ? new Date(campaign.updated_at).toLocaleDateString('ko-KR') : '미정'}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 font-semibold text-blue-600">
+                  <FiShoppingBag className="h-4 w-4" aria-hidden="true" />
+                  {campaign.brand || '브랜드 미정'}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
+                  <FiPlayCircle className="h-4 w-4" aria-hidden="true" />
+                  {campaign.category || '카테고리 미정'}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-600">
+                  참여 {numberFormatter.format(campaign.participants ?? participantsList.length)}명
+                </span>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                캠페인 보상은 {campaign.price ? numberFormatter.format(campaign.price) + '원' : '협의 가능'} 입니다. 상세 안내는 관리자 승인 후 전달됩니다.
+              </div>
+              <div className="mt-auto flex flex-wrap items-center gap-3">
+                {campaign.shopify_url && (
+                  <Link
+                    href={campaign.shopify_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:border-blue-300 hover:bg-white"
+                  >
+                    <FiExternalLink className="h-4 w-4" aria-hidden="true" /> 랜딩 페이지 보기
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                  disabled
+                >
+                  <FiMessageCircle className="h-4 w-4" aria-hidden="true" /> 메시지 문의 준비중
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <nav className="flex flex-wrap gap-2">
+              {tabConfig.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={
+                    'rounded-full px-4 py-2 text-sm font-semibold transition ' +
+                    (activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                  }
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+            <div className="text-xs text-slate-400">실시간 데이터는 Supabase 연동 시 자동으로 업데이트됩니다.</div>
+          </div>
+          <div className="p-6">{renderTabContent()}</div>
+        </section>
+
+        <section className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 p-6 text-center text-sm text-blue-700">
+          <p className="font-semibold">콘텐츠 업로드 / 참여하기 기능은 곧 오픈 예정이에요.</p>
+          <p className="mt-2 text-blue-600">관리자 승인을 통해 접수 중이며, 정식 오픈 시 푸시로 가장 먼저 알려드릴게요.</p>
+        </section>
       </div>
     </AdaptiveLayout>
   );
 }
+interface MetricChipProps {
+  label: string;
+  value: string;
+  helper?: string;
+}
 
-function KPI_Card({ label, value }: { label: string, value: string | number }) {
+function MetricChip({ label, value, helper }: MetricChipProps) {
   return (
-    <div className="bg-blue-950/40 backdrop-blur-sm rounded-xl p-4 text-center shadow-lg border border-blue-800/50">
-      <p className="text-sm text-blue-300/70 font-semibold mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white">{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-1 text-lg font-bold text-slate-900">{value}</p>
+      {helper && <p className="text-xs text-slate-500">{helper}</p>}
+    </div>
+  );
+}
+
+interface QuickFactItemProps {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  href?: string;
+}
+
+function QuickFactItem({ label, value, icon, href }: QuickFactItemProps) {
+  const content = (
+    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 transition hover:border-blue-200">
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">{icon}</span>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+        <p className="text-sm font-medium text-slate-700">{value}</p>
+      </div>
+    </div>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} target="_blank" rel="noopener noreferrer">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
+}
+
+interface HighlightCardProps {
+  title: string;
+  participant: ParticipantWithInfluencer | null;
+  metricKey: 'views' | 'conversions';
+  helper: string;
+}
+
+function HighlightCard({ title, participant, metricKey, helper }: HighlightCardProps) {
+  if (!participant) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+        데이터가 집계되면 자동으로 표시됩니다.
+      </div>
+    );
+  }
+
+  const metrics = (participant.performance_metrics as Record<string, unknown>) ?? {};
+  const metricValue = metricKey === 'views' ? Number(metrics.views) || 0 : Number(metrics.conversions) || 0;
+
+  return (
+    <div className="flex flex-col gap-4 rounded-2xl border border-blue-200 bg-blue-50/50 p-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-blue-500">{helper}</p>
+        <h4 className="mt-1 text-lg font-bold text-blue-900">{title}</h4>
+      </div>
+      <div className="flex items-center gap-4">
+        <Image
+          src={participant.influencer.avatar || '/logo/sunjeong_link_logo.png'}
+          alt={participant.influencer.name}
+          width={56}
+          height={56}
+          className="h-14 w-14 rounded-full border border-blue-200 object-cover"
+        />
+        <div>
+          <p className="text-sm font-semibold text-slate-900">{participant.influencer.name}</p>
+          <p className="text-xs text-slate-500">
+            {(metricKey === 'views' ? '조회수 ' : '전환 ') + numberFormatter.format(metricValue)} · 팔로워 {numberFormatter.format(participant.influencer.follower_count)}명
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface PerformanceCardProps {
+  label: string;
+  value: number;
+  helper?: string;
+  isCurrency?: boolean;
+}
+
+function PerformanceCard({ label, value, helper, isCurrency = false }: PerformanceCardProps) {
+  const display = value > 0 ? numberFormatter.format(value) + (isCurrency ? '원' : '') : '집계중';
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-2 flex items-baseline gap-2 text-2xl font-bold text-slate-900">
+        <FiTrendingUp className="h-5 w-5 text-blue-500" aria-hidden="true" />
+        {display}
+      </p>
+      {helper && <p className="text-xs text-slate-500">{helper}</p>}
     </div>
   );
 }

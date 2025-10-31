@@ -24,7 +24,13 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['localhost', 'sunjeong-link-ver2.vercel.app', 'flagcdn.com', 'images.unsplash.com'],
+    domains: ['localhost', 'sunjeong-link-ver2.vercel.app', 'flagcdn.com', 'images.unsplash.com', 'unavatar.io'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'unavatar.io' },
+      { protocol: 'https', hostname: 'p16-sign.tiktokcdn.com' },
+      { protocol: 'https', hostname: 'p19-sign.tiktokcdn.com' },
+      { protocol: 'https', hostname: 'lf16-tiktok-web.ttwstatic.com' },
+    ],
   },
   // PWA에서 파일 캐싱 최적화
   async headers() {

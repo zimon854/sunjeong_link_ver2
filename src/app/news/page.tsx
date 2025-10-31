@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
@@ -11,7 +12,7 @@ const NewsPage = () => {
   }, []);
 
   const renderLink = (post: (typeof newsPosts)[number]) => {
-    const linkContent = '기사 보기';
+    const linkContent = '기사보기';
 
     if (post.externalUrl) {
       return (
@@ -35,6 +36,9 @@ const NewsPage = () => {
       </Link>
     );
   };
+
+  const newsImages = ['/news/news1.png', '/news/news2.png', '/news/news3.png'];
+  const fallbackImage = newsImages[0];
 
   return (
     <AdaptiveLayout title="업계 뉴스룸">
@@ -63,39 +67,59 @@ const NewsPage = () => {
         </header>
 
         <section className="space-y-6">
-          {sortedPosts.map((post) => (
-            <article
-              key={post.id}
-              className="card hover:border-blue-200 hover:shadow-md transition-colors"
-            >
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="space-y-3 md:w-3/4">
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                    <time dateTime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('ko-KR')}</time>
-                    <span>·</span>
-                    <span>{post.source}</span>
-                    <span>·</span>
-                    <span>{post.author}</span>
-                    <span>·</span>
-                    <span>{post.readingTime}</span>
+          {sortedPosts.map((post, index) => {
+            const previewImage = post.imageUrl ?? newsImages[index % newsImages.length];
+            const previewAlt = post.imageAlt ?? `${post.source} 기사 대표 이미지`;
+
+            return (
+              <article
+                key={post.id}
+                className="card hover:border-blue-200 hover:shadow-md transition-colors"
+              >
+                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+                    <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-slate-100 md:h-32 md:w-48">
+                      <Image
+                        src={previewImage || fallbackImage}
+                        alt={previewAlt}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 12rem"
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="space-y-3 md:w-[32rem]">
+                      <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                        <time dateTime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('ko-KR')}</time>
+                        <span>·</span>
+                        <span>{post.source}</span>
+                        <span>·</span>
+                        <span>{post.author}</span>
+                        <span>·</span>
+                        <span>{post.readingTime}</span>
+                      </div>
+                      <h2 className="text-2xl font-bold text-slate-900">{post.title}</h2>
+                      <p className="text-slate-600 leading-relaxed text-sm md:text-base">{post.summary}</p>
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        {post.categories.map((category) => (
+                          <span
+                            key={category}
+                            className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-blue-700"
+                          >
+                            #{category}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-2xl font-bold text-slate-900">{post.title}</h2>
-                  <p className="text-slate-600 leading-relaxed text-sm md:text-base">{post.summary}</p>
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    {post.categories.map((category) => (
-                      <span
-                        key={category}
-                        className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-blue-700"
-                      >
-                        #{category}
-                      </span>
-                    ))}
+                  <div className="md:w-1/4">
+                    <div className="flex md:justify-end">
+                      {renderLink(post)}
+                    </div>
                   </div>
                 </div>
-                <div className="md:w-1/4 text-right">{renderLink(post)}</div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </section>
 
         <footer className="text-xs text-slate-500 text-center space-y-2">

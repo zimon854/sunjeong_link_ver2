@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/database.types';
 import { useNativeToast } from '@/hooks/useNativeToast';
@@ -10,7 +11,7 @@ type Influencer = Database['public']['Tables']['koc_tiktok_influencers']['Row'];
 
 const numberFormatter = new Intl.NumberFormat('ko-KR');
 const PAGE_SIZE = 50;
-
+const SUPABASE_BATCH_SIZE = 1000;
 const computeRating = (inf: Influencer): number => {
   const followerScore = (inf.followers ?? 0) % 5000;
   const sttScore = (inf.stt ?? 0) % 17;
@@ -45,10 +46,35 @@ const getTikTokAvatarUrl = (profileUrl?: string | null): string | null => {
   return `https://unavatar.io/tiktok/${username}`;
 };
 
+const HIGHLIGHT_CREATORS = [
+  { displayName: 'Leo', profileUrl: 'https://www.tiktok.com/@thomynguyen47' },
+  { displayName: 'Yuna VuKim', profileUrl: 'https://www.tiktok.com/@yuna.vukieuanh' },
+  { displayName: 'Chi Hoàng', profileUrl: 'https://www.tiktok.com/@chikimhoang0310' },
+  { displayName: 'TÚ ANH SUSU', profileUrl: 'https://www.tiktok.com/@susubae01' },
+] as const;
+
+const highlightUsernameSet = new Set(
+  HIGHLIGHT_CREATORS.map((creator) => (extractTikTokUsername(creator.profileUrl)?.toLowerCase() ?? ''))
+    .filter(Boolean),
+);
+
+const highlightDisplayNameMap = new Map(
+  HIGHLIGHT_CREATORS
+    .map((creator) => {
+      const username = extractTikTokUsername(creator.profileUrl)?.toLowerCase();
+      return username ? [username, creator.displayName] : null;
+    })
+    .filter((entry): entry is [string, string] => Boolean(entry)),
+);
+
 const getInfluencerSummary = (influencer: Influencer, rating: number): string => {
   const followerText = numberFormatter.format(influencer.followers ?? 0);
   const name = influencer.name;
   return `${name}은(는) TikTok에서 ${followerText}명의 팔로워와 함께 브랜드 협업에서 높은 참여도를 보이는 크리에이터입니다. 평균 평점 ${rating.toFixed(1)}점을 기록하며 스토리텔링 중심의 콘텐츠를 선보이고 있어요.`;
+};
+
+const resolveHighlightAvatarUrl = (influencer: Influencer): string | null => {
+  return getTikTokAvatarUrl(influencer.tiktok_profile_url) ?? influencer.profile_image_url ?? null;
 };
 
 const DEFAULT_AVATAR_SVG =
@@ -135,23 +161,51 @@ export default function InfluencersPage() {
   const fetchInfluencers = useCallback(async () => {
     setLoadingInfluencers(true);
 
-    const { data, error } = await supabase
-      .from('koc_tiktok_influencers')
-      .select('*')
-      .order('stt', { ascending: true });
+    const aggregated: Influencer[] = [];
+    let rangeStart = 0;
 
-    if (error) {
+    try {
+      while (true) {
+        const rangeEnd = rangeStart + SUPABASE_BATCH_SIZE - 1;
+        const { data, error } = await supabase
+          .from('koc_tiktok_influencers')
+          .select('*')
+          .order('stt', { ascending: true })
+          .range(rangeStart, rangeEnd);
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          break;
+        }
+
+        aggregated.push(...data);
+
+        if (data.length < SUPABASE_BATCH_SIZE) {
+          break;
+        }
+
+        rangeStart += SUPABASE_BATCH_SIZE;
+      }
+
+      setInfluencers(aggregated);
+    } catch (error) {
       console.error('Failed to load koc influencers from Lynkable', error);
       showError('인플루언서 정보를 불러오지 못했습니다.', { position: 'center' });
       setInfluencers([]);
-    } else {
-      setInfluencers(data ?? []);
+    } finally {
+      setLoadingInfluencers(false);
     }
-
-    setLoadingInfluencers(false);
   }, [showError, supabase]);
 
   useEffect(() => {
+    if (!isAdmin) {
+      setInfluencers([]);
+      return;
+    }
+
     fetchInfluencers();
 
     const channel = supabase
@@ -168,7 +222,7 @@ export default function InfluencersPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchInfluencers, supabase]);
+  }, [fetchInfluencers, isAdmin, supabase]);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -306,14 +360,25 @@ export default function InfluencersPage() {
       return [];
     }
 
-    const candidates = influencers.filter((inf) => (inf.followers ?? 0) > 0);
-    if (candidates.length === 0) {
+    const highlightMatches = influencers
+      .map((inf) => {
+        const username = extractTikTokUsername(inf.tiktok_profile_url)?.toLowerCase();
+        if (!username || !highlightUsernameSet.has(username)) {
+          return null;
+        }
+
+        const displayName = highlightDisplayNameMap.get(username);
+        return displayName ? { ...inf, name: displayName } : inf;
+      })
+      .filter((inf): inf is Influencer => Boolean(inf));
+
+    if (highlightMatches.length === 0) {
       return [];
     }
 
-    return [...candidates]
+    return [...highlightMatches]
       .sort((a, b) => (b.followers ?? 0) - (a.followers ?? 0))
-      .slice(0, 4);
+      .slice(0, HIGHLIGHT_CREATORS.length);
   }, [influencers]);
 
   const metrics = useMemo(() => {
@@ -338,6 +403,36 @@ export default function InfluencersPage() {
       averageRating,
     };
   }, [sortedInfluencers]);
+
+  if (adminLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="space-y-3 text-center text-slate-500">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-300/60 border-t-blue-500" />
+          <p>관리자 권한을 확인하는 중입니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="py-16 text-center">
+          <h1 className="text-2xl font-bold text-slate-900">관리자 전용 페이지입니다.</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            인플루언서 목록은 관리자 계정으로 로그인한 경우에만 확인할 수 있습니다.
+          </p>
+          <Link
+            href="/auth"
+            className="btn-primary mt-6 inline-flex items-center justify-center"
+          >
+            관리자 로그인
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 py-16 px-4 sm:px-6 lg:px-8">
@@ -684,9 +779,9 @@ function FeaturedInfluencersSection({ influencers }: { influencers: Influencer[]
       <div className="flex flex-col gap-2 mb-8 text-center md:text-left md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">대표 인플루언서 하이라이트</h2>
-          <p className="text-sm text-slate-500">팔로워 수 기준 상위 인플루언서들의 존재감을 한 눈에 확인하세요.</p>
+          <p className="text-sm text-slate-500">주요 크리에이터 네 명을 선별해 팔로워 순으로 보여드려요.</p>
+          <p className="text-xs text-slate-400">리스트는 수동으로 큐레이션되어 고정 노출됩니다.</p>
         </div>
-  <p className="text-xs text-slate-400">Lynkable 실시간 데이터 기반 자동 선정</p>
       </div>
       <div className="space-y-6">
         <FeaturedInfluencerHero influencer={hero} />
@@ -705,16 +800,22 @@ function FeaturedInfluencersSection({ influencers }: { influencers: Influencer[]
 function FeaturedInfluencerHero({ influencer }: { influencer: Influencer }) {
   const rating = computeRating(influencer);
   const followerText = numberFormatter.format(influencer.followers ?? 0);
-  const avatarUrl = influencer.profile_image_url ?? getTikTokAvatarUrl(influencer.tiktok_profile_url);
+  const avatarUrl = resolveHighlightAvatarUrl(influencer) ?? DEFAULT_AVATAR_SVG;
   const summary = `${influencer.name} · 팔로워 ${followerText}명 · 평점 ${rating.toFixed(1)}점의 퍼포먼스를 기록 중인 크리에이터입니다.`;
 
   return (
     <article className="relative overflow-hidden rounded-[36px] border border-slate-200 bg-slate-900 text-white shadow-xl">
       <div className="absolute inset-0">
         {avatarUrl && (
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-60"
-            style={{ backgroundImage: `url(${avatarUrl})` }}
+          <Image
+            src={avatarUrl}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-60"
+            placeholder="blur"
+            blurDataURL={DEFAULT_AVATAR_SVG}
             aria-hidden
           />
         )}
@@ -732,14 +833,15 @@ function FeaturedInfluencerHero({ influencer }: { influencer: Influencer }) {
                 width={80}
                 height={80}
                 className="h-20 w-20 rounded-3xl border-4 border-white/40 object-cover shadow-lg"
-                unoptimized
+                placeholder="blur"
+                blurDataURL={DEFAULT_AVATAR_SVG}
               />
             )}
             <div className="space-y-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-200">
                 Top Creator
               </span>
-              <h3 className="text-3xl font-bold leading-tight md:text-4xl">{influencer.name}</h3>
+              <h3 className="text-3xl font-bold leading-tight !text-white md:text-4xl">{influencer.name}</h3>
             </div>
           </div>
           <p className="max-w-2xl text-sm leading-relaxed text-slate-200/90">{summary}</p>
@@ -776,12 +878,15 @@ function FeaturedInfluencerHero({ influencer }: { influencer: Influencer }) {
         <div className="relative mx-auto h-full w-full max-w-sm">
           <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] border border-white/15 bg-slate-950 shadow-2xl">
             <Image
-              src={avatarUrl ?? DEFAULT_AVATAR_SVG}
+              src={avatarUrl}
               alt={`${influencer.name} 대표 이미지`}
               fill
               sizes="(max-width: 1024px) 60vw, 400px"
               className="object-cover"
-              unoptimized={Boolean(avatarUrl)}
+              quality={70}
+              placeholder="blur"
+              blurDataURL={DEFAULT_AVATAR_SVG}
+              priority
             />
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent" aria-hidden />
             <div className="absolute bottom-5 left-5 text-xs font-semibold uppercase tracking-[0.35em] text-white/80">
@@ -796,19 +901,21 @@ function FeaturedInfluencerHero({ influencer }: { influencer: Influencer }) {
 
 function FeaturedInfluencerTile({ influencer }: { influencer: Influencer }) {
   const rating = computeRating(influencer);
-  const avatarUrl = influencer.profile_image_url ?? getTikTokAvatarUrl(influencer.tiktok_profile_url);
+  const avatarUrl = resolveHighlightAvatarUrl(influencer) ?? DEFAULT_AVATAR_SVG;
   const summary = getInfluencerSummary(influencer, rating);
 
   return (
     <article className="relative flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-slate-900/95 text-white shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
       <div className="relative aspect-[3/4] w-full overflow-hidden">
         <Image
-          src={avatarUrl ?? DEFAULT_AVATAR_SVG}
+          src={avatarUrl}
           alt={`${influencer.name} 대표 이미지`}
           fill
           sizes="(max-width: 1024px) 60vw, 400px"
           className="object-cover"
-          unoptimized={Boolean(avatarUrl)}
+          quality={70}
+          placeholder="blur"
+          blurDataURL={DEFAULT_AVATAR_SVG}
         />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 via-black/30 to-transparent" aria-hidden />
         <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white">

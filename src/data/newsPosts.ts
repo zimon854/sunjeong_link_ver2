@@ -12,9 +12,35 @@ export interface NewsPost {
   highlights?: string[];
   factSources?: { label: string; url: string }[];
   externalUrl?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 }
 
 export const newsPosts: NewsPost[] = [
+  {
+    id: '2025-koreatech-kahi-award',
+    title: "와이레스(YLESS), 추석 황금연휴 외국인 관광객 위한 K-뷰티 '글로우업(glow up)' 체험 제공",
+    summary:
+      '비즈월드뉴스는 YLESS가 추석 황금연휴 기간 외국인 관광객에게 K-뷰티 글로우업 체험존을 열고 퍼스널 컬러·메이크업 서비스를 무료로 선보였다고 전했습니다.',
+    publishedAt: '2024-09-16',
+    author: '비즈월드뉴스 취재팀',
+    editor: '비즈월드뉴스 편집국',
+    source: '비즈월드뉴스',
+    readingTime: '3분 소요',
+    categories: ['K-뷰티', '관광', '체험 프로모션'],
+    body: [
+      '보도에 따르면 YLESS는 서울 도심 주요 관광지와 연계해 외국인 방문객이 K-뷰티 루틴을 직접 경험할 수 있도록 “글로우업(glow up)” 체험존을 운영했습니다.',
+      '현장에서는 전문 뷰티 디렉터가 무료 퍼스널 컬러 진단과 맞춤형 메이크업 시연을 제공하며, 참가자들이 즉시 활용할 수 있는 색조·스킨케어 제품 샘플을 지원했습니다.',
+      'YLESS는 이번 체험을 계기로 다국어 뷰티 큐레이션 콘텐츠와 글로벌 공동구매 프로그램을 연계해 해외 관광객의 재방문과 온라인 구매를 동시에 이끌겠다는 계획을 밝혔습니다.',
+    ],
+    highlights: [
+      '추석 연휴 기간 외국인 대상 K-뷰티 “글로우업” 체험존 운영',
+      '무료 퍼스널 컬러 진단·메이크업 시연으로 현장 만족도 제고',
+    ],
+    externalUrl: 'https://www.bizwnews.com/news/articleView.html?idxno=114838',
+    imageUrl: '/news/news4.png',
+    imageAlt: 'YLESS K-뷰티 글로우업 체험 현장 이미지',
+  },
   {
     id: '2023-kihoilbo-stable-revenue',
     title: '기호일보: 매출 안정을 겨냥한 선정 에이전시의 통합 마케팅',
@@ -36,6 +62,8 @@ export const newsPosts: NewsPost[] = [
       '인하우스형 협업과 후킹 콘텐츠 전략',
     ],
     externalUrl: 'https://www.kihoilbo.co.kr/news/articleView.html?idxno=1058413',
+    imageUrl: '/news/news1.png',
+    imageAlt: '기호일보 기사 대표 이미지',
   },
   {
     id: '2025-sentv-triple-crown',
@@ -58,6 +86,8 @@ export const newsPosts: NewsPost[] = [
       '인플루언서 매칭 플랫폼 특허 출원',
     ],
     externalUrl: 'https://www.sentv.co.kr/article/view/sentv202504300099',
+    imageUrl: '/news/news2.png',
+    imageAlt: '서울경제TV 기사 대표 이미지',
   },
   {
     id: '2025-kdpress-triple-crown',
@@ -80,6 +110,8 @@ export const newsPosts: NewsPost[] = [
       '데이터 기반 연구조직 운영',
     ],
     externalUrl: 'https://www.kdpress.co.kr/news/articleView.html?idxno=137556',
+    imageUrl: '/news/news3.png',
+    imageAlt: '데일리경제 기사 대표 이미지',
   },
   {
     id: '2025-newseconomy-interview',
@@ -102,6 +134,8 @@ export const newsPosts: NewsPost[] = [
       '링커블 글로벌 공동구매 플랫폼 론칭 계획',
     ],
     externalUrl: 'https://www.newseconomy.kr/news/articleView.html?idxno=18032',
+    imageUrl: '/news/news5.png',
+    imageAlt: '경제인뉴스 인터뷰 대표 이미지',
   },
 ];
 

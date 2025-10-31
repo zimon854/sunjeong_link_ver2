@@ -18,7 +18,7 @@ export default async function InfluencerDetailPage({ params }: InfluencerPagePro
     const fallbackInfluencer: Influencer = {
       id: 'unknown',
       name: 'Unknown Influencer',
-      avatar: '/campaign_sample/sample1.jpeg',
+      avatar: '/campaign_sample/kahi.png',
       country: 'Unknown',
       country_code: 'us',
       follower_count: 0,
@@ -46,7 +46,7 @@ export default async function InfluencerDetailPage({ params }: InfluencerPagePro
     const mockInfluencer: Influencer = {
       id: id,
       name: 'Nicha',
-      avatar: '/campaign_sample/sample1.jpeg',
+      avatar: '/campaign_sample/kahi.png',
       country: 'Thailand',
       country_code: 'th',
       follower_count: 12000,

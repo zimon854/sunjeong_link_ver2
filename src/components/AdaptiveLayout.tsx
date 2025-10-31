@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { getDeviceInfo } from '@/lib/device'
-import PWAAppBar from './PWAAppBar'
-import PWAGestureArea from './PWAGestureArea'
-import PWAStatusBar from './PWAStatusBar'
+import PWAAppBar from '@/components/PWAAppBar'
+import PWAGestureArea from '@/components/PWAGestureArea'
+import PWAStatusBar from '@/components/PWAStatusBar'
 
 interface AdaptiveLayoutProps {
   children: React.ReactNode
