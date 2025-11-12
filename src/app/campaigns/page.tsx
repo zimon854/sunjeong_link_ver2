@@ -457,17 +457,17 @@ export default function CampaignListPage() {
               <p className="text-base text-slate-600 md:text-lg">
                 브랜드와 크리에이터를 연결하는 링커블의 캠페인 현황입니다. 신규 제안을 빠르게 확인하고, 진행 중인 액션을 한눈에 파악하세요.
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/campaigns/new"
-                  className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-700"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-700 sm:w-auto"
                 >
                   새 캠페인 등록
                   <FiArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="/dashboard/performance"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-600"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-600 sm:w-auto"
                 >
                   성과 리포트 이동
                   <FiArrowUpRight className="h-4 w-4" aria-hidden="true" />
@@ -480,7 +480,7 @@ export default function CampaignListPage() {
               ))}
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+          <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-slate-500 sm:flex-nowrap sm:overflow-x-auto sm:pb-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-semibold text-slate-700">
               평균 보상 {summary.averageReward ? `${numberFormatter.format(summary.averageReward)}원` : '데이터 준비 중'}
             </span>
@@ -503,13 +503,13 @@ export default function CampaignListPage() {
           )}
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:pb-0">
               {availableCategories.map((cat) => (
                 <button
                   key={cat}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 border ${
+                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 border ${
                     selectedCategory === cat
                       ? 'border-blue-500 bg-blue-600 text-white shadow-sm'
                       : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600'
@@ -523,7 +523,7 @@ export default function CampaignListPage() {
             <div className="flex w-full flex-col gap-4 lg:w-auto">
               <div className="flex w-full items-center gap-3">
                 <select
-                  className="w-full rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                  className="w-full rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 sm:w-auto"
                   value={sort}
                   onChange={(event) => setSort(event.target.value)}
                 >

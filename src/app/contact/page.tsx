@@ -144,11 +144,11 @@ const companyFacts = [
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 py-16">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 py-12 sm:py-16">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 sm:gap-16 sm:px-6 lg:px-8">
         {/* Hero */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
-          <div className="space-y-10 p-8 md:p-12">
+          <div className="space-y-8 p-6 sm:space-y-10 sm:p-8 md:p-12">
             <div className="space-y-4">
               <span className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-900 px-4 py-1 text-xs font-semibold text-white">
                 Lynkable Contact Center
@@ -161,8 +161,8 @@ export default function ContactPage() {
               </p>
             </div>
 
-            <div className="grid gap-10 md:grid-cols-[1.55fr,1fr]">
-              <div className="space-y-7">
+            <div className="grid gap-8 md:grid-cols-[1.55fr,1fr] md:gap-10">
+              <div className="space-y-6">
                 <dl className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <dt className="text-xs font-semibold text-slate-500">크리에이터 네트워크</dt>
@@ -177,16 +177,16 @@ export default function ContactPage() {
                     <dd className="mt-1 text-base font-semibold text-slate-900">평균 4시간 이내</dd>
                   </div>
                 </dl>
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <a
                     href="mailto:borrow13@sunjeong.co.kr"
-                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-700"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-700 sm:w-auto"
                   >
                     <FiMail className="h-4 w-4" /> 이메일 보내기
                   </a>
                   <a
                     href="tel:+821028035248"
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-800 transition hover:border-slate-400"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-800 transition hover:border-slate-400 sm:w-auto"
                   >
                     <FiPhone className="h-4 w-4" /> 통화 예약하기
                   </a>
@@ -225,11 +225,11 @@ export default function ContactPage() {
         </section>
 
         {/* Contact channels */}
-        <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
           {contactChannels.map(({ id, title, subtitle, badge, icon: Icon, contacts, accent }) => (
             <article
               key={id}
-              className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md sm:p-6"
             >
               <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${accent} opacity-10`} aria-hidden="true" />
               <div className="relative z-10 flex h-full flex-col gap-5">
@@ -255,11 +255,11 @@ export default function ContactPage() {
                       <div className="space-y-0.5">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">{label}</p>
                         {href ? (
-                          <a href={href} className="text-sm font-semibold text-slate-900 hover:text-blue-600">
+                          <a href={href} className="break-words text-sm font-semibold text-slate-900 hover:text-blue-600">
                             {value}
                           </a>
                         ) : (
-                          <p className="text-sm font-semibold text-slate-900">{value}</p>
+                          <p className="break-words text-sm font-semibold text-slate-900">{value}</p>
                         )}
                         {helper && <p className="text-xs text-slate-500">{helper}</p>}
                       </div>
@@ -274,7 +274,7 @@ export default function ContactPage() {
         {/* Company story */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
           <div className="grid gap-0 md:grid-cols-[1.15fr,0.85fr]">
-            <div className="space-y-8 border-b border-slate-200 p-8 md:border-b-0 md:border-r md:p-12">
+            <div className="space-y-8 border-b border-slate-200 p-6 sm:p-8 md:border-b-0 md:border-r md:p-12">
               <div className="space-y-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">About Lynkable</p>
                 <h2 className="font-serif text-3xl font-semibold text-slate-900">
@@ -284,15 +284,15 @@ export default function ContactPage() {
                   링커블은 동남아와 한국을 잇는 공동구매·UGC 스튜디오입니다. 콘텐츠 제작, 인플루언서 매칭, 퍼포먼스 미디어를 하나의 파이프라인으로 묶어 빠른 실행과 성장 지표를 만들어 냅니다.
                 </p>
               </div>
-              <div className="flex flex-col gap-4">
-              {companyHighlights.map(({ title, body }) => (
-                <div key={title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                  <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600 whitespace-pre-line">{body}</p>
-                </div>
-              ))}
+              <div className="space-y-4">
+                {companyHighlights.map(({ title, body }) => (
+                  <div key={title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+                    <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-600">{body}</p>
+                  </div>
+                ))}
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {companyFacts.map(({ label, value }) => (
                   <div key={label} className="flex flex-col rounded-2xl border border-slate-100 bg-white p-4">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">{label}</span>
@@ -305,7 +305,7 @@ export default function ContactPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-sky-500 to-emerald-400" aria-hidden="true" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.3),_transparent_65%)]" aria-hidden="true" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(15,23,42,0.35),_transparent_70%)]" aria-hidden="true" />
-              <div className="relative flex h-full flex-col justify-between p-8 text-white md:p-12">
+              <div className="relative flex h-full flex-col justify-between p-6 text-white sm:p-8 md:p-12">
                 <div className="flex items-center gap-4">
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/90 text-slate-900 shadow-sm">
                     <FiMapPin className="h-5 w-5" />
@@ -343,23 +343,23 @@ export default function ContactPage() {
         </section>
 
         {/* CTA */}
-        <section className="overflow-hidden rounded-[32px] border border-slate-300 bg-slate-900 p-8 text-white shadow-lg md:p-12">
-          <div className="grid gap-8 md:grid-cols-[1.4fr,0.6fr] md:items-center">
+        <section className="overflow-hidden rounded-[32px] border border-slate-300 bg-slate-900 p-6 text-white shadow-lg sm:p-8 md:p-12">
+          <div className="grid gap-6 md:grid-cols-[1.4fr,0.6fr] md:items-center sm:gap-8">
             <div className="space-y-4">
               <h2 className="font-serif text-3xl font-semibold text-white md:text-[34px]">새로운 협업을 시작할 준비가 되셨나요?</h2>
-              <p className="text-sm leading-relaxed text-slate-200 md:text-base">
+              <p className="text-sm leading-relaxed text-slate-200 sm:text-base">
                 브랜드 목적과 시장 상황을 알려주시면 48시간 이내 맞춤 전략과 예상 타임라인을 보내드립니다. NDA가 필요하면 사전에 요청해 주세요.
               </p>
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <Link
                   href="/campaigns/new"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 font-semibold text-slate-900 transition hover:bg-slate-200"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-2 font-semibold text-slate-900 transition hover:bg-slate-200 sm:w-auto"
                 >
                   공동구매 캠페인 문의
                 </Link>
                 <Link
                   href="/news"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/35 px-5 py-2 font-semibold text-white transition hover:bg-white/10"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/35 px-5 py-2 font-semibold text-white transition hover:bg-white/10 sm:w-auto"
                 >
                   뉴스룸 보기
                 </Link>

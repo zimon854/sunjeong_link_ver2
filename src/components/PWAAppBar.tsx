@@ -43,8 +43,8 @@ export default function PWAAppBar({
         ) : (
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500">LY</span>
         )}
-        <div className="flex flex-col min-w-0">
-          <span className="text-sm font-semibold leading-tight truncate">{title}</span>
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold leading-tight">{title}</span>
           <span className="text-[11px] text-slate-400">링커블 PWA</span>
         </div>
       </div>

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -43,29 +43,68 @@ const getTikTokAvatarUrl = (profileUrl?: string | null): string | null => {
   if (!username) {
     return null;
   }
-  return `https://unavatar.io/tiktok/${username}`;
+
+  const params = new URLSearchParams({ username: username.toLowerCase() });
+  return '/api/tiktok-avatar?' + params.toString();
 };
 
-const HIGHLIGHT_CREATORS = [
-  { displayName: 'Leo', profileUrl: 'https://www.tiktok.com/@thomynguyen47' },
-  { displayName: 'Yuna VuKim', profileUrl: 'https://www.tiktok.com/@yuna.vukieuanh' },
-  { displayName: 'Chi Hoàng', profileUrl: 'https://www.tiktok.com/@chikimhoang0310' },
-  { displayName: 'TÚ ANH SUSU', profileUrl: 'https://www.tiktok.com/@susubae01' },
+type HighlightCreatorConfig = {
+  displayName: string;
+  profileUrl: string;
+  username?: string;
+  matchNames?: readonly string[];
+};
+
+const HIGHLIGHT_CREATORS: readonly HighlightCreatorConfig[] = [
+  {
+    displayName: 'Kim Chi Hoàng',
+    profileUrl: 'https://www.tiktok.com/@chikimhoang0310',
+    matchNames: ['Chi Hoàng', 'Kim Chi Hoang', 'Chi Hoang'],
+  },
+  {
+    displayName: 'TÚ ANH SUSU',
+    profileUrl: 'https://www.tiktok.com/@susubae01',
+    matchNames: ['Tu Anh Susu', 'Tu Anh SuSu', 'Tú Anh SuSu'],
+  },
+  {
+    displayName: 'Yaya Thảo',
+    profileUrl: 'https://www.tiktok.com/@yayathao',
+    matchNames: ['Yaya Thao'],
+  },
+  {
+    displayName: 'Yuna Vu',
+    profileUrl: 'https://www.tiktok.com/@yuna.vukieuanh',
+    matchNames: ['Yuna VuKim'],
+  },
 ] as const;
 
-const highlightUsernameSet = new Set(
-  HIGHLIGHT_CREATORS.map((creator) => (extractTikTokUsername(creator.profileUrl)?.toLowerCase() ?? ''))
-    .filter(Boolean),
-);
+const normalizeName = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
 
-const highlightDisplayNameMap = new Map(
-  HIGHLIGHT_CREATORS
-    .map((creator) => {
-      const username = extractTikTokUsername(creator.profileUrl)?.toLowerCase();
-      return username ? [username, creator.displayName] : null;
-    })
-    .filter((entry): entry is [string, string] => Boolean(entry)),
-);
+  const normalized = value.trim().toLowerCase();
+  return normalized.length > 0 ? normalized : null;
+};
+
+const normalizedHighlightCreators = HIGHLIGHT_CREATORS.map((creator) => {
+  const usernameRaw = creator.username ?? extractTikTokUsername(creator.profileUrl);
+  const username = usernameRaw ? usernameRaw.toLowerCase() : null;
+  const normalizedNames = new Set<string>();
+
+  [creator.displayName, ...(creator.matchNames ?? [])].forEach((name) => {
+    const normalized = normalizeName(name);
+    if (normalized) {
+      normalizedNames.add(normalized);
+    }
+  });
+
+  return {
+    ...creator,
+    username,
+    normalizedNames,
+  };
+});
 
 const getInfluencerSummary = (influencer: Influencer, rating: number): string => {
   const followerText = numberFormatter.format(influencer.followers ?? 0);
@@ -74,7 +113,11 @@ const getInfluencerSummary = (influencer: Influencer, rating: number): string =>
 };
 
 const resolveHighlightAvatarUrl = (influencer: Influencer): string | null => {
-  return getTikTokAvatarUrl(influencer.tiktok_profile_url) ?? influencer.profile_image_url ?? null;
+  if (influencer.profile_image_url) {
+    return influencer.profile_image_url;
+  }
+  const fallbackUrl = getTikTokAvatarUrl(influencer.tiktok_profile_url);
+  return fallbackUrl && !fallbackUrl.includes('unavatar.io') ? fallbackUrl : null;
 };
 
 const DEFAULT_AVATAR_SVG =
@@ -124,6 +167,8 @@ export default function InfluencersPage() {
   const [newInfluencer, setNewInfluencer] = useState<NewInfluencerForm>(() => createInitialNewInfluencerForm());
   const [submitting, setSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const highlightAvatarPrefetchRef = useRef<Set<string>>(new Set());
 
   const handleCopy = useCallback(async (value: string, message: string) => {
     if (!value) {
@@ -201,12 +246,11 @@ export default function InfluencersPage() {
   }, [showError, supabase]);
 
   useEffect(() => {
+    fetchInfluencers();
+
     if (!isAdmin) {
-      setInfluencers([]);
       return;
     }
-
-    fetchInfluencers();
 
     const channel = supabase
       .channel('koc_tiktok_influencers_changes')
@@ -360,26 +404,76 @@ export default function InfluencersPage() {
       return [];
     }
 
-    const highlightMatches = influencers
-      .map((inf) => {
-        const username = extractTikTokUsername(inf.tiktok_profile_url)?.toLowerCase();
-        if (!username || !highlightUsernameSet.has(username)) {
-          return null;
+    const byUsername = new Map<string, Influencer>();
+    const byName = new Map<string, Influencer>();
+
+    influencers.forEach((inf) => {
+      const username = extractTikTokUsername(inf.tiktok_profile_url)?.toLowerCase();
+      if (username && !byUsername.has(username)) {
+        byUsername.set(username, inf);
+      }
+
+      const normalized = normalizeName(inf.name);
+      if (normalized && !byName.has(normalized)) {
+        byName.set(normalized, inf);
+      }
+    });
+
+    const curated: Influencer[] = [];
+
+    normalizedHighlightCreators.forEach((creator) => {
+      let match: Influencer | undefined;
+
+      if (creator.username) {
+        match = byUsername.get(creator.username);
+      }
+
+      if (!match) {
+        for (const name of creator.normalizedNames) {
+          const candidate = byName.get(name);
+          if (candidate) {
+            match = candidate;
+            break;
+          }
         }
+      }
 
-        const displayName = highlightDisplayNameMap.get(username);
-        return displayName ? { ...inf, name: displayName } : inf;
-      })
-      .filter((inf): inf is Influencer => Boolean(inf));
+      if (match) {
+        curated.push(
+          match.name === creator.displayName ? match : { ...match, name: creator.displayName },
+        );
+      }
+    });
 
-    if (highlightMatches.length === 0) {
-      return [];
+    return curated;
+  }, [influencers]);
+
+  useEffect(() => {
+    if (featuredInfluencers.length === 0) {
+      return;
     }
 
-    return [...highlightMatches]
-      .sort((a, b) => (b.followers ?? 0) - (a.followers ?? 0))
-      .slice(0, HIGHLIGHT_CREATORS.length);
-  }, [influencers]);
+    const controller = new AbortController();
+    const prefetched = highlightAvatarPrefetchRef.current;
+
+    featuredInfluencers.slice(0, HIGHLIGHT_CREATORS.length).forEach((inf) => {
+      const url = getTikTokAvatarUrl(inf.tiktok_profile_url);
+      if (!url || prefetched.has(url)) {
+        return;
+      }
+
+      prefetched.add(url);
+      fetch(url, { signal: controller.signal }).catch((error) => {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Failed to prefetch TikTok avatar', error);
+        }
+      });
+    });
+
+    return () => {
+      controller.abort();
+    };
+  }, [featuredInfluencers]);
 
   const metrics = useMemo(() => {
     if (sortedInfluencers.length === 0) {
@@ -404,47 +498,19 @@ export default function InfluencersPage() {
     };
   }, [sortedInfluencers]);
 
-  if (adminLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="space-y-3 text-center text-slate-500">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-300/60 border-t-blue-500" />
-          <p>관리자 권한을 확인하는 중입니다.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="py-16 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">관리자 전용 페이지입니다.</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            인플루언서 목록은 관리자 계정으로 로그인한 경우에만 확인할 수 있습니다.
-          </p>
-          <Link
-            href="/auth"
-            className="btn-primary mt-6 inline-flex items-center justify-center"
-          >
-            관리자 로그인
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">TikTok KOC 인플루언서</h1>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto">Lynkable에 저장된 TikTok KOC 데이터를 검색하고 대표 영상 링크까지 빠르게 확인하세요.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="mb-10 text-center sm:mb-12">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">TikTok KOC 인플루언서</h1>
+          <p className="mt-3 text-sm text-slate-600 sm:text-base">
+            Lynkable에 저장된 TikTok KOC 데이터를 검색하고 대표 영상 링크까지 빠르게 확인하세요.
+          </p>
           {isAdmin && !adminLoading && (
             <button
               type="button"
               onClick={() => setShowAdminForm((prev) => !prev)}
-              className="mt-6 inline-flex items-center gap-2 rounded-full border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-blue-50"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-blue-50 sm:w-auto"
             >
               {showAdminForm ? '등록 폼 숨기기' : '등록 폼 열기'}
             </button>
@@ -452,26 +518,26 @@ export default function InfluencersPage() {
         </div>
 
         <div className="mb-10 space-y-6">
-          <div className="relative max-w-2xl mx-auto">
+          <div className="relative mx-auto max-w-2xl">
             <input
               type="text"
               placeholder="이름, No, TikTok 링크 검색"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-6 py-4 rounded-full bg-white text-slate-700 placeholder-slate-400 border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-300 shadow-sm"
+              className="w-full rounded-full border border-slate-300 bg-white px-5 py-3 text-base text-slate-700 placeholder-slate-400 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:px-6 sm:py-4"
             />
             <svg className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col items-stretch justify-center gap-3 text-sm sm:flex-row sm:items-center sm:gap-4">
+            <div className="flex items-center gap-2 sm:justify-center">
               <label className="text-xs font-medium text-slate-500">정렬</label>
               <select
                 value={sortKey}
                 onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
-                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-full border border-slate-300 bg-white px-4 py-2 text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none sm:w-auto"
               >
                 <option value="followers_desc">팔로워 많은순</option>
                 <option value="followers_asc">팔로워 적은순</option>
@@ -565,7 +631,8 @@ export default function InfluencersPage() {
           <FeaturedInfluencersSection influencers={featuredInfluencers} />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-10">
+        <div className="mb-10 -mx-4 overflow-x-auto px-4 pb-2">
+          <div className="grid min-w-[600px] grid-cols-2 gap-3 sm:min-w-0 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
             <InfluencerMetricCard
               label="총 인플루언서"
               value={`${numberFormatter.format(metrics.creators)} 명`}
@@ -586,21 +653,124 @@ export default function InfluencersPage() {
             value={`${metrics.averageRating.toFixed(2)} 점`}
             helper="현재 목록 기준"
           />
+          </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="overflow-x-hidden">
-            <table className="w-full table-fixed text-sm text-slate-700">
-              <thead className="bg-slate-100 border-b border-slate-200 sticky top-0 backdrop-blur-lg z-10">
+        <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="space-y-3 px-4 py-5 md:hidden">
+            {loadingInfluencers && (
+              <div className="py-12 text-center text-slate-500">
+                인플루언서 데이터를 불러오는 중입니다.
+              </div>
+            )}
+            {!loadingInfluencers && paginatedInfluencers.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-12 text-center text-sm text-slate-500">
+                검색 조건에 맞는 인플루언서를 찾을 수 없습니다.
+              </div>
+            )}
+            {!loadingInfluencers && paginatedInfluencers.map((inf, index) => {
+              const displayIndex = (currentPage - 1) * PAGE_SIZE + index + 1;
+              const ratingValue = computeRating(inf);
+              const followerText = numberFormatter.format(inf.followers ?? 0);
+              const avatarUrl = inf.profile_image_url ?? getTikTokAvatarUrl(inf.tiktok_profile_url);
+              return (
+                <article
+                  key={inf.id ?? `${inf.stt}-${inf.name}`}
+                  className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
+                      {displayIndex}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
+                        <Image
+                          src={avatarUrl ?? DEFAULT_AVATAR_SVG}
+                          alt={`${inf.name} 프로필 이미지`}
+                          width={96}
+                          height={96}
+                          className="h-full w-full object-cover"
+                          unoptimized
+                        />
+                      </div>
+                      <div>
+                        <p className="text-base font-semibold text-slate-900">{inf.name}</p>
+                        <p className="text-xs text-slate-500">팔로워 {followerText}명</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
+                      <Image
+                        src="https://flagcdn.com/w20/vn.png"
+                        alt="Vietnam flag"
+                        width={20}
+                        height={14}
+                        className="rounded-[3px] border border-white/60"
+                      />
+                      VN
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 font-semibold text-amber-600">
+                      평점 {ratingValue.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2 text-sm">
+                    {inf.tiktok_profile_url && (
+                      <a
+                        href={inf.tiktok_profile_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                      >
+                        TikTok 프로필 열기
+                      </a>
+                    )}
+                    {inf.best_video_url ? (
+                      <a
+                        href={inf.best_video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-100"
+                      >
+                        대표 영상 보기
+                      </a>
+                    ) : (
+                      <span className="text-xs text-slate-400">대표 영상이 등록되어 있지 않습니다.</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(inf.tiktok_profile_url ?? '', '프로필 링크')}
+                      className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-1.5 font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+                    >
+                      프로필 링크 복사
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(inf.best_video_url ?? '', '대표 영상 링크')}
+                      className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 font-semibold text-emerald-600 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={!inf.best_video_url}
+                    >
+                      대표 영상 복사
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="min-w-[760px] w-full table-fixed text-sm text-slate-700">
+              <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-100/95 backdrop-blur">
                 <tr>
-                  <th scope="col" className="w-20 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">No</th>
-                  <th scope="col" className="w-24 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">프로필</th>
-                  <th scope="col" className="w-48 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">이름</th>
+                  <th scope="col" className="w-16 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">No</th>
+                  <th scope="col" className="w-20 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">프로필</th>
+                  <th scope="col" className="px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">이름</th>
                   <th scope="col" className="w-20 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">국가</th>
                   <th scope="col" className="w-28 px-4 py-4 text-right text-xs font-semibold text-slate-500 align-middle">팔로워</th>
                   <th scope="col" className="w-24 px-4 py-4 text-right text-xs font-semibold text-slate-500 align-middle">평점</th>
-                  <th scope="col" className="w-48 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">TikTok</th>
-                  <th scope="col" className="w-48 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">대표 영상</th>
+                  <th scope="col" className="px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">TikTok</th>
+                  <th scope="col" className="px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">대표 영상</th>
                   <th scope="col" className="w-40 px-4 py-4 text-left text-xs font-semibold text-slate-500 align-middle">빠른 작업</th>
                 </tr>
               </thead>
@@ -788,7 +958,7 @@ function FeaturedInfluencersSection({ influencers }: { influencers: Influencer[]
         {rest.length > 0 && (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {rest.map((inf) => (
-              <FeaturedInfluencerTile key={inf.id ?? `${inf.stt}-${inf.name}`} influencer={inf} />
+              <FeaturedInfluencerTile key={inf.id ?? `${inf.stt}-${inf.name}`} influencer={inf} eager />
             ))}
           </div>
         )}
@@ -817,48 +987,50 @@ function FeaturedInfluencerHero({ influencer }: { influencer: Influencer }) {
             placeholder="blur"
             blurDataURL={DEFAULT_AVATAR_SVG}
             aria-hidden
+            unoptimized
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-900/80" aria-hidden />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.22),_transparent_65%)]" aria-hidden />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(129,140,248,0.18),_transparent_70%)]" aria-hidden />
       </div>
-      <div className="relative z-10 grid items-center gap-10 p-8 md:p-10 lg:grid-cols-[1.15fr,0.85fr]">
-        <div className="flex flex-col gap-8">
-          <div className="flex items-start gap-5">
+      <div className="relative z-10 grid gap-8 p-6 text-left sm:p-8 md:p-10 lg:grid-cols-[1.15fr,0.85fr]">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
             {avatarUrl && (
               <Image
                 src={avatarUrl}
                 alt={`${influencer.name} 프로필 이미지`}
-                width={80}
-                height={80}
-                className="h-20 w-20 rounded-3xl border-4 border-white/40 object-cover shadow-lg"
+                width={96}
+                height={96}
+                className="h-20 w-20 rounded-3xl border-4 border-white/40 object-cover shadow-lg sm:h-24 sm:w-24"
                 placeholder="blur"
                 blurDataURL={DEFAULT_AVATAR_SVG}
+                unoptimized
               />
             )}
             <div className="space-y-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-200">
                 Top Creator
               </span>
-              <h3 className="text-3xl font-bold leading-tight !text-white md:text-4xl">{influencer.name}</h3>
+              <h3 className="text-2xl font-bold leading-tight text-white sm:text-3xl md:text-4xl">{influencer.name}</h3>
             </div>
           </div>
-          <p className="max-w-2xl text-sm leading-relaxed text-slate-200/90">{summary}</p>
-          <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+          <p className="max-w-2xl text-sm leading-relaxed text-slate-200/90 sm:text-base">{summary}</p>
+          <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-white/90">
             <FeatureStatBadge label="팔로워" value={`${followerText}명`} />
             <FeatureStatBadge label="평균 평점" value={`${rating.toFixed(1)}점`} accent="amber" />
             {typeof influencer.stt === 'number' && influencer.stt > 0 && (
               <FeatureStatBadge label="No" value={`#${influencer.stt}`} accent="slate" />
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap">
             {influencer.tiktok_profile_url && (
               <a
                 href={influencer.tiktok_profile_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-2 font-semibold text-white transition hover:bg-white/20"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-2 font-semibold text-white transition hover:bg-white/20 sm:w-auto"
               >
                 TikTok 프로필 방문
               </a>
@@ -868,25 +1040,25 @@ function FeaturedInfluencerHero({ influencer }: { influencer: Influencer }) {
                 href={influencer.best_video_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-400/20 px-5 py-2 font-semibold text-sky-100 transition hover:bg-sky-400/30"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-sky-300/40 bg-sky-400/20 px-5 py-2 font-semibold text-sky-100 transition hover:bg-sky-400/30 sm:w-auto"
               >
                 대표 영상 살펴보기
               </a>
             )}
           </div>
         </div>
-        <div className="relative mx-auto h-full w-full max-w-sm">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] border border-white/15 bg-slate-950 shadow-2xl">
+        <div className="relative mx-auto flex h-full w-full max-w-xs items-center justify-center sm:max-w-sm">
+          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[30px] border border-white/15 bg-slate-950 shadow-2xl">
             <Image
               src={avatarUrl}
               alt={`${influencer.name} 대표 이미지`}
               fill
-              sizes="(max-width: 1024px) 60vw, 400px"
+              sizes="(max-width: 1024px) 70vw, 400px"
               className="object-cover"
-              quality={70}
               placeholder="blur"
               blurDataURL={DEFAULT_AVATAR_SVG}
               priority
+              unoptimized
             />
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent" aria-hidden />
             <div className="absolute bottom-5 left-5 text-xs font-semibold uppercase tracking-[0.35em] text-white/80">
@@ -899,7 +1071,7 @@ function FeaturedInfluencerHero({ influencer }: { influencer: Influencer }) {
   );
 }
 
-function FeaturedInfluencerTile({ influencer }: { influencer: Influencer }) {
+function FeaturedInfluencerTile({ influencer, eager = false }: { influencer: Influencer; eager?: boolean }) {
   const rating = computeRating(influencer);
   const avatarUrl = resolveHighlightAvatarUrl(influencer) ?? DEFAULT_AVATAR_SVG;
   const summary = getInfluencerSummary(influencer, rating);
@@ -911,11 +1083,14 @@ function FeaturedInfluencerTile({ influencer }: { influencer: Influencer }) {
           src={avatarUrl}
           alt={`${influencer.name} 대표 이미지`}
           fill
+          priority={eager}
+          loading={eager ? 'eager' : undefined}
           sizes="(max-width: 1024px) 60vw, 400px"
           className="object-cover"
           quality={70}
           placeholder="blur"
           blurDataURL={DEFAULT_AVATAR_SVG}
+          unoptimized
         />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 via-black/30 to-transparent" aria-hidden />
         <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white">

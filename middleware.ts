@@ -5,7 +5,7 @@ const ALLOWED_ROLES = new Set(['admin', 'reviewer']);
 
 export async function middleware(request: NextRequest) {
   // 보호된 경로 목록
-  const protectedPaths = ['/dashboard', '/campaigns', '/influencers', '/chat', '/profile']
+  const protectedPaths = ['/dashboard', '/campaigns', '/chat', '/profile']
 
   // 현재 경로가 보호된 경로인지 확인
   const isProtectedPath = protectedPaths.some(path =>

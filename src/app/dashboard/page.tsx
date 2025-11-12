@@ -344,12 +344,9 @@ export default function DashboardPage() {
   if (!isAdmin) {
     return (
       <AdaptiveLayout title="틱톡 대시보드">
-        <div className="flex min-h-[60vh] items-center justify-center px-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-slate-900">관리자 전용 페이지입니다.</p>
-            <p className="mt-2 text-sm text-slate-500">대시보드 접근을 위해 관리자 계정으로 로그인해 주세요.</p>
-            <Link href="/auth" className="btn-primary mt-6 inline-flex items-center justify-center">관리자 로그인</Link>
-          </div>
+        <div className="py-20 text-center text-slate-500">
+          <p>대시보드 접근 권한이 필요합니다.</p>
+          <Link href="/auth" className="btn-primary mt-4 inline-block">관리자 로그인</Link>
         </div>
       </AdaptiveLayout>
     );
@@ -392,10 +389,8 @@ function DashboardHero({ role, highlights }: { role: 'admin' | 'reviewer' | null
           <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-blue-100">
             <FiStar className="h-4 w-4" /> TikTok Growth Engine
           </span>
-          <h1 className="font-display text-3xl font-semibold leading-tight text-white sm:text-4xl">
-            글로벌 숏폼 캠페인을 실시간으로
-            <br className="hidden sm:block" />
-            조율하세요.
+          <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">
+            글로벌 숏폼 캠페인을 실시간으로 조율하세요.
           </h1>
           <p className="text-sm text-blue-100 sm:text-base">
             링커블의 AI 매칭과 공동구매 파이프라인으로 틱톡 퍼포먼스를 빠르게 확대하고, 콘텐츠-커머스 전환을 한 화면에서 확인하세요.

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import { FiArrowRight } from 'react-icons/fi';
 import AdaptiveLayout from '@/components/AdaptiveLayout';
 import { newsPosts } from '@/data/newsPosts';
 
@@ -12,7 +13,11 @@ const NewsPage = () => {
   }, []);
 
   const renderLink = (post: (typeof newsPosts)[number]) => {
-    const linkContent = '기사보기';
+    const linkContent = (
+      <span className="inline-flex items-center gap-2 text-sm font-semibold">
+        기사 보기 <FiArrowRight className="h-4 w-4" aria-hidden />
+      </span>
+    );
 
     if (post.externalUrl) {
       return (
@@ -20,7 +25,7 @@ const NewsPage = () => {
           href={post.externalUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-blue-700 transition hover:bg-blue-50 sm:w-auto"
         >
           {linkContent}
         </a>
@@ -30,7 +35,7 @@ const NewsPage = () => {
     return (
       <Link
         href={`/news/${post.id}`}
-        className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-blue-700 transition hover:bg-blue-50 sm:w-auto"
       >
         {linkContent}
       </Link>
@@ -42,24 +47,28 @@ const NewsPage = () => {
 
   return (
     <AdaptiveLayout title="업계 뉴스룸">
-      <div className="max-w-4xl mx-auto py-12 space-y-10">
-        <header className="space-y-4 text-center">
-          <p className="text-sm font-semibold text-blue-600/80">Lynkable Newsroom</p>
-          <h1 className="text-4xl font-extrabold text-slate-900">글로벌 커머스 뉴스 & 공식 발표</h1>
-          <p className="text-sm md:text-base text-slate-600">
-            링커블이 직접 작성하거나 검증한 최신 동향, 정책 업데이트, 성과 리포트를 한눈에 확인하세요.
-            모든 콘텐츠는 내부 편집 규정을 거쳐 게재되며, 출처와 발행 날짜를 명시합니다.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
+      <div className="mx-auto w-full max-w-4xl space-y-10 px-4 py-12 sm:px-6">
+        <header className="space-y-5 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-white">
+            Lynkable Newsroom
+          </span>
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">글로벌 커머스 뉴스 & 공식 발표</h1>
+            <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
+              링커블이 직접 작성하거나 검증한 최신 동향, 정책 업데이트, 성과 리포트를 한눈에 확인하세요.
+              모든 콘텐츠는 내부 편집 규정을 거쳐 발행되며, 출처와 발행 날짜를 명시합니다.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
               href="/news/editorial-policy"
-              className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-700 hover:bg-blue-100 transition"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 font-semibold text-blue-700 transition hover:bg-blue-100 sm:w-auto"
             >
               편집 기준 및 제보 안내
             </Link>
             <a
               href="mailto:press@lynkable.co"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 transition shadow-sm"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-500 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-blue-600 sm:w-auto"
             >
               뉴스룸 제보하기
             </a>
@@ -74,45 +83,41 @@ const NewsPage = () => {
             return (
               <article
                 key={post.id}
-                className="card hover:border-blue-200 hover:shadow-md transition-colors"
+                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md sm:p-6"
               >
-                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
-                    <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-slate-100 md:h-32 md:w-48">
-                      <Image
-                        src={previewImage || fallbackImage}
-                        alt={previewAlt}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 12rem"
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="space-y-3 md:w-[32rem]">
-                      <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                        <time dateTime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('ko-KR')}</time>
-                        <span>·</span>
-                        <span>{post.source}</span>
-                        <span>·</span>
-                        <span>{post.author}</span>
-                        <span>·</span>
-                        <span>{post.readingTime}</span>
-                      </div>
-                      <h2 className="text-2xl font-bold text-slate-900">{post.title}</h2>
-                      <p className="text-slate-600 leading-relaxed text-sm md:text-base">{post.summary}</p>
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        {post.categories.map((category) => (
-                          <span
-                            key={category}
-                            className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-blue-700"
-                          >
-                            #{category}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-6">
+                  <div className="relative h-52 w-full overflow-hidden rounded-2xl bg-slate-100 sm:h-60 lg:h-32 lg:w-48">
+                    <Image
+                      src={previewImage || fallbackImage}
+                      alt={previewAlt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 18rem"
+                      className="object-cover"
+                    />
                   </div>
-                  <div className="md:w-1/4">
-                    <div className="flex md:justify-end">
+                  <div className="flex flex-1 flex-col gap-4">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-slate-400">
+                      <time dateTime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('ko-KR')}</time>
+                      <span>•</span>
+                      <span>{post.source}</span>
+                      <span>•</span>
+                      <span>{post.author}</span>
+                      <span>•</span>
+                      <span>{post.readingTime}</span>
+                    </div>
+                    <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">{post.title}</h2>
+                    <p className="text-sm leading-relaxed text-slate-600 sm:text-base">{post.summary}</p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {post.categories.map((category) => (
+                        <span
+                          key={category}
+                          className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 font-semibold text-blue-700"
+                        >
+                          #{category}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex w-full justify-start lg:justify-end">
                       {renderLink(post)}
                     </div>
                   </div>

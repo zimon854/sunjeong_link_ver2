@@ -6,7 +6,7 @@ import { useState } from "react";
 import AuthButton from "./AuthButton";
 
 function NavLink({ href, label, isActive }: { href: string; label: string; isActive: boolean }) {
-  const baseClasses = 'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
+  const baseClasses = 'px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
 
   if (isActive) {
     return (
@@ -73,17 +73,17 @@ export default function NavBar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3">
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-sm">
+      <div className="mx-auto flex w-full items-center justify-between px-3 py-2 sm:px-4 md:px-6 md:py-3 lg:max-w-6xl">
         {/* 로고 */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded">
-            <Image 
-              src="/logo/sunjeong_link_logo.png" 
-              alt="선정링크 로고" 
-              width={140} 
-              height={45} 
-              className="h-10 md:h-12 w-auto object-contain" 
+            <Image
+              src="/logo/sunjeong_link_logo.png"
+              alt="선정링크 로고"
+              width={120}
+              height={40}
+              className="h-8 w-auto object-contain sm:h-9 md:h-12"
               priority
             />
           </Link>
@@ -102,7 +102,7 @@ export default function NavBar() {
         </div>
 
         {/* 우측 컨트롤 */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="hidden md:block">
             <AuthButton />
           </div>

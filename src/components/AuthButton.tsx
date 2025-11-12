@@ -80,19 +80,19 @@ export default function AuthButton() {
   const greetingLabel = '관리자 계정';
 
   return isAdmin ? (
-    <div className="flex items-center gap-4 flex-nowrap">
-      <span className="text-sm text-slate-600 whitespace-nowrap">
+    <div className="flex flex-wrap items-center justify-center gap-3 text-center md:justify-start md:text-left">
+      <span className="text-sm text-slate-600">
         안녕하세요, {greetingLabel}님!
       </span>
       <Link
         href="/mypage"
-        className="px-4 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-semibold transition duration-200 shadow-sm whitespace-nowrap"
+        className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm transition duration-200 hover:bg-blue-100 sm:w-auto"
       >
         마이페이지
       </Link>
       <button
         onClick={handleLogout}
-        className="px-4 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold transition duration-200 shadow-sm whitespace-nowrap"
+        className="w-full rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-rose-600 sm:w-auto"
       >
         로그아웃
       </button>
@@ -100,7 +100,7 @@ export default function AuthButton() {
   ) : (
     <Link
       href="/auth"
-      className="btn-primary text-sm px-4 py-2 whitespace-nowrap inline-flex items-center justify-center"
+      className="btn-primary inline-flex w-full items-center justify-center px-4 py-2 text-sm sm:w-auto"
     >
       관리자 로그인
     </Link>
