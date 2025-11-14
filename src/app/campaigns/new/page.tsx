@@ -45,7 +45,7 @@ const createInitialForm = (): NewCampaignForm => ({
 
 export default function CampaignCreatePage() {
   const { showSuccess, showError } = useNativeToast();
-  const { isAdmin, loading: authLoading } = useAdminAuth();
+  const { canManage, loading: authLoading } = useAdminAuth();
   const router = useRouter();
 
   const hasSupabaseConfig = Boolean(
@@ -69,7 +69,7 @@ export default function CampaignCreatePage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!isAdmin) {
+    if (!canManage) {
       showError('관리자만 캠페인을 등록할 수 있습니다.', { position: 'center' });
       return;
     }
@@ -142,7 +142,7 @@ export default function CampaignCreatePage() {
     );
   }
 
-  if (!isAdmin) {
+  if (!canManage) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-sm space-y-4">

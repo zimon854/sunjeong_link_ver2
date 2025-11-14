@@ -5,6 +5,7 @@ import { FiActivity, FiBarChart2, FiLogIn, FiShield } from 'react-icons/fi';
 
 const CREDENTIALS = {
   borrow13: { password: 'Tjswjd5248!', role: 'admin' as const, label: '관리자 계정' },
+  guest01: { password: 'GuestLink24!', role: 'reviewer' as const, label: '게스트 계정' },
 } as const;
 
 type CredentialKey = keyof typeof CREDENTIALS;
@@ -76,12 +77,48 @@ const AuthPageContent = () => {
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const redirectUrl = searchParams?.get('redirect') || '/dashboard';
 
+  const performCredentialLogin = async (credential: CredentialKey) => {
+    const matchedCredential = CREDENTIALS[credential];
+    if (!matchedCredential) {
+      throw new Error('등록되지 않은 계정입니다.');
+    }
+
+    const successLabel = matchedCredential.label;
+    setMessage({ type: 'success', text: `${successLabel}으로 로그인했습니다. 대시보드로 이동합니다.` });
+
+    const authData = {
+      user: credential,
+      role: matchedCredential.role,
+      loginTime: new Date().toISOString()
+    };
+    sessionStorage.setItem('adminAuth', JSON.stringify(authData));
+    try {
+      localStorage.setItem('adminAuth', JSON.stringify(authData));
+    } catch (storageError) {
+      console.warn('Unable to persist admin session to localStorage:', storageError);
+    }
+
+    document.cookie = `adminAuth=${encodeURIComponent(JSON.stringify(authData))}; path=/; SameSite=Lax`;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('adminAuth:changed'));
+    }
+
+    setTimeout(() => {
+      router.push(redirectUrl);
+      router.refresh();
+    }, 1000);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 입력값 검증
     if (!username || !password) {
       setMessage({ type: 'error', text: '관리자 ID와 비밀번호를 모두 입력해주세요.' });
+      return;
+    }
+
+    if (username === 'guest01') {
+      setMessage({ type: 'error', text: '게스트 계정은 전용 버튼을 통해서만 로그인할 수 있습니다.' });
       return;
     }
 
@@ -96,30 +133,7 @@ const AuthPageContent = () => {
         return;
       }
 
-      const successLabel = matchedCredential.label;
-      setMessage({ type: 'success', text: `${successLabel}으로 로그인했습니다. 대시보드로 이동합니다.` });
-
-      const authData = {
-        user: username,
-        role: matchedCredential.role,
-        loginTime: new Date().toISOString()
-      };
-      sessionStorage.setItem('adminAuth', JSON.stringify(authData));
-      try {
-        localStorage.setItem('adminAuth', JSON.stringify(authData));
-      } catch (storageError) {
-        console.warn('Unable to persist admin session to localStorage:', storageError);
-      }
-
-      document.cookie = `adminAuth=${encodeURIComponent(JSON.stringify(authData))}; path=/; SameSite=Lax`;
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('adminAuth:changed'));
-      }
-
-      setTimeout(() => {
-        router.push(redirectUrl);
-        router.refresh();
-      }, 1000);
+      await performCredentialLogin(username as CredentialKey);
     } catch (error) {
       console.error('Unexpected login error:', error);
       setMessage({ type: 'error', text: '예상치 못한 오류가 발생했습니다. 다시 시도해주세요.' });
@@ -128,6 +142,35 @@ const AuthPageContent = () => {
     }
   };
 
+  const handleGuestLogin = async () => {
+    if (!username || !password) {
+      setMessage({ type: 'error', text: '게스트 ID와 비밀번호를 입력한 뒤 버튼을 눌러주세요.' });
+      return;
+    }
+
+    if (username !== 'guest01') {
+      setMessage({ type: 'error', text: '게스트 전용 ID는 guest01 입니다.' });
+      return;
+    }
+
+    const guestCredential = CREDENTIALS['guest01'];
+    if (password !== guestCredential.password) {
+      setMessage({ type: 'error', text: '게스트 비밀번호가 올바르지 않습니다.' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      await performCredentialLogin('guest01');
+    } catch (error) {
+      console.error('Unexpected guest login error:', error);
+      setMessage({ type: 'error', text: '게스트 로그인에 실패했습니다. 다시 시도해 주세요.' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (
@@ -166,6 +209,25 @@ const AuthPageContent = () => {
               handleLogin={handleLogin}
               loading={loading}
             />
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                <span className="h-px flex-1 bg-slate-200" aria-hidden="true" />
+                <span>또는</span>
+                <span className="h-px flex-1 bg-slate-200" aria-hidden="true" />
+              </div>
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                disabled={loading}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-600 disabled:opacity-50"
+              >
+                게스트로 둘러보기
+              </button>
+              <p className="text-center text-[11px] text-slate-400">
+                게스트 ID/비밀번호를 입력한 뒤 버튼을 눌러야만 열람 전용 권한이 부여됩니다.
+              </p>
+            </div>
 
             {message && (
               <div

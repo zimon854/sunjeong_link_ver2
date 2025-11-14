@@ -157,7 +157,7 @@ const createInitialNewInfluencerForm = (): NewInfluencerForm => ({
 export default function InfluencersPage() {
   const supabase = createClient();
   const { showSuccess, showError } = useNativeToast();
-  const { isAdmin, loading: adminLoading } = useAdminAuth();
+  const { isAdmin, canManage, loading: adminLoading } = useAdminAuth();
 
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [loadingInfluencers, setLoadingInfluencers] = useState(true);
@@ -269,13 +269,18 @@ export default function InfluencersPage() {
   }, [fetchInfluencers, isAdmin, supabase]);
 
   useEffect(() => {
-    if (!isAdmin) {
+    if (!canManage) {
       setShowAdminForm(false);
     }
-  }, [isAdmin]);
+  }, [canManage]);
 
   const handleCreateInfluencer = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!canManage) {
+      showError('관리자만 인플루언서를 등록할 수 있습니다.', { position: 'center' });
+      return;
+    }
 
     const requiredFields = [
       { key: 'stt', label: 'No' },
@@ -345,7 +350,7 @@ export default function InfluencersPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [fetchInfluencers, newInfluencer, showError, showSuccess, supabase]);
+  }, [canManage, fetchInfluencers, newInfluencer, showError, showSuccess, supabase]);
 
   const filteredInfluencers = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -506,7 +511,7 @@ export default function InfluencersPage() {
           <p className="mt-3 text-sm text-slate-600 sm:text-base">
             Lynkable에 저장된 TikTok KOC 데이터를 검색하고 대표 영상 링크까지 빠르게 확인하세요.
           </p>
-          {isAdmin && !adminLoading && (
+          {canManage && !adminLoading && (
             <button
               type="button"
               onClick={() => setShowAdminForm((prev) => !prev)}
@@ -514,6 +519,11 @@ export default function InfluencersPage() {
             >
               {showAdminForm ? '등록 폼 숨기기' : '등록 폼 열기'}
             </button>
+          )}
+          {isAdmin && !canManage && !adminLoading && (
+            <p className="mt-4 text-xs font-medium text-rose-500">
+              게스트 계정은 열람 전용으로, 인플루언서 등록은 관리자에게만 허용됩니다.
+            </p>
           )}
         </div>
 
@@ -547,7 +557,7 @@ export default function InfluencersPage() {
           </div>
         </div>
 
-        {isAdmin && !adminLoading && showAdminForm && (
+        {canManage && !adminLoading && showAdminForm && (
           <section className="mb-12">
             <div className="rounded-3xl border border-blue-200 bg-blue-50/70 p-6 md:p-8 shadow-sm">
               <div className="flex flex-col gap-1 mb-6">

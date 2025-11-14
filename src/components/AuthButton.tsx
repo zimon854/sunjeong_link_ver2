@@ -77,7 +77,7 @@ export default function AuthButton() {
     }
   };
 
-  const greetingLabel = '관리자 계정';
+  const greetingLabel = role === 'reviewer' ? '게스트 계정' : '관리자 계정';
 
   return isAdmin ? (
     <div className="flex flex-wrap items-center justify-center gap-3 text-center md:justify-start md:text-left">

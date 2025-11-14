@@ -1,8 +1,41 @@
 import { useState, useEffect } from 'react';
 
+type AdminRole = 'admin' | 'reviewer';
+
 export function useAdminAuth() {
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [hasAccess, setHasAccess] = useState<boolean>(false);
+  const [role, setRole] = useState<AdminRole | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const assignStateFromAuth = (adminAuth: string | null) => {
+    if (!adminAuth) {
+      setHasAccess(false);
+      setRole(null);
+      return;
+    }
+
+    try {
+      const authData = JSON.parse(adminAuth);
+      const parsedRole = typeof authData.role === 'string' ? authData.role : null;
+
+      if (parsedRole && (parsedRole === 'admin' || parsedRole === 'reviewer')) {
+        setHasAccess(true);
+        setRole(parsedRole);
+        return;
+      }
+
+      if (authData.user === 'admin') {
+        setHasAccess(true);
+        setRole('admin');
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking admin auth:', error);
+    }
+
+    setHasAccess(false);
+    setRole(null);
+  };
 
   useEffect(() => {
     const checkAdminAuth = () => {
@@ -10,20 +43,11 @@ export function useAdminAuth() {
         const rawSession = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('adminAuth') : null;
         const rawLocal = typeof localStorage !== 'undefined' ? localStorage.getItem('adminAuth') : null;
         const adminAuth = rawSession ?? rawLocal;
-        if (adminAuth) {
-          const authData = JSON.parse(adminAuth);
-          const role = typeof authData.role === 'string' ? authData.role : null;
-          if (role && ['admin', 'reviewer'].includes(role)) {
-            setIsAdmin(true);
-          } else {
-            setIsAdmin(authData.user === 'admin');
-          }
-        } else {
-          setIsAdmin(false);
-        }
+        assignStateFromAuth(adminAuth);
       } catch (error) {
         console.error('Error checking admin auth:', error);
-        setIsAdmin(false);
+        setHasAccess(false);
+        setRole(null);
       } finally {
         setLoading(false);
       }
@@ -41,5 +65,5 @@ export function useAdminAuth() {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  return { isAdmin, loading };
+  return { isAdmin: hasAccess, loading, role, canManage: role === 'admin' };
 }

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-const ALLOWED_USERS = new Set(['admin', 'playreview']);
+const ALLOWED_USERS = new Set(['admin', 'playreview', 'borrow13', 'guest01']);
 const ALLOWED_ROLES = new Set(['admin', 'reviewer']);
 
 export async function middleware(request: NextRequest) {
